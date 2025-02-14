@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - type
+  - attributes
+properties:
+  id:
+    type: string
+    format: uuid
+    description: "Transaction ID"
+  type:
+    type: string
+    enum: [ transaction ]
+  attributes:
+    $ref: './TransactionAttributes.yaml'

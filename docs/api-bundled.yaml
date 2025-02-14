@@ -1,0 +1,372 @@
+openapi: 3.0.0
+info:
+  title: User storage service
+  description: User storage service for recovery flow
+  version: 0.0.1
+paths:
+  /test:
+    post:
+      summary: Test
+      operationId: test
+      responses:
+        '201':
+          description: Ok
+components:
+  schemas:
+    Subscriber:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Subscriber ID
+            type:
+              type: string
+              enum:
+                - subscriber
+            attributes:
+              type: object
+              required:
+                - user_id
+                - plan_id
+                - streak_months
+                - status
+                - start_at
+                - end_at
+                - created_at
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  description: User ID UUID
+                plan_id:
+                  type: string
+                  format: ObjectId
+                  description: Plan ID object ID
+                streak_months:
+                  type: integer
+                  description: Streak months
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+                    - cancelled
+                  description: Status
+                start_at:
+                  type: string
+                  format: date-time
+                  description: Start at
+                end_at:
+                  type: string
+                  format: date-time
+                  description: End at
+                updated_at:
+                  type: string
+                  format: date-time
+                  description: Updated at
+                created_at:
+                  type: string
+                  format: date-time
+                  description: Created at
+    SubscribersCollection:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscriber/properties/data'
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+    SubscriberUpdate:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscriber_update
+            attributes:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  format: ObjectId
+                  description: Plan ID object ID
+                streak_months:
+                  type: integer
+                  description: Streak months
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+                    - cancelled
+                  description: Status
+                start_at:
+                  type: string
+                  format: date-time
+                  description: Start at
+                end_at:
+                  type: string
+                  format: date-time
+                  description: End at
+    SubscriptionPlan:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Subscription Plan ID
+            type:
+              type: string
+              enum:
+                - subscription_plan
+            attributes:
+              type: object
+              required:
+                - title
+                - price
+                - currency
+                - pay_frequency
+                - status
+                - created_at
+              properties:
+                title:
+                  type: string
+                  description: Title
+                price:
+                  type: number
+                  description: Price
+                currency:
+                  type: string
+                  description: Currency
+                pay_frequency:
+                  type: string
+                  description: Pay frequency
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+                    - cancelled
+                  description: Status
+                updated_at:
+                  type: string
+                  format: date-time
+                  description: Updated at
+                deleted_at:
+                  type: string
+                  format: date-time
+                created_at:
+                  type: string
+                  format: date-time
+                  description: Created at
+    SubscriptionPlansCollection:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionPlan/properties/data'
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+    SubscriptionPlanUpdate:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscription_plan_update
+            attributes:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Title
+                price:
+                  type: number
+                  description: Price
+                currency:
+                  type: string
+                  description: Currency
+                pay_frequency:
+                  type: string
+                  description: Pay frequency
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+                    - cancelled
+                  description: Status
+    Transaction:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Transaction ID
+            type:
+              type: string
+              enum:
+                - transaction
+            attributes:
+              type: object
+              required:
+                - amount
+                - currency
+                - payment_method
+                - provider_transaction_id
+                - created_at
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  description: User ID
+                plan_id:
+                  type: string
+                  format: ObjectId
+                  description: Plan ID
+                sub_id:
+                  type: string
+                  format: ObjectId
+                  description: Subscriber ID
+                amount:
+                  type: number
+                  format: float
+                  description: Transaction amount
+                currency:
+                  type: string
+                  description: Transaction currency
+                payment_method:
+                  type: string
+                  description: Payment method
+                provider_transaction_id:
+                  type: string
+                  description: Provider transaction ID
+                created_at:
+                  type: string
+                  format: date-time
+                  description: Transaction creation date
+    TransactionsCollection:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction/properties/data'
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+    LinksSelf:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          type: string
+          description: Link to resources
+        update:
+          type: string
+          description: Link to update resources
+    LinksDirect:
+      type: object
+      required:
+        - links
+      properties:
+        links:
+          type: object
+          required:
+            - self
+            - related
+            - data
+          properties:
+            self:
+              type: string
+              description: Link to participants
+            related:
+              type: string
+              description: Link to participants
+        data:
+          type: object
+          required:
+            - id
+            - type
+          properties:
+            id:
+              type: string
+              description: resources id
+            type:
+              type: string
+              description: resources type
+    LinksPagination:
+      type: object
+      required:
+        - self
+      properties:
+        previous:
+          type: string
+          description: Link to the previous page
+        self:
+          type: string
+          description: Link to the current page
+        next:
+          type: string
+          description: Link to the next page
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,44 @@
+openapi: 3.0.0
+info:
+  title: User storage service
+  description: User storage service for recovery flow
+  version: 0.0.1
+
+paths:
+  /test:
+    post:
+      summary: Test
+      operationId: test
+      responses:
+        '201':
+          description: "Ok"
+
+components:
+  schemas:
+    Subscriber:
+      $ref: './spec/components/schemas/Subscriber.yaml'
+    SubscribersCollection:
+      $ref: './spec/components/schemas/SubscribersCollection.yaml'
+    SubscriberUpdate:
+      $ref: './spec/components/schemas/SubscriberUpdate.yaml'
+    SubscriptionPlan:
+      $ref: './spec/components/schemas/SubscriptionPlan.yaml'
+    SubscriptionPlansCollection:
+      $ref: './spec/components/schemas/SubscriptionPlansCollection.yaml'
+    SubscriptionPlanUpdate:
+      $ref: './spec/components/schemas/SubscriptionPlanUpdate.yaml'
+    Transaction:
+      $ref: './spec/components/schemas/Transaction.yaml'
+    TransactionsCollection:
+      $ref: './spec/components/schemas/TransactionsCollection.yaml'
+    LinksSelf:
+      $ref: './spec/components/schemas/LinksSelf.yaml'
+    LinksDirect:
+      $ref: './spec/components/schemas/LinksDirect.yaml'
+    LinksPagination:
+      $ref: './spec/components/schemas/LinksPagination.yaml'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

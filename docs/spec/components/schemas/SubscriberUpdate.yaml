@@ -1,0 +1,38 @@
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ subscriber_update ]
+      attributes:
+        type: object
+        properties:
+          plan_id:
+            type: string
+            format: ObjectId
+            description: "Plan ID object ID"
+          streak_months:
+            type: integer
+            description: "Streak months"
+          status:
+            type: string
+            enum:
+              - "active"
+              - "inactive"
+              - "cancelled"
+            description: "Status"
+          start_at:
+            type: string
+            format: date-time
+            description: "Start at"
+          end_at:
+            type: string
+            format: date-time
+            description: "End at"

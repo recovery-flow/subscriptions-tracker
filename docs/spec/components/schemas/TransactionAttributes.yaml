@@ -1,0 +1,37 @@
+type: object
+required:
+  - amount
+  - currency
+  - payment_method
+  - provider_transaction_id
+  - created_at
+properties:
+  user_id:
+    type: string
+    format: uuid
+    description: "User ID"
+  plan_id:
+    type: string
+    format: ObjectId
+    description: "Plan ID"
+  sub_id:
+    type: string
+    format: ObjectId
+    description: "Subscriber ID"
+  amount:
+    type: number
+    format: float
+    description: "Transaction amount"
+  currency:
+    type: string
+    description: "Transaction currency"
+  payment_method:
+    type: string
+    description: "Payment method"
+  provider_transaction_id:
+    type: string
+    description: "Provider transaction ID"
+  created_at:
+    type: string
+    format: date-time
+    description: "Transaction creation date"

@@ -1,0 +1,36 @@
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+      - id
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ subscription_plan_update ]
+      attributes:
+        type: object
+        properties:
+          title:
+            type: string
+            description: "Title"
+          price:
+            type: number
+            description: "Price"
+          currency:
+            type: string
+            description: "Currency"
+          pay_frequency:
+            type: string
+            description: "Pay frequency"
+          status:
+            type: string
+            enum:
+              - "active"
+              - "inactive"
+              - "cancelled"
+            description: "Status"
