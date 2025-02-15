@@ -11,6 +11,7 @@ import (
 	"github.com/alecthomas/kingpin"
 	"github.com/recovery-flow/comtools/logkit"
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service"
 )
 
 func Run(args []string) bool {
@@ -31,6 +32,12 @@ func Run(args []string) bool {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	srv, err := service.NewService(cfg, logger)
+	if err != nil {
+		logger.Fatalf("failed to create server: %v", err)
+		return false
+	}
+
 	var wg sync.WaitGroup
 
 	cmd, err := app.Parse(args[1:])
@@ -41,7 +48,7 @@ func Run(args []string) bool {
 
 	switch cmd {
 	case serviceCmd.FullCommand():
-		runServices(ctx, &wg)
+		runServices(ctx, srv, &wg)
 	default:
 		logger.Errorf("unknown command %s", cmd)
 		return false

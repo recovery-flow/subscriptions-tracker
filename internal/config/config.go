@@ -46,9 +46,9 @@ type DatabaseConfig struct {
 		ApiSecret string `mapstructure:"api"`
 	} `mapstructure:"cloudinary"`
 	Redis struct {
-		addr     string `mapstructure:"addr"`
-		password string `mapstructure:"password"`
-		db       int    `mapstructure:"db"`
+		Addr     string `mapstructure:"addr"`
+		Password string `mapstructure:"password"`
+		DB       int    `mapstructure:"db"`
 	} `mapstructure:"redis"`
 }
 

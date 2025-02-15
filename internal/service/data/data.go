@@ -21,7 +21,11 @@ type Data struct {
 }
 
 func NewDataBase(cfg Config) (*Data, error) {
+	sub, err := repositories.NewSubscribers(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB, cfg.Mongo.Uri, cfg.Mongo.DbName)
+	if err != nil {
+		return nil, err
+	}
 	return &Data{
-		Subscribers: repositories.NewSubscribers(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB, cfg.Mongo.Uri, cfg.Mongo.DbName), //todo
+		Subscribers: sub, //todo
 	}, nil
 }
