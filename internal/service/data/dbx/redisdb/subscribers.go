@@ -30,14 +30,13 @@ func (s *subscriber) Add(ctx context.Context, subscriber models.Subscriber) erro
 
 	//todo some pole can be nil => check
 	data := map[string]interface{}{
-		"user_id":       subscriber.UserID.String(),
-		"plan_id":       subscriber.PlanID.String(),
-		"streak_months": subscriber.StreakMonths,
-		"status":        subscriber.Status,
-		"start_at":      subscriber.StartAt.Time(),
-		"end_at":        subscriber.EndAt.Time(),
-		"updated_at":    subscriber.UpdatedAt.Time(),
-		"created_at":    subscriber.CreatedAt.Time(),
+		"user_id":    subscriber.UserID.String(),
+		"plan_id":    subscriber.PlanID.String(),
+		"status":     subscriber.Status,
+		"start_at":   subscriber.StartAt.Time(),
+		"end_at":     subscriber.EndAt.Time(),
+		"updated_at": subscriber.UpdatedAt.Time(),
+		"created_at": subscriber.CreatedAt.Time(),
 	}
 
 	err := s.client.HSet(ctx, subKey, data).Err()
