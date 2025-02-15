@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/recovery-flow/subscriptions-tracker/internal/service"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/transport/rest"
 )
 
 func runServices(ctx context.Context, wg *sync.WaitGroup) {
@@ -16,5 +16,5 @@ func runServices(ctx context.Context, wg *sync.WaitGroup) {
 		}()
 	}
 
-	run(func() { service.Run(ctx) })
+	run(func() { rest.Run(ctx) })
 }

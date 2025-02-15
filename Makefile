@@ -26,5 +26,5 @@ migrate-down:
 	migrate -path internal/data/migration -database $(DB_URL) -verbose down
 
 run-server:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscription-tracker/main.go
 	KV_VIPER_FILE=$(CONFIG_FILE) ./main run service
