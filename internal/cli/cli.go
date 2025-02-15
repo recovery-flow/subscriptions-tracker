@@ -10,6 +10,7 @@ import (
 
 	"github.com/alecthomas/kingpin"
 	"github.com/recovery-flow/comtools/cifractx"
+	"github.com/recovery-flow/comtools/logkit"
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
 )
 
@@ -19,7 +20,7 @@ func Run(args []string) bool {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	logger := config.SetupLogger(cfg.Logging.Level, cfg.Logging.Format)
+	logger := logkit.SetupLogger(cfg.Server.Log.Level, cfg.Server.Log.Format)
 	logger.Info("Starting server...")
 
 	var (
@@ -31,7 +32,7 @@ func Run(args []string) bool {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	service, err := config.NewServer(cfg)
+	service, err := config.NewServer(cfg, logger)
 	if err != nil {
 		logger.Fatalf("failed to create server: %v", err)
 		return false
