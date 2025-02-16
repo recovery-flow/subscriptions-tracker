@@ -11,17 +11,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// SubscriptionPlans описывает кэш-операции для планов подписки с поддержкой фильтрации и пагинации.
 type SubscriptionPlans interface {
-	Mew() SubscriptionPlans
+	New() SubscriptionPlans
 
 	Add(ctx context.Context, plan models.SubscriptionPlan) error
 	Get(ctx context.Context) (*models.SubscriptionPlan, error)
 	Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 	DeleteOne(ctx context.Context) error
 	DeleteMany(ctx context.Context) error
+	UpdateMany(ctx context.Context, fields map[string]interface{}) (int64, error)
 
-	Filter(ctx context.Context, filters map[string]any) SubscriptionPlans
+	Filter(filters map[string]any) SubscriptionPlans
 	Limit(limit int) SubscriptionPlans
 	Skip(skip int) SubscriptionPlans
 }
@@ -44,7 +44,7 @@ func NewSubscriptionPlans(client *redis.Client, lifeTime time.Duration) Subscrip
 	}
 }
 
-func (s *subscriptionPlans) Mew() SubscriptionPlans {
+func (s *subscriptionPlans) New() SubscriptionPlans {
 	return &subscriptionPlans{
 		client:   s.client,
 		LifeTime: s.LifeTime,
@@ -54,7 +54,7 @@ func (s *subscriptionPlans) Mew() SubscriptionPlans {
 	}
 }
 
-func (s *subscriptionPlans) Filter(ctx context.Context, newFilters map[string]any) SubscriptionPlans {
+func (s *subscriptionPlans) Filter(newFilters map[string]any) SubscriptionPlans {
 	copied := make(map[string]string)
 	for k, v := range s.filters {
 		copied[k] = v
@@ -198,6 +198,26 @@ func (s *subscriptionPlans) DeleteMany(ctx context.Context) error {
 		}
 	}
 	return delErr
+}
+
+func (s *subscriptionPlans) UpdateMany(ctx context.Context, fields map[string]interface{}) (int64, error) {
+	keys, err := s.client.Keys(ctx, "sub:id:*").Result()
+	if err != nil {
+		return 0, fmt.Errorf("error retrieving keys: %w", err)
+	}
+	var updatedCount int64 = 0
+	for _, key := range keys {
+		data, err := s.client.HGetAll(ctx, key).Result()
+		if err != nil || len(data) == 0 {
+		}
+		if s.matchesFilters(data) {
+			if err := s.client.HSet(ctx, key, fields).Err(); err != nil {
+				continue
+			}
+			updatedCount++
+		}
+	}
+	return updatedCount, nil
 }
 
 func (s *subscriptionPlans) matchesFilters(data map[string]string) bool {

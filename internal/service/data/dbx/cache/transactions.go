@@ -12,7 +12,7 @@ import (
 )
 
 type Transactions interface {
-	Mew() Transactions
+	New() Transactions
 
 	Add(ctx context.Context, tx models.Transaction) error
 	Get(ctx context.Context) (*models.Transaction, error)
@@ -20,7 +20,7 @@ type Transactions interface {
 	DeleteOne(ctx context.Context) error
 	DeleteMany(ctx context.Context) error
 
-	Filter(ctx context.Context, filters map[string]any) Transactions
+	Filter(filters map[string]any) Transactions
 	Limit(limit int) Transactions
 	Skip(skip int) Transactions
 }
@@ -43,7 +43,7 @@ func NewTransactions(client *redis.Client, lifeTime time.Duration) Transactions 
 	}
 }
 
-func (t *transactions) Mew() Transactions {
+func (t *transactions) New() Transactions {
 	return &transactions{
 		client:   t.client,
 		LifeTime: t.LifeTime,
@@ -53,7 +53,7 @@ func (t *transactions) Mew() Transactions {
 	}
 }
 
-func (t *transactions) Filter(ctx context.Context, newFilters map[string]any) Transactions {
+func (t *transactions) Filter(newFilters map[string]any) Transactions {
 	copied := make(map[string]string)
 	for k, v := range t.filters {
 		copied[k] = v
@@ -103,9 +103,6 @@ func (t *transactions) Add(ctx context.Context, tx models.Transaction) error {
 	}
 	if tx.UserID != nil {
 		data["user_id"] = tx.UserID.Hex()
-	}
-	if tx.SubID != nil {
-		data["sub_id"] = tx.SubID.Hex()
 	}
 	if err := t.client.HSet(ctx, key, data).Err(); err != nil {
 		return fmt.Errorf("error adding transaction to Redis: %w", err)
@@ -235,17 +232,9 @@ func mapToTransaction(data map[string]string) (*models.Transaction, error) {
 			userID = &tmp
 		}
 	}
-	var subID *primitive.ObjectID
-	if sid, ok := data["sub_id"]; ok && sid != "" {
-		tmp, err := primitive.ObjectIDFromHex(sid)
-		if err == nil {
-			subID = &tmp
-		}
-	}
 	return &models.Transaction{
 		ID:            id,
 		UserID:        userID,
-		SubID:         subID,
 		Amount:        amount,
 		Currency:      data["currency"],
 		Status:        models.TrStatus(data["status"]),

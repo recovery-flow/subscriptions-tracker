@@ -71,12 +71,12 @@ func (s *subscribers) New() Subscribers {
 }
 
 func (s *subscribers) Insert(r *http.Request, sub models.Subscriber) (*models.Subscriber, error) {
-	created, err := s.mongo.Insert(r.Context(), sub)
+	created, err := s.mongo.New().Insert(r.Context(), sub)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.redis.Add(r.Context(), *created)
+	err = s.redis.New().Add(r.Context(), *created)
 	if err != nil {
 		return nil, err
 	}
@@ -89,11 +89,12 @@ func (s *subscribers) Select(r *http.Request) ([]models.Subscriber, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return subs, nil
 }
 
 func (s *subscribers) Get(r *http.Request) (*models.Subscriber, error) {
-	sub, err := s.redis.Mew().FilterStrict(s.filters).Get(r.Context())
+	sub, err := s.redis.New().FilterStrict(s.filters).Get(r.Context())
 	if err != nil {
 		return nil, err
 	}
@@ -132,24 +133,24 @@ func (s *subscribers) FilterStrict(filters map[string]interface{}) Subscribers {
 }
 
 func (s *subscribers) UpdateOne(r *http.Request, fields map[string]interface{}) (*models.Subscriber, error) {
-	updated, err := s.mongo.FilterStrict(s.filters).UpdateOne(r.Context(), fields)
+	updated, err := s.mongo.New().FilterStrict(s.filters).UpdateOne(r.Context(), fields)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.redis.Add(r.Context(), *updated)
+	err = s.redis.New().Add(r.Context(), *updated)
 	if err != nil {
 		return nil, err
 	}
 	return updated, nil
 }
 func (s *subscribers) UpdateMany(r *http.Request, fields map[string]interface{}) (int64, error) {
-	count, err := s.mongo.FilterStrict(s.filters).UpdateMany(r.Context(), fields)
+	count, err := s.mongo.New().FilterStrict(s.filters).UpdateMany(r.Context(), fields)
 	if err != nil {
 		return 0, err
 	}
 
-	_, err = s.redis.FilterStrict(s.filters).UpdateMany(r.Context(), fields)
+	_, err = s.redis.New().FilterStrict(s.filters).UpdateMany(r.Context(), fields)
 	if err != nil {
 		return 0, err
 	}
@@ -158,12 +159,12 @@ func (s *subscribers) UpdateMany(r *http.Request, fields map[string]interface{})
 }
 
 func (s *subscribers) DeleteOne(r *http.Request) error {
-	err := s.mongo.FilterStrict(s.filters).DeleteOne(r.Context())
+	err := s.mongo.New().FilterStrict(s.filters).DeleteOne(r.Context())
 	if err != nil {
 		return err
 	}
 
-	err = s.redis.DeleteOne(r.Context())
+	err = s.redis.New().FilterStrict(s.filters).DeleteOne(r.Context())
 	if err != nil {
 		return err
 	}
@@ -171,12 +172,12 @@ func (s *subscribers) DeleteOne(r *http.Request) error {
 }
 
 func (s *subscribers) DeleteMany(r *http.Request) (int64, error) {
-	count, err := s.mongo.FilterStrict(s.filters).DeleteMany(r.Context())
+	count, err := s.mongo.New().FilterStrict(s.filters).DeleteMany(r.Context())
 	if err != nil {
 		return 0, err
 	}
 
-	err = s.redis.DeleteMany(r.Context())
+	err = s.redis.New().FilterStrict(s.filters).DeleteMany(r.Context())
 	if err != nil {
 		return 0, err
 	}

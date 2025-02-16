@@ -12,7 +12,7 @@ import (
 )
 
 type Subscribers interface {
-	Mew() Subscribers
+	New() Subscribers
 
 	Add(ctx context.Context, subscriber models.Subscriber) error
 	Get(ctx context.Context) (*models.Subscriber, error)
@@ -26,7 +26,7 @@ type Subscribers interface {
 	Skip(skip int) Subscribers
 }
 
-type subscriberCache struct {
+type subscriber struct {
 	client   *redis.Client
 	LifeTime time.Duration
 	filters  map[string]string
@@ -35,7 +35,7 @@ type subscriberCache struct {
 }
 
 func NewSubscribers(client *redis.Client, lifeTime time.Duration) Subscribers {
-	return &subscriberCache{
+	return &subscriber{
 		client:   client,
 		LifeTime: lifeTime,
 		filters:  make(map[string]string),
@@ -44,8 +44,8 @@ func NewSubscribers(client *redis.Client, lifeTime time.Duration) Subscribers {
 	}
 }
 
-func (s *subscriberCache) Mew() Subscribers {
-	return &subscriberCache{
+func (s *subscriber) New() Subscribers {
+	return &subscriber{
 		client:   s.client,
 		LifeTime: s.LifeTime,
 		filters:  make(map[string]string),
@@ -54,7 +54,7 @@ func (s *subscriberCache) Mew() Subscribers {
 	}
 }
 
-func (s *subscriberCache) FilterStrict(newFilters map[string]any) Subscribers {
+func (s *subscriber) FilterStrict(newFilters map[string]any) Subscribers {
 	copied := make(map[string]string)
 	for k, v := range s.filters {
 		copied[k] = v
@@ -62,7 +62,7 @@ func (s *subscriberCache) FilterStrict(newFilters map[string]any) Subscribers {
 	for k, v := range newFilters {
 		copied[k] = fmt.Sprintf("%v", v)
 	}
-	return &subscriberCache{
+	return &subscriber{
 		client:   s.client,
 		LifeTime: s.LifeTime,
 		filters:  copied,
@@ -71,8 +71,8 @@ func (s *subscriberCache) FilterStrict(newFilters map[string]any) Subscribers {
 	}
 }
 
-func (s *subscriberCache) Limit(limit int) Subscribers {
-	return &subscriberCache{
+func (s *subscriber) Limit(limit int) Subscribers {
+	return &subscriber{
 		client:   s.client,
 		LifeTime: s.LifeTime,
 		filters:  s.filters,
@@ -81,8 +81,8 @@ func (s *subscriberCache) Limit(limit int) Subscribers {
 	}
 }
 
-func (s *subscriberCache) Skip(skip int) Subscribers {
-	return &subscriberCache{
+func (s *subscriber) Skip(skip int) Subscribers {
+	return &subscriber{
 		client:   s.client,
 		LifeTime: s.LifeTime,
 		filters:  s.filters,
@@ -91,7 +91,7 @@ func (s *subscriberCache) Skip(skip int) Subscribers {
 	}
 }
 
-func (s *subscriberCache) Add(ctx context.Context, subscriber models.Subscriber) error {
+func (s *subscriber) Add(ctx context.Context, subscriber models.Subscriber) error {
 	key := fmt.Sprintf("sub:id:%s", subscriber.ID.Hex())
 	userKey := fmt.Sprintf("sub:user_id:%s", subscriber.UserID.String())
 
@@ -121,7 +121,7 @@ func (s *subscriberCache) Add(ctx context.Context, subscriber models.Subscriber)
 	return nil
 }
 
-func (s *subscriberCache) Select(ctx context.Context) ([]models.Subscriber, error) {
+func (s *subscriber) Select(ctx context.Context) ([]models.Subscriber, error) {
 	keys, err := s.client.Keys(ctx, "sub:id:*").Result()
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving keys: %w", err)
@@ -154,7 +154,7 @@ func (s *subscriberCache) Select(ctx context.Context) ([]models.Subscriber, erro
 	return result, nil
 }
 
-func (s *subscriberCache) Get(ctx context.Context) (*models.Subscriber, error) {
+func (s *subscriber) Get(ctx context.Context) (*models.Subscriber, error) {
 	subs, err := s.Select(ctx)
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func (s *subscriberCache) Get(ctx context.Context) (*models.Subscriber, error) {
 	return &subs[0], nil
 }
 
-func (s *subscriberCache) UpdateMany(ctx context.Context, fields map[string]interface{}) (int64, error) {
+func (s *subscriber) UpdateMany(ctx context.Context, fields map[string]interface{}) (int64, error) {
 	keys, err := s.client.Keys(ctx, "sub:id:*").Result()
 	if err != nil {
 		return 0, fmt.Errorf("error retrieving keys: %w", err)
@@ -182,7 +182,7 @@ func (s *subscriberCache) UpdateMany(ctx context.Context, fields map[string]inte
 	return updatedCount, nil
 }
 
-func (s *subscriberCache) DeleteOne(ctx context.Context) error {
+func (s *subscriber) DeleteOne(ctx context.Context) error {
 	keys, err := s.client.Keys(ctx, "sub:id:*").Result()
 	if err != nil {
 		return fmt.Errorf("error retrieving keys: %w", err)
@@ -202,7 +202,7 @@ func (s *subscriberCache) DeleteOne(ctx context.Context) error {
 	return fmt.Errorf("no matching subscriber found for deletion")
 }
 
-func (s *subscriberCache) DeleteMany(ctx context.Context) error {
+func (s *subscriber) DeleteMany(ctx context.Context) error {
 	keys, err := s.client.Keys(ctx, "sub:id:*").Result()
 	if err != nil {
 		return fmt.Errorf("error retrieving keys: %w", err)
@@ -222,7 +222,7 @@ func (s *subscriberCache) DeleteMany(ctx context.Context) error {
 	return delErr
 }
 
-func (s *subscriberCache) matchesFilters(data map[string]string) bool {
+func (s *subscriber) matchesFilters(data map[string]string) bool {
 	for fk, fv := range s.filters {
 		if data[fk] != fv {
 			return false
