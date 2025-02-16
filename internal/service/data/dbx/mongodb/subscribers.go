@@ -22,7 +22,6 @@ type Subscribers interface {
 	Get(ctx context.Context) (*models.Subscriber, error)
 
 	FilterStrict(filters map[string]any) Subscribers
-	FilterDate(filters map[string]any, after bool) Subscribers
 
 	UpdateOne(ctx context.Context, fields map[string]any) (*models.Subscriber, error)
 	UpdateMany(ctx context.Context, fields map[string]any) (int64, error)
@@ -129,6 +128,8 @@ func (s *subscribers) FilterStrict(filters map[string]any) Subscribers {
 		"plan_id":       true,
 		"streak_months": true,
 		"status":        true,
+		"start_at":      true,
+		"end_at":        true,
 	}
 
 	for field, value := range filters {
@@ -139,50 +140,6 @@ func (s *subscribers) FilterStrict(filters map[string]any) Subscribers {
 			continue
 		}
 		s.filters[field] = value
-	}
-	return s
-}
-
-func (s *subscribers) FilterDate(filters map[string]any, after bool) Subscribers {
-	var validFilters = map[string]bool{
-		"start_at":   true,
-		"end_at":     true,
-		"updated_at": true,
-		"created_at": true,
-	}
-
-	var op string
-	if after {
-		op = "$gte"
-	} else {
-		op = "$lte"
-	}
-
-	for field, value := range filters {
-		if !validFilters[field] {
-			continue
-		}
-		if value == nil {
-			continue
-		}
-
-		var t time.Time
-		switch val := value.(type) {
-		case time.Time:
-			t = val
-		case *time.Time:
-			t = *val
-		case string:
-			parsed, err := time.Parse(time.RFC3339, val)
-			if err != nil {
-				continue
-			}
-			t = parsed
-		default:
-			continue
-		}
-
-		s.filters[field] = bson.M{op: t}
 	}
 	return s
 }

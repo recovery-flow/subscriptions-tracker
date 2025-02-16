@@ -9,7 +9,6 @@ import (
 type Transaction struct {
 	ID            primitive.ObjectID  `bson:"_id" json:"id"`
 	UserID        *primitive.ObjectID `bson:"user_id,omitempty" json:"user_id,omitempty"`
-	PlanID        *primitive.ObjectID `bson:"plan_id,omitempty" json:"plan_id,omitempty"`
 	SubID         *primitive.ObjectID `bson:"sub_id,omitempty" json:"sub_id,omitempty"`
 	Amount        int                 `bson:"amount" json:"amount"`
 	Currency      string              `bson:"currency" json:"currency"`

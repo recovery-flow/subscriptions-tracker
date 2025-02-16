@@ -19,8 +19,9 @@ type Subscribers interface {
 	Select(ctx context.Context) ([]models.Subscriber, error)
 	DeleteOne(ctx context.Context) error
 	DeleteMany(ctx context.Context) error
+	UpdateMany(ctx context.Context, fields map[string]interface{}) (int64, error)
 
-	Filter(ctx context.Context, filters map[string]any) Subscribers
+	FilterStrict(filters map[string]any) Subscribers
 	Limit(limit int) Subscribers
 	Skip(skip int) Subscribers
 }
@@ -53,7 +54,7 @@ func (s *subscriberCache) Mew() Subscribers {
 	}
 }
 
-func (s *subscriberCache) Filter(ctx context.Context, newFilters map[string]any) Subscribers {
+func (s *subscriberCache) FilterStrict(newFilters map[string]any) Subscribers {
 	copied := make(map[string]string)
 	for k, v := range s.filters {
 		copied[k] = v
@@ -138,7 +139,7 @@ func (s *subscriberCache) Select(ctx context.Context) ([]models.Subscriber, erro
 			}
 		}
 	}
-	// Применяем Skip и Limit
+
 	if s.skip > 0 && s.skip < len(result) {
 		result = result[s.skip:]
 	} else if s.skip >= len(result) {
@@ -159,6 +160,26 @@ func (s *subscriberCache) Get(ctx context.Context) (*models.Subscriber, error) {
 		return nil, err
 	}
 	return &subs[0], nil
+}
+
+func (s *subscriberCache) UpdateMany(ctx context.Context, fields map[string]interface{}) (int64, error) {
+	keys, err := s.client.Keys(ctx, "sub:id:*").Result()
+	if err != nil {
+		return 0, fmt.Errorf("error retrieving keys: %w", err)
+	}
+	var updatedCount int64 = 0
+	for _, key := range keys {
+		data, err := s.client.HGetAll(ctx, key).Result()
+		if err != nil || len(data) == 0 {
+		}
+		if s.matchesFilters(data) {
+			if err := s.client.HSet(ctx, key, fields).Err(); err != nil {
+				continue
+			}
+			updatedCount++
+		}
+	}
+	return updatedCount, nil
 }
 
 func (s *subscriberCache) DeleteOne(ctx context.Context) error {

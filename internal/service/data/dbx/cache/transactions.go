@@ -104,9 +104,6 @@ func (t *transactions) Add(ctx context.Context, tx models.Transaction) error {
 	if tx.UserID != nil {
 		data["user_id"] = tx.UserID.Hex()
 	}
-	if tx.PlanID != nil {
-		data["plan_id"] = tx.PlanID.Hex()
-	}
 	if tx.SubID != nil {
 		data["sub_id"] = tx.SubID.Hex()
 	}
@@ -238,13 +235,6 @@ func mapToTransaction(data map[string]string) (*models.Transaction, error) {
 			userID = &tmp
 		}
 	}
-	var planID *primitive.ObjectID
-	if pid, ok := data["plan_id"]; ok && pid != "" {
-		tmp, err := primitive.ObjectIDFromHex(pid)
-		if err == nil {
-			planID = &tmp
-		}
-	}
 	var subID *primitive.ObjectID
 	if sid, ok := data["sub_id"]; ok && sid != "" {
 		tmp, err := primitive.ObjectIDFromHex(sid)
@@ -255,7 +245,6 @@ func mapToTransaction(data map[string]string) (*models.Transaction, error) {
 	return &models.Transaction{
 		ID:            id,
 		UserID:        userID,
-		PlanID:        planID,
 		SubID:         subID,
 		Amount:        amount,
 		Currency:      data["currency"],
