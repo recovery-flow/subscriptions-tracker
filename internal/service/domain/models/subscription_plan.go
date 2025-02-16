@@ -1,6 +1,10 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"fmt"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type SubscriptionPlan struct {
 	ID       primitive.ObjectID `bson:"_id" json:"id"`
@@ -25,6 +29,20 @@ const (
 	PlanStatusCanceled PlanStatus = "canceled"
 )
 
+func StringToPlanStatus(s string) (*PlanStatus, error) {
+	dict := map[string]PlanStatus{
+		"active":   PlanStatusActive,
+		"inactive": PlanStatusInactive,
+		"canceled": PlanStatusCanceled,
+	}
+	if _, ok := dict[s]; !ok {
+		res := dict[s]
+		return &res, nil
+	}
+
+	return nil, fmt.Errorf("invalid plan status: %s", s)
+}
+
 type PayFreq string
 
 const (
@@ -33,3 +51,18 @@ const (
 	PayFreqMonthly PayFreq = "monthly"
 	PayFreqYearly  PayFreq = "yearly"
 )
+
+func StringToPayFreq(s string) (*PayFreq, error) {
+	dict := map[string]PayFreq{
+		"daily":   PayFreqDaily,
+		"weekly":  PayFreqWeekly,
+		"monthly": PayFreqMonthly,
+		"yearly":  PayFreqYearly,
+	}
+	if _, ok := dict[s]; !ok {
+		res := dict[s]
+		return &res, nil
+	}
+
+	return nil, fmt.Errorf("invalid pay frequency: %s", s)
+}

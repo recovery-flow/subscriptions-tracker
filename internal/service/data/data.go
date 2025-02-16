@@ -1,31 +1,33 @@
 package data
 
 import (
+	"github.com/recovery-flow/subscriptions-tracker/internal/config"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/data/repositories"
 )
 
-type Config struct {
-	Mongo struct {
-		Uri    string
-		DbName string
-	}
-	Redis struct {
-		Addr     string
-		Password string
-		DB       int
-	}
-}
-
 type Data struct {
-	Subscribers repositories.Subscribers
+	Subscribers  repositories.Subscribers
+	Plans        repositories.SubscriptionPlans
+	Transactions repositories.Transactions
 }
 
-func NewDataBase(cfg Config) (*Data, error) {
-	sub, err := repositories.NewSubscribers(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB, cfg.Mongo.Uri, cfg.Mongo.DbName)
+func NewDataBase(cfg config.Config) (*Data, error) {
+	subs, err := repositories.NewSubscribers(cfg)
 	if err != nil {
 		return nil, err
 	}
+	plans, err := repositories.NewSubscriptionPlans(cfg)
+	if err != nil {
+		return nil, err
+	}
+	transactions, err := repositories.NewTransactions(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Data{
-		Subscribers: sub, //todo
+		Subscribers:  subs,
+		Plans:        plans,
+		Transactions: transactions,
 	}, nil
 }

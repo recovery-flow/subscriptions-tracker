@@ -1,6 +1,10 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"fmt"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Transaction struct {
 	ID            primitive.ObjectID  `bson:"_id" json:"id"`
@@ -21,3 +25,16 @@ const (
 	TrStatusSuccess TrStatus = "success"
 	TrStatusFailed  TrStatus = "failed"
 )
+
+func StringToTrStatus(s string) (*TrStatus, error) {
+	dict := map[string]TrStatus{
+		"success": TrStatusSuccess,
+		"failed":  TrStatusFailed,
+	}
+	if _, ok := dict[s]; !ok {
+		res := dict[s]
+		return &res, nil
+	}
+
+	return nil, fmt.Errorf("invalid transaction status: %s", s)
+}

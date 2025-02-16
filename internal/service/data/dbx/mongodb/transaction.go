@@ -53,7 +53,7 @@ func NewTransactions(uri, dbName, collectionName string) (Transactions, error) {
 	database := client.Database(dbName)
 	coll := database.Collection(collectionName)
 
-	return &subscribers{
+	return &transactions{
 		client:     client,
 		database:   database,
 		collection: coll,
