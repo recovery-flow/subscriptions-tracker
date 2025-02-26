@@ -10,12 +10,14 @@ import (
 )
 
 type ServerConfig struct {
+	Name     string `mapstructure:"name"`
 	Port     string `mapstructure:"port"`
 	BasePath string `mapstructure:"base_path"`
+	TestMode bool   `mapstructure:"test_mode"`
 	Log      struct {
 		Level  string `mapstructure:"level"`
 		Format string `mapstructure:"format"`
-	} `mapstructure:"log"`
+	} `mapstructure:"logging"`
 }
 
 type JWTConfig struct {
@@ -25,31 +27,24 @@ type JWTConfig struct {
 	} `mapstructure:"access_token"`
 }
 
+type DatabaseConfig struct {
+	SQL struct {
+		URL string `mapstructure:"url"`
+	} `mapstructure:"sql"`
+
+	Redis struct {
+		Addr     string `mapstructure:"addr"`
+		Password string `mapstructure:"password"`
+		DB       int    `mapstructure:"db"`
+		Lifetime int    `mapstructure:"lifetime"`
+	} `mapstructure:"redis"`
+}
+
 type RabbitConfig struct {
 	URL      string `mapstructure:"url"`
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	Exchange string `mapstructure:"exchange"`
-}
-
-type DatabaseConfig struct {
-	SQL struct {
-		URL string `mapstructure:"url"`
-	} `mapstructure:"sql"`
-	Mongo struct {
-		URI  string `mapstructure:"uri"`
-		Name string `mapstructure:"name"`
-	} `mapstructure:"mongo"`
-	Cloudinary struct {
-		CloudName string `mapstructure:"cloud_name"`
-		ApiKey    string `mapstructure:"api_key"`
-		ApiSecret string `mapstructure:"api"`
-	} `mapstructure:"cloudinary"`
-	Redis struct {
-		Addr     string `mapstructure:"addr"`
-		Password string `mapstructure:"password"`
-		DB       int    `mapstructure:"db"`
-	} `mapstructure:"redis"`
 }
 
 type SwaggerConfig struct {

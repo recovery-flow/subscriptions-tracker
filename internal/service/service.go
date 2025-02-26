@@ -1,39 +1,31 @@
 package service
 
 import (
-	"github.com/recovery-flow/rerabbit"
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/data"
-	"github.com/recovery-flow/tokens"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra"
 	"github.com/sirupsen/logrus"
 )
 
 type Service struct {
-	Config       *config.Config
-	Logger       *logrus.Logger
-	TokenManager *tokens.TokenManager
-	Rabbit       *rerabbit.RabbitBroker
-	DB           *data.Data
+	Config *config.Config
+	Domain domain.Domain
+	Log    *logrus.Logger
 }
 
-func NewService(cfg *config.Config, logger *logrus.Logger) (*Service, error) {
-	rabbit, err := rerabbit.NewBroker(cfg.Rabbit.URL)
+func NewService(cfg *config.Config, log *logrus.Logger) (*Service, error) {
+	inf, err := infra.NewInfra(cfg, log)
 	if err != nil {
 		return nil, err
 	}
-
-	database, err := data.NewDataBase(cfg)
+	dmn, err := domain.NewDomain(inf, log)
 	if err != nil {
 		return nil, err
 	}
-
-	tm := tokens.NewTokenManager(cfg.Database.Redis.Addr, cfg.Database.Redis.Password, cfg.Database.Redis.DB, logger, cfg.JWT.AccessToken.TokenLifetime)
 
 	return &Service{
-		Config:       cfg,
-		Logger:       logger,
-		Rabbit:       &rabbit,
-		DB:           database,
-		TokenManager: &tm,
+		Config: cfg,
+		Log:    log,
+		Domain: dmn,
 	}, nil
 }
