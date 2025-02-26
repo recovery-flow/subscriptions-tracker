@@ -35,7 +35,7 @@ type transactions struct {
 	skip    int64
 }
 
-func NewTransactions(cfg config.Config) (Transactions, error) {
+func NewTransactions(cfg *config.Config) (Transactions, error) {
 	redisRepo := cache.NewTransactions(redis.NewClient(&redis.Options{
 		Addr:     cfg.Database.Redis.Addr,
 		Password: cfg.Database.Redis.Password,

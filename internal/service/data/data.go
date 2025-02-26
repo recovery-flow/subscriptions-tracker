@@ -11,7 +11,7 @@ type Data struct {
 	Transactions repositories.Transactions
 }
 
-func NewDataBase(cfg config.Config) (*Data, error) {
+func NewDataBase(cfg *config.Config) (*Data, error) {
 	subs, err := repositories.NewSubscribers(cfg)
 	if err != nil {
 		return nil, err

@@ -38,7 +38,7 @@ type subscriptionPlans struct {
 	skip    int64
 }
 
-func NewSubscriptionPlans(cfg config.Config) (SubscriptionPlans, error) {
+func NewSubscriptionPlans(cfg *config.Config) (SubscriptionPlans, error) {
 	redisRepo := cache.NewSubscriptionPlans(redis.NewClient(&redis.Options{
 		Addr:     cfg.Database.Redis.Addr,
 		Password: cfg.Database.Redis.Password,
