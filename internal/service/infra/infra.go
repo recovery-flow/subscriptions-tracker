@@ -3,7 +3,6 @@ package infra
 import (
 	"github.com/recovery-flow/rerabbit"
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/data/repositories"
 	"github.com/sirupsen/logrus"
 )
 
