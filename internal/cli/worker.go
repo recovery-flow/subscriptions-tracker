@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/recovery-flow/subscriptions-tracker/internal/service"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/transport/rest"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/api"
 )
 
 func runServices(ctx context.Context, srv *service.Service, wg *sync.WaitGroup) {
@@ -17,5 +17,5 @@ func runServices(ctx context.Context, srv *service.Service, wg *sync.WaitGroup) 
 		}()
 	}
 
-	run(func() { rest.Run(ctx, srv) })
+	run(func() { api.Run(ctx, srv) })
 }

@@ -48,13 +48,13 @@ type SubscriptionCancellation struct {
 }
 
 type SubscriptionPlan struct {
-	ID           uuid.UUID
-	Name         string
-	Description  sql.NullString
-	Price        string
-	BillingCycle string
-	Currency     string
-	CreatedAt    sql.NullTime
+	ID                  uuid.UUID
+	TypeID              uuid.UUID
+	Price               string
+	BillingInterval     int32
+	BillingIntervalUnit string
+	Currency            string
+	CreatedAt           sql.NullTime
 }
 
 type SubscriptionTransaction struct {
@@ -67,4 +67,11 @@ type SubscriptionTransaction struct {
 	PaymentProvider string
 	PaymentID       sql.NullString
 	TransactionDate sql.NullTime
+}
+
+type SubscriptionType struct {
+	ID          uuid.UUID
+	Name        string
+	Description sql.NullString
+	CreatedAt   sql.NullTime
 }

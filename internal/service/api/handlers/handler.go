@@ -1,13 +1,22 @@
 package handlers
 
 import (
+	"github.com/recovery-flow/subscriptions-tracker/internal/config"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain"
+	"github.com/sirupsen/logrus"
 )
 
-type Handlers struct {
-	svc *service.Service
+type Handler struct {
+	Config *config.Config
+	Domain domain.Domain
+	Log    *logrus.Logger
 }
 
-func NewHandlers(svc *service.Service) *Handlers {
-	return &Handlers{svc: svc}
+func NewHandler(svc *service.Service) (*Handler, error) {
+	return &Handler{
+		Config: svc.Config,
+		Domain: svc.Domain,
+		Log:    svc.Log,
+	}, nil
 }

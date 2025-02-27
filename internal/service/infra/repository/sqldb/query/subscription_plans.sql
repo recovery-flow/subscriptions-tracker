@@ -1,34 +1,34 @@
--- name: CreateSubscriptionPlan :one
+-- name: CreateSubscriptionPlanVariant :one
 INSERT INTO subscription_plans (
-    name,
-    description,
+    type_id,
     price,
-    billing_cycle,
+    billing_interval,
+    billing_interval_unit,
     currency
 ) VALUES (
              $1, $2, $3, $4, $5
          )
     RETURNING *;
 
--- name: GetSubscriptionPlanByID :one
+-- name: GetSubscriptionPlanVariantByID :one
 SELECT * FROM subscription_plans
 WHERE id = $1;
 
--- name: ListSubscriptionPlans :many
+-- name: ListSubscriptionPlanVariantsByType :many
 SELECT * FROM subscription_plans
+WHERE type_id = $1
 ORDER BY created_at DESC;
 
--- name: UpdateSubscriptionPlan :one
+-- name: UpdateSubscriptionPlanVariant :one
 UPDATE subscription_plans
 SET
-    name = $2,
-    description = $3,
-    price = $4,
-    billing_cycle = $5,
-    currency = $6
+    price = $2,
+    billing_interval = $3,
+    billing_interval_unit = $4,
+    currency = $5
 WHERE id = $1
     RETURNING *;
 
--- name: DeleteSubscriptionPlan :exec
+-- name: DeleteSubscriptionPlanVariant :exec
 DELETE FROM subscription_plans
 WHERE id = $1;

@@ -7,90 +7,90 @@ package core
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 )
 
-const createSubscriptionPlan = `-- name: CreateSubscriptionPlan :one
+const createSubscriptionPlanVariant = `-- name: CreateSubscriptionPlanVariant :one
 INSERT INTO subscription_plans (
-    name,
-    description,
+    type_id,
     price,
-    billing_cycle,
+    billing_interval,
+    billing_interval_unit,
     currency
 ) VALUES (
              $1, $2, $3, $4, $5
          )
-    RETURNING id, name, description, price, billing_cycle, currency, created_at
+    RETURNING id, type_id, price, billing_interval, billing_interval_unit, currency, created_at
 `
 
-type CreateSubscriptionPlanParams struct {
-	Name         string
-	Description  sql.NullString
-	Price        string
-	BillingCycle string
-	Currency     string
+type CreateSubscriptionPlanVariantParams struct {
+	TypeID              uuid.UUID
+	Price               string
+	BillingInterval     int32
+	BillingIntervalUnit string
+	Currency            string
 }
 
-func (q *Queries) CreateSubscriptionPlan(ctx context.Context, arg CreateSubscriptionPlanParams) (SubscriptionPlan, error) {
-	row := q.db.QueryRowContext(ctx, createSubscriptionPlan,
-		arg.Name,
-		arg.Description,
+func (q *Queries) CreateSubscriptionPlanVariant(ctx context.Context, arg CreateSubscriptionPlanVariantParams) (SubscriptionPlan, error) {
+	row := q.db.QueryRowContext(ctx, createSubscriptionPlanVariant,
+		arg.TypeID,
 		arg.Price,
-		arg.BillingCycle,
+		arg.BillingInterval,
+		arg.BillingIntervalUnit,
 		arg.Currency,
 	)
 	var i SubscriptionPlan
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
-		&i.Description,
+		&i.TypeID,
 		&i.Price,
-		&i.BillingCycle,
+		&i.BillingInterval,
+		&i.BillingIntervalUnit,
 		&i.Currency,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
-const deleteSubscriptionPlan = `-- name: DeleteSubscriptionPlan :exec
+const deleteSubscriptionPlanVariant = `-- name: DeleteSubscriptionPlanVariant :exec
 DELETE FROM subscription_plans
 WHERE id = $1
 `
 
-func (q *Queries) DeleteSubscriptionPlan(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteSubscriptionPlan, id)
+func (q *Queries) DeleteSubscriptionPlanVariant(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteSubscriptionPlanVariant, id)
 	return err
 }
 
-const getSubscriptionPlanByID = `-- name: GetSubscriptionPlanByID :one
-SELECT id, name, description, price, billing_cycle, currency, created_at FROM subscription_plans
+const getSubscriptionPlanVariantByID = `-- name: GetSubscriptionPlanVariantByID :one
+SELECT id, type_id, price, billing_interval, billing_interval_unit, currency, created_at FROM subscription_plans
 WHERE id = $1
 `
 
-func (q *Queries) GetSubscriptionPlanByID(ctx context.Context, id uuid.UUID) (SubscriptionPlan, error) {
-	row := q.db.QueryRowContext(ctx, getSubscriptionPlanByID, id)
+func (q *Queries) GetSubscriptionPlanVariantByID(ctx context.Context, id uuid.UUID) (SubscriptionPlan, error) {
+	row := q.db.QueryRowContext(ctx, getSubscriptionPlanVariantByID, id)
 	var i SubscriptionPlan
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
-		&i.Description,
+		&i.TypeID,
 		&i.Price,
-		&i.BillingCycle,
+		&i.BillingInterval,
+		&i.BillingIntervalUnit,
 		&i.Currency,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
-const listSubscriptionPlans = `-- name: ListSubscriptionPlans :many
-SELECT id, name, description, price, billing_cycle, currency, created_at FROM subscription_plans
+const listSubscriptionPlanVariantsByType = `-- name: ListSubscriptionPlanVariantsByType :many
+SELECT id, type_id, price, billing_interval, billing_interval_unit, currency, created_at FROM subscription_plans
+WHERE type_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListSubscriptionPlans(ctx context.Context) ([]SubscriptionPlan, error) {
-	rows, err := q.db.QueryContext(ctx, listSubscriptionPlans)
+func (q *Queries) ListSubscriptionPlanVariantsByType(ctx context.Context, typeID uuid.UUID) ([]SubscriptionPlan, error) {
+	rows, err := q.db.QueryContext(ctx, listSubscriptionPlanVariantsByType, typeID)
 	if err != nil {
 		return nil, err
 	}
@@ -100,10 +100,10 @@ func (q *Queries) ListSubscriptionPlans(ctx context.Context) ([]SubscriptionPlan
 		var i SubscriptionPlan
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
-			&i.Description,
+			&i.TypeID,
 			&i.Price,
-			&i.BillingCycle,
+			&i.BillingInterval,
+			&i.BillingIntervalUnit,
 			&i.Currency,
 			&i.CreatedAt,
 		); err != nil {
@@ -120,43 +120,40 @@ func (q *Queries) ListSubscriptionPlans(ctx context.Context) ([]SubscriptionPlan
 	return items, nil
 }
 
-const updateSubscriptionPlan = `-- name: UpdateSubscriptionPlan :one
+const updateSubscriptionPlanVariant = `-- name: UpdateSubscriptionPlanVariant :one
 UPDATE subscription_plans
 SET
-    name = $2,
-    description = $3,
-    price = $4,
-    billing_cycle = $5,
-    currency = $6
+    price = $2,
+    billing_interval = $3,
+    billing_interval_unit = $4,
+    currency = $5
 WHERE id = $1
-    RETURNING id, name, description, price, billing_cycle, currency, created_at
+    RETURNING id, type_id, price, billing_interval, billing_interval_unit, currency, created_at
 `
 
-type UpdateSubscriptionPlanParams struct {
-	ID           uuid.UUID
-	Name         string
-	Description  sql.NullString
-	Price        string
-	BillingCycle string
-	Currency     string
+type UpdateSubscriptionPlanVariantParams struct {
+	ID                  uuid.UUID
+	Price               string
+	BillingInterval     int32
+	BillingIntervalUnit string
+	Currency            string
 }
 
-func (q *Queries) UpdateSubscriptionPlan(ctx context.Context, arg UpdateSubscriptionPlanParams) (SubscriptionPlan, error) {
-	row := q.db.QueryRowContext(ctx, updateSubscriptionPlan,
+func (q *Queries) UpdateSubscriptionPlanVariant(ctx context.Context, arg UpdateSubscriptionPlanVariantParams) (SubscriptionPlan, error) {
+	row := q.db.QueryRowContext(ctx, updateSubscriptionPlanVariant,
 		arg.ID,
-		arg.Name,
-		arg.Description,
 		arg.Price,
-		arg.BillingCycle,
+		arg.BillingInterval,
+		arg.BillingIntervalUnit,
 		arg.Currency,
 	)
 	var i SubscriptionPlan
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
-		&i.Description,
+		&i.TypeID,
 		&i.Price,
-		&i.BillingCycle,
+		&i.BillingInterval,
+		&i.BillingIntervalUnit,
 		&i.Currency,
 		&i.CreatedAt,
 	)
