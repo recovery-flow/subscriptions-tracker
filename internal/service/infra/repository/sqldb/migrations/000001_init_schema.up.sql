@@ -38,12 +38,12 @@ CREATE INDEX idx_payment_methods_type ON payment_methods (type);
 CREATE TABLE subscriptions (
     user_id UUID PRIMARY KEY,
     plan_id UUID NOT NULL REFERENCES subscription_plans(id),
-    payment_method_id UUID REFERENCES payment_methods(id),
+    payment_method_id UUID NOT NULL REFERENCES payment_methods(id),
     status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'canceled', 'expired', 'pending')),
     start_date TIMESTAMP NOT NULL DEFAULT NOW(),
     end_date TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 CREATE INDEX idx_subscriptions_status ON subscriptions (status);
