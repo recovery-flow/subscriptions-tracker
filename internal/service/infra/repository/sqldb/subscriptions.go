@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -17,14 +18,16 @@ type Subscriptions interface {
 	Insert(ctx context.Context, sub models.Subscription) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
-	Count(ctx context.Context) (int, error)
 	Select(ctx context.Context) ([]models.Subscription, error)
+	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.Subscription, error)
 
 	FilterUserID(userID string) Subscriptions
 	FilterPlanID(planID string) Subscriptions
 	FilterStatus(status string) Subscriptions
 	FilterPaymentMethodID(paymentMethodID string) Subscriptions
+
+	//TODO: Add FilterStartDate, FilterEndDate, FilterCreatedAt, FilterUpdatedAt
 
 	Page(limit, offset uint64) Subscriptions
 }
@@ -39,13 +42,14 @@ type subscriptions struct {
 }
 
 func NewSubscriptions(db *sql.DB) Subscriptions {
+	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	return &subscriptions{
 		db:       db,
-		selector: sq.Select("*").From(subscriptionTable),
-		inserter: sq.Insert(subscriptionTable),
-		updater:  sq.Update(subscriptionTable),
-		deleter:  sq.Delete(subscriptionTable),
-		counter:  sq.Select("COUNT(*) AS count").From(subscriptionTable),
+		selector: builder.Select("*").From(subscriptionTable),
+		inserter: builder.Insert(subscriptionTable),
+		updater:  builder.Update(subscriptionTable),
+		deleter:  builder.Delete(subscriptionTable),
+		counter:  builder.Select("COUNT(*) AS count").From(subscriptionTable),
 	}
 }
 
@@ -64,6 +68,9 @@ func (s *subscriptions) Insert(ctx context.Context, sub models.Subscription) err
 		"created_at":        sub.CreatedAt,
 		"updated_at":        sub.UpdatedAt,
 	}).ToSql()
+
+	fmt.Printf("query: %s, args: %v", query, args)
+	time.Sleep(1 * time.Second)
 	if err != nil {
 		return fmt.Errorf("error building insert query: %w", err)
 	}

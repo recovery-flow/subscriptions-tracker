@@ -17,7 +17,7 @@ type ServerConfig struct {
 	Log      struct {
 		Level  string `mapstructure:"level"`
 		Format string `mapstructure:"format"`
-	} `mapstructure:"logging"`
+	} `mapstructure:"log"`
 }
 
 type JWTConfig struct {

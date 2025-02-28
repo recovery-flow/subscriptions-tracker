@@ -18,7 +18,7 @@ rabbit:
 
 database:
   sql:
-    url: "postgresql://postgres:postgres@localhost:5555/postgres?sslmode=disable"
+    url: "postgresql://postgres:postgres@localhost:5556/postgres?sslmode=disable"
   mongo:
     uri: "mongodb://localhost:27017"
     name: "re-flow"
