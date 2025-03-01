@@ -22,6 +22,8 @@ type SubscriptionPlan interface {
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.SubscriptionPlan, error)
 
+	Transaction(func() error) error
+
 	FilterID(id uuid.UUID) SubscriptionPlan
 	FilterTypeID(typeID uuid.UUID) SubscriptionPlan
 
@@ -49,11 +51,11 @@ func NewSubscriptionPlan(db *sql.DB) SubscriptionPlan {
 	}
 }
 
-func (s *subscriptionPlan) New() SubscriptionPlan {
-	return NewSubscriptionPlan(s.db)
+func (p *subscriptionPlan) New() SubscriptionPlan {
+	return NewSubscriptionPlan(p.db)
 }
 
-func (s *subscriptionPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) error {
+func (p *subscriptionPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) error {
 	values := map[string]interface{}{
 		"id":                    plan.ID,
 		"type_id":               plan.TypeID,
@@ -64,18 +66,18 @@ func (s *subscriptionPlan) Insert(ctx context.Context, plan models.SubscriptionP
 		"created_at":            plan.CreatedAt,
 	}
 
-	query, args, err := s.inserter.SetMap(values).ToSql()
+	query, args, err := p.inserter.SetMap(values).ToSql()
 	if err != nil {
 		return fmt.Errorf("building insert query for subscription_plans: %w", err)
 	}
 
-	if _, err := s.db.ExecContext(ctx, query, args...); err != nil {
+	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
 		return fmt.Errorf("inserting subscription_plan: %w", err)
 	}
 	return nil
 }
 
-func (s *subscriptionPlan) Update(ctx context.Context, plan models.SubscriptionPlan) error {
+func (p *subscriptionPlan) Update(ctx context.Context, plan models.SubscriptionPlan) error {
 	updates := map[string]interface{}{
 		"type_id":               plan.TypeID,
 		"price":                 plan.Price,
@@ -83,36 +85,36 @@ func (s *subscriptionPlan) Update(ctx context.Context, plan models.SubscriptionP
 		"billing_interval_unit": plan.BillingIntervalUnit,
 		"currency":              plan.Currency,
 	}
-	query, args, err := s.updater.SetMap(updates).ToSql()
+	query, args, err := p.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for subscription_plans: %w", err)
 	}
 
-	if _, err := s.db.ExecContext(ctx, query, args...); err != nil {
+	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
 		return fmt.Errorf("updating subscription_plan: %w", err)
 	}
 	return nil
 }
 
-func (s *subscriptionPlan) Delete(ctx context.Context) error {
-	query, args, err := s.deleter.ToSql()
+func (p *subscriptionPlan) Delete(ctx context.Context) error {
+	query, args, err := p.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for subscription_plans: %w", err)
 	}
 
-	if _, err := s.db.ExecContext(ctx, query, args...); err != nil {
+	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
 		return fmt.Errorf("deleting subscription_plan: %w", err)
 	}
 	return nil
 }
 
-func (s *subscriptionPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
-	query, args, err := s.selector.ToSql()
+func (p *subscriptionPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
+	query, args, err := p.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for subscription_plans: %w", err)
 	}
 
-	rows, err := s.db.QueryContext(ctx, query, args...)
+	rows, err := p.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("executing select query for subscription_plans: %w", err)
 	}
@@ -138,27 +140,27 @@ func (s *subscriptionPlan) Select(ctx context.Context) ([]models.SubscriptionPla
 	return plans, nil
 }
 
-func (s *subscriptionPlan) Count(ctx context.Context) (int, error) {
-	query, args, err := s.counter.ToSql()
+func (p *subscriptionPlan) Count(ctx context.Context) (int, error) {
+	query, args, err := p.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for subscription_plans: %w", err)
 	}
 
 	var count int
-	if err := s.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
+	if err := p.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
 		return 0, fmt.Errorf("counting subscription_plans: %w", err)
 	}
 	return count, nil
 }
 
-func (s *subscriptionPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
-	query, args, err := s.selector.ToSql()
+func (p *subscriptionPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
+	query, args, err := p.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for subscription_plans: %w", err)
 	}
 
 	var plan models.SubscriptionPlan
-	err = s.db.QueryRowContext(ctx, query, args...).Scan(
+	err = p.db.QueryRowContext(ctx, query, args...).Scan(
 		&plan.ID,
 		&plan.TypeID,
 		&plan.Price,
@@ -177,26 +179,48 @@ func (s *subscriptionPlan) Get(ctx context.Context) (*models.SubscriptionPlan, e
 	return &plan, nil
 }
 
-func (s *subscriptionPlan) FilterID(id uuid.UUID) SubscriptionPlan {
+func (p *subscriptionPlan) FilterID(id uuid.UUID) SubscriptionPlan {
 	cond := sq.Eq{"id": id}
-	s.selector = s.selector.Where(cond)
-	s.updater = s.updater.Where(cond)
-	s.deleter = s.deleter.Where(cond)
-	s.counter = s.counter.Where(cond)
-	return s
+	p.selector = p.selector.Where(cond)
+	p.updater = p.updater.Where(cond)
+	p.deleter = p.deleter.Where(cond)
+	p.counter = p.counter.Where(cond)
+	return p
 }
 
-func (s *subscriptionPlan) FilterTypeID(typeID uuid.UUID) SubscriptionPlan {
+func (p *subscriptionPlan) FilterTypeID(typeID uuid.UUID) SubscriptionPlan {
 	cond := sq.Eq{"type_id": typeID}
-	s.selector = s.selector.Where(cond)
-	s.updater = s.updater.Where(cond)
-	s.deleter = s.deleter.Where(cond)
-	s.counter = s.counter.Where(cond)
-	return s
+	p.selector = p.selector.Where(cond)
+	p.updater = p.updater.Where(cond)
+	p.deleter = p.deleter.Where(cond)
+	p.counter = p.counter.Where(cond)
+	return p
 }
 
-func (s *subscriptionPlan) Page(limit, offset uint64) SubscriptionPlan {
-	s.selector = s.selector.Limit(limit).Offset(offset)
-	s.counter = s.counter.Limit(limit).Offset(offset)
-	return s
+func (p *subscriptionPlan) Transaction(f func() error) error {
+	ctx := context.Background()
+
+	tx, err := p.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	if err := f(); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
+		}
+		return fmt.Errorf("transaction failed: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (p *subscriptionPlan) Page(limit, offset uint64) SubscriptionPlan {
+	p.selector = p.selector.Limit(limit).Offset(offset)
+	p.counter = p.counter.Limit(limit).Offset(offset)
+	return p
 }

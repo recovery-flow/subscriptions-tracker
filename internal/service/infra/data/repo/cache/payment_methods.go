@@ -138,10 +138,15 @@ func parsePayMethod(payMethodID string, vals map[string]string) (*models.Payment
 		return nil, fmt.Errorf("error parsing userID: %w", err)
 	}
 
+	typeMethod, err := models.ParsePayType(vals["type"])
+	if err != nil {
+		return nil, fmt.Errorf("error parsing type: %w", err)
+	}
+
 	account := &models.PaymentMethod{
 		ID:            ID,
 		UserID:        userID,
-		Type:          vals["type"],
+		Type:          typeMethod,
 		ProviderToken: vals["provider_token"],
 		IsDefault:     vals["is_default"] == "true",
 		CreatedAt:     createdAt,

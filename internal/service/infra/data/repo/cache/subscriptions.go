@@ -156,8 +156,6 @@ func parseSubscription(userID string, vals map[string]string) (*models.Subscript
 		return nil, fmt.Errorf("error parsing payment_method_id: %w", err)
 	}
 
-	status := vals["status"]
-
 	startDate, err := time.Parse(time.RFC3339, vals["start_date"])
 	if err != nil {
 		return nil, fmt.Errorf("error parsing start_date: %w", err)
@@ -181,6 +179,11 @@ func parseSubscription(userID string, vals map[string]string) (*models.Subscript
 	uid, err := uuid.Parse(userID)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing user_id: %w", err)
+	}
+
+	status, err := models.ParseSubscriptionStatus(vals["status"])
+	if err != nil {
+		return nil, fmt.Errorf("error parsing status: %w", err)
 	}
 
 	sub := models.Subscription{

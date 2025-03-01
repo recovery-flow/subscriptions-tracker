@@ -8,10 +8,26 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo"
 )
 
 const paymentMethodsTable = "payment_methods"
+
+type PaymentMethods interface {
+	New() PaymentMethods
+
+	Insert(ctx context.Context, pm models.PaymentMethod) error
+	Update(ctx context.Context, updates map[string]any) error
+	Delete(ctx context.Context) error
+
+	Select(ctx context.Context) ([]models.PaymentMethod, error)
+	Count(ctx context.Context) (int, error)
+	Get(ctx context.Context) (*models.PaymentMethod, error)
+
+	FilterID(id uuid.UUID) PaymentMethods
+	FilterUserID(userID uuid.UUID) PaymentMethods
+
+	Page(limit, offset uint64) PaymentMethods
+}
 
 type paymentMethods struct {
 	db       *sql.DB
@@ -22,7 +38,7 @@ type paymentMethods struct {
 	counter  sq.SelectBuilder
 }
 
-func NewPaymentMethods(db *sql.DB) repo.PaymentMethods {
+func NewPaymentMethods(db *sql.DB) PaymentMethods {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	return &paymentMethods{
 		db:       db,
@@ -34,7 +50,7 @@ func NewPaymentMethods(db *sql.DB) repo.PaymentMethods {
 	}
 }
 
-func (p *paymentMethods) New() repo.PaymentMethods {
+func (p *paymentMethods) New() PaymentMethods {
 	return NewPaymentMethods(p.db)
 }
 
@@ -150,7 +166,7 @@ func (p *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error)
 	return &pm, nil
 }
 
-func (p *paymentMethods) FilterID(id uuid.UUID) repo.PaymentMethods {
+func (p *paymentMethods) FilterID(id uuid.UUID) PaymentMethods {
 	cond := sq.Eq{"id": id}
 	p.selector = p.selector.Where(cond)
 	p.updater = p.updater.Where(cond)
@@ -159,7 +175,7 @@ func (p *paymentMethods) FilterID(id uuid.UUID) repo.PaymentMethods {
 	return p
 }
 
-func (p *paymentMethods) FilterUserID(userID uuid.UUID) repo.PaymentMethods {
+func (p *paymentMethods) FilterUserID(userID uuid.UUID) PaymentMethods {
 	cond := sq.Eq{"user_id": userID}
 	p.selector = p.selector.Where(cond)
 	p.updater = p.updater.Where(cond)
@@ -168,7 +184,7 @@ func (p *paymentMethods) FilterUserID(userID uuid.UUID) repo.PaymentMethods {
 	return p
 }
 
-func (p *paymentMethods) Page(limit, offset uint64) repo.PaymentMethods {
+func (p *paymentMethods) Page(limit, offset uint64) PaymentMethods {
 	p.selector = p.selector.Limit(limit).Offset(offset)
 	p.counter = p.counter.Limit(limit).Offset(offset)
 	return p
