@@ -42,7 +42,6 @@ func (m *PayMethods) Add(ctx context.Context, payMethod models.PaymentMethod) er
 		return fmt.Errorf("error adding payment method ID to user set: %w", err)
 	}
 
-	// Если задан TTL, используем pipeline для установки времени жизни всех ключей одновременно
 	if m.lifeTime > 0 {
 		pipe := m.client.Pipeline()
 		keys := []string{payMethodKey, userIDKey}
@@ -117,6 +116,36 @@ func (m *PayMethods) Delete(ctx context.Context, methodID string) error {
 	err = m.client.SRem(ctx, userIDKey, methodID).Err()
 	if err != nil {
 		return fmt.Errorf("error removing payment method methodID from user set: %w", err)
+	}
+
+	return nil
+}
+
+func (m *PayMethods) DeleteByUserID(ctx context.Context, userID string) error {
+	userIDKey := fmt.Sprintf("payment_method:user_id:%s", userID)
+
+	IDs, err := m.client.SMembers(ctx, userIDKey).Result()
+	if err != nil {
+		return fmt.Errorf("error getting payment method IDs from Redis: %w", err)
+	}
+
+	if len(IDs) == 0 {
+		return nil
+	}
+
+	pipe := m.client.Pipeline()
+	for _, ID := range IDs {
+		payMethodKey := fmt.Sprintf("payment_method:id:%s", ID)
+		pipe.Del(ctx, payMethodKey)
+	}
+	_, err = pipe.Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("error deleting payment methods: %w", err)
+	}
+
+	err = m.client.Del(ctx, userIDKey).Err()
+	if err != nil {
+		return fmt.Errorf("error deleting user set: %w", err)
 	}
 
 	return nil

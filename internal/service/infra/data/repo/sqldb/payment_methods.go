@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 )
 
@@ -16,15 +15,13 @@ type PaymentMethods interface {
 	New() PaymentMethods
 
 	Insert(ctx context.Context, pm models.PaymentMethod) error
-	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 
 	Select(ctx context.Context) ([]models.PaymentMethod, error)
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.PaymentMethod, error)
 
-	FilterID(id uuid.UUID) PaymentMethods
-	FilterUserID(userID uuid.UUID) PaymentMethods
+	Filter(filters map[string]any) PaymentMethods
 
 	Page(limit, offset uint64) PaymentMethods
 }
@@ -71,18 +68,6 @@ func (p *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) er
 
 	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
 		return fmt.Errorf("inserting payment_method: %w", err)
-	}
-	return nil
-}
-
-func (p *paymentMethods) Update(ctx context.Context, updates map[string]any) error {
-	query, args, err := p.updater.SetMap(updates).ToSql()
-	if err != nil {
-		return fmt.Errorf("building update query for payment_methods: %w", err)
-	}
-
-	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
-		return fmt.Errorf("updating payment_method: %w", err)
 	}
 	return nil
 }
@@ -166,21 +151,20 @@ func (p *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error)
 	return &pm, nil
 }
 
-func (p *paymentMethods) FilterID(id uuid.UUID) PaymentMethods {
-	cond := sq.Eq{"id": id}
-	p.selector = p.selector.Where(cond)
-	p.updater = p.updater.Where(cond)
-	p.deleter = p.deleter.Where(cond)
-	p.counter = p.counter.Where(cond)
-	return p
-}
-
-func (p *paymentMethods) FilterUserID(userID uuid.UUID) PaymentMethods {
-	cond := sq.Eq{"user_id": userID}
-	p.selector = p.selector.Where(cond)
-	p.updater = p.updater.Where(cond)
-	p.deleter = p.deleter.Where(cond)
-	p.counter = p.counter.Where(cond)
+func (p *paymentMethods) Filter(filters map[string]any) PaymentMethods {
+	var validFilters = map[string]bool{
+		"id":      true,
+		"user_id": true,
+	}
+	for key, value := range filters {
+		if _, exists := validFilters[key]; !exists {
+			continue
+		}
+		p.selector = p.selector.Where(sq.Eq{key: value})
+		p.counter = p.counter.Where(sq.Eq{key: value})
+		p.deleter = p.deleter.Where(sq.Eq{key: value})
+		p.updater = p.updater.Where(sq.Eq{key: value})
+	}
 	return p
 }
 
