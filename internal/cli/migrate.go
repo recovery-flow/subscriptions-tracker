@@ -12,7 +12,7 @@ import (
 func runMigration(ctx context.Context, cfg config.Config, direction string) error {
 	cmd := exec.Command(
 		"migrate",
-		"-path", "internal/data/sql/repositories/migrations",
+		"-path", "internal/service/infra/data/repository/sqldb/migrations",
 		"-database", cfg.Database.SQL.URL,
 		"-verbose", direction,
 	)

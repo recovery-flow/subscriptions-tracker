@@ -28,13 +28,13 @@ if [ "$release_note" = "" ]; then
     echo "[INFO] No command line input provided. Set \$release_note to $release_note"
 fi
 
-# Initialize the local directory as a Git repository
+# Initialize the local directory as a Git repo
 git init
 
-# Adds the files in the local repository and stages them for commit.
+# Adds the files in the local repo and stages them for commit.
 git add .
 
-# Commits the tracked changes and prepares them to be pushed to a remote repository.
+# Commits the tracked changes and prepares them to be pushed to a remote repo.
 git commit -m "$release_note"
 
 # Sets the new remote
@@ -52,6 +52,6 @@ fi
 
 git pull origin master
 
-# Pushes (Forces) the changes in the local repository up to the remote repository
+# Pushes (Forces) the changes in the local repo up to the remote repo
 echo "Git pushing to https://${git_host}/${git_user_id}/${git_repo_id}.git"
 git push origin master 2>&1 | grep -v 'To https'

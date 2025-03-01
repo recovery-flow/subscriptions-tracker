@@ -9,27 +9,10 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo"
 )
 
 const billingSchedulesTable = "billing_schedules"
-
-type BillingSchedules interface {
-	New() BillingSchedules
-
-	Insert(ctx context.Context, bs models.BillingSchedule) error
-	Update(ctx context.Context, updates map[string]any) error
-	Delete(ctx context.Context) error
-
-	Select(ctx context.Context) ([]models.BillingSchedule, error)
-	Count(ctx context.Context) (int, error)
-	Get(ctx context.Context) (*models.BillingSchedule, error)
-
-	FilterID(id uuid.UUID) BillingSchedules
-	FilterUserID(userID uuid.UUID) BillingSchedules
-	FilterStatus(status string) BillingSchedules
-
-	Page(limit, offset uint64) BillingSchedules
-}
 
 type billingSchedules struct {
 	db       *sql.DB
@@ -40,7 +23,7 @@ type billingSchedules struct {
 	counter  sq.SelectBuilder
 }
 
-func NewBillingSchedules(db *sql.DB) BillingSchedules {
+func NewBillingSchedules(db *sql.DB) repo.BillingPlan {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	return &billingSchedules{
 		db:       db,
@@ -52,11 +35,11 @@ func NewBillingSchedules(db *sql.DB) BillingSchedules {
 	}
 }
 
-func (b *billingSchedules) New() BillingSchedules {
+func (b *billingSchedules) New() repo.BillingPlan {
 	return NewBillingSchedules(b.db)
 }
 
-func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule) error {
+func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingPlan) error {
 	values := map[string]interface{}{
 		"id":             bs.ID,
 		"user_id":        bs.UserID,
@@ -104,7 +87,7 @@ func (b *billingSchedules) Delete(ctx context.Context) error {
 	return nil
 }
 
-func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule, error) {
+func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingPlan, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for billing_schedules: %w", err)
@@ -116,9 +99,9 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 	}
 	defer rows.Close()
 
-	var results []models.BillingSchedule
+	var results []models.BillingPlan
 	for rows.Next() {
-		var bs models.BillingSchedule
+		var bs models.BillingPlan
 		var attemptedDate *time.Time
 
 		err := rows.Scan(
@@ -151,13 +134,13 @@ func (b *billingSchedules) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, error) {
+func (b *billingSchedules) Get(ctx context.Context) (*models.BillingPlan, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for billing_schedules: %w", err)
 	}
 
-	var bs models.BillingSchedule
+	var bs models.BillingPlan
 	var attemptedDate *time.Time
 
 	err = b.db.QueryRowContext(ctx, query, args...).Scan(
@@ -179,7 +162,7 @@ func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, er
 	return &bs, nil
 }
 
-func (b *billingSchedules) FilterID(id uuid.UUID) BillingSchedules {
+func (b *billingSchedules) FilterID(id uuid.UUID) repo.BillingPlan {
 	cond := sq.Eq{"id": id}
 	b.selector = b.selector.Where(cond)
 	b.updater = b.updater.Where(cond)
@@ -188,7 +171,7 @@ func (b *billingSchedules) FilterID(id uuid.UUID) BillingSchedules {
 	return b
 }
 
-func (b *billingSchedules) FilterUserID(userID uuid.UUID) BillingSchedules {
+func (b *billingSchedules) FilterUserID(userID uuid.UUID) repo.BillingPlan {
 	cond := sq.Eq{"user_id": userID}
 	b.selector = b.selector.Where(cond)
 	b.updater = b.updater.Where(cond)
@@ -197,7 +180,7 @@ func (b *billingSchedules) FilterUserID(userID uuid.UUID) BillingSchedules {
 	return b
 }
 
-func (b *billingSchedules) FilterStatus(status string) BillingSchedules {
+func (b *billingSchedules) FilterStatus(status string) repo.BillingPlan {
 	cond := sq.Eq{"status": status}
 	b.selector = b.selector.Where(cond)
 	b.updater = b.updater.Where(cond)
@@ -206,7 +189,7 @@ func (b *billingSchedules) FilterStatus(status string) BillingSchedules {
 	return b
 }
 
-func (b *billingSchedules) Page(limit, offset uint64) BillingSchedules {
+func (b *billingSchedules) Page(limit, offset uint64) repo.BillingPlan {
 	b.selector = b.selector.Limit(limit).Offset(offset)
 	b.counter = b.counter.Limit(limit).Offset(offset)
 	return b

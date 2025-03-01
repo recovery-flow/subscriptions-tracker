@@ -8,31 +8,12 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo"
 )
 
-const subscriptionTransactionsTable = "subscription_transactions"
+const transactionsTable = "subscription_transactions"
 
-type SubscriptionTransactions interface {
-	New() SubscriptionTransactions
-
-	Insert(ctx context.Context, trn models.SubscriptionTransaction) error
-	Update(ctx context.Context, updates map[string]any) error
-	Delete(ctx context.Context) error
-
-	Select(ctx context.Context) ([]models.SubscriptionTransaction, error)
-	Count(ctx context.Context) (int, error)
-	Get(ctx context.Context) (*models.SubscriptionTransaction, error)
-
-	FilterID(ID uuid.UUID) SubscriptionTransactions
-	FilterUserID(userID uuid.UUID) SubscriptionTransactions
-	FilterPaymentMethodID(paymentMethodID uuid.UUID) SubscriptionTransactions
-	FilterStatus(status models.TrnStatus) SubscriptionTransactions
-	FilterPaymentProvider(provider models.PaymentProvider) SubscriptionTransactions
-
-	Page(limit, offset uint64) SubscriptionTransactions
-}
-
-type subscriptionTransactions struct {
+type transactions struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -41,23 +22,23 @@ type subscriptionTransactions struct {
 	counter  sq.SelectBuilder
 }
 
-func NewSubscriptionTransactions(db *sql.DB) SubscriptionTransactions {
+func NewTransactions(db *sql.DB) repo.Transactions {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	return &subscriptionTransactions{
+	return &transactions{
 		db:       db,
-		selector: builder.Select("*").From(subscriptionTransactionsTable),
-		inserter: builder.Insert(subscriptionTransactionsTable),
-		updater:  builder.Update(subscriptionTransactionsTable),
-		deleter:  builder.Delete(subscriptionTransactionsTable),
-		counter:  builder.Select("COUNT(*) AS count").From(subscriptionTransactionsTable),
+		selector: builder.Select("*").From(transactionsTable),
+		inserter: builder.Insert(transactionsTable),
+		updater:  builder.Update(transactionsTable),
+		deleter:  builder.Delete(transactionsTable),
+		counter:  builder.Select("COUNT(*) AS count").From(transactionsTable),
 	}
 }
 
-func (s *subscriptionTransactions) New() SubscriptionTransactions {
-	return NewSubscriptionTransactions(s.db)
+func (s *transactions) New() repo.Transactions {
+	return NewTransactions(s.db)
 }
 
-func (s *subscriptionTransactions) Insert(ctx context.Context, trn models.SubscriptionTransaction) error {
+func (s *transactions) Insert(ctx context.Context, trn models.Transaction) error {
 	values := map[string]interface{}{
 		"id":                trn.ID,
 		"user_id":           trn.UserID,
@@ -81,7 +62,7 @@ func (s *subscriptionTransactions) Insert(ctx context.Context, trn models.Subscr
 	return nil
 }
 
-func (s *subscriptionTransactions) Update(ctx context.Context, updates map[string]any) error {
+func (s *transactions) Update(ctx context.Context, updates map[string]any) error {
 	query, args, err := s.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for subscription_transactions: %w", err)
@@ -93,7 +74,7 @@ func (s *subscriptionTransactions) Update(ctx context.Context, updates map[strin
 	return nil
 }
 
-func (s *subscriptionTransactions) Delete(ctx context.Context) error {
+func (s *transactions) Delete(ctx context.Context) error {
 	query, args, err := s.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for subscription_transactions: %w", err)
@@ -105,7 +86,7 @@ func (s *subscriptionTransactions) Delete(ctx context.Context) error {
 	return nil
 }
 
-func (s *subscriptionTransactions) Select(ctx context.Context) ([]models.SubscriptionTransaction, error) {
+func (s *transactions) Select(ctx context.Context) ([]models.Transaction, error) {
 	query, args, err := s.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for subscription_transactions: %w", err)
@@ -117,9 +98,9 @@ func (s *subscriptionTransactions) Select(ctx context.Context) ([]models.Subscri
 	}
 	defer rows.Close()
 
-	var results []models.SubscriptionTransaction
+	var results []models.Transaction
 	for rows.Next() {
-		var trn models.SubscriptionTransaction
+		var trn models.Transaction
 
 		err := rows.Scan(
 			&trn.ID,
@@ -141,7 +122,7 @@ func (s *subscriptionTransactions) Select(ctx context.Context) ([]models.Subscri
 	return results, nil
 }
 
-func (s *subscriptionTransactions) Count(ctx context.Context) (int, error) {
+func (s *transactions) Count(ctx context.Context) (int, error) {
 	query, args, err := s.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for subscription_transactions: %w", err)
@@ -154,13 +135,13 @@ func (s *subscriptionTransactions) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (s *subscriptionTransactions) Get(ctx context.Context) (*models.SubscriptionTransaction, error) {
+func (s *transactions) Get(ctx context.Context) (*models.Transaction, error) {
 	query, args, err := s.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for subscription_transactions: %w", err)
 	}
 
-	var trn models.SubscriptionTransaction
+	var trn models.Transaction
 
 	err = s.db.QueryRowContext(ctx, query, args...).Scan(
 		&trn.ID,
@@ -183,7 +164,7 @@ func (s *subscriptionTransactions) Get(ctx context.Context) (*models.Subscriptio
 	return &trn, nil
 }
 
-func (s *subscriptionTransactions) FilterID(ID uuid.UUID) SubscriptionTransactions {
+func (s *transactions) FilterID(ID uuid.UUID) repo.Transactions {
 	cond := sq.Eq{"id": ID}
 	s.selector = s.selector.Where(cond)
 	s.updater = s.updater.Where(cond)
@@ -192,7 +173,7 @@ func (s *subscriptionTransactions) FilterID(ID uuid.UUID) SubscriptionTransactio
 	return s
 }
 
-func (s *subscriptionTransactions) FilterUserID(userID uuid.UUID) SubscriptionTransactions {
+func (s *transactions) FilterUserID(userID uuid.UUID) repo.Transactions {
 	cond := sq.Eq{"user_id": userID}
 	s.selector = s.selector.Where(cond)
 	s.updater = s.updater.Where(cond)
@@ -201,7 +182,7 @@ func (s *subscriptionTransactions) FilterUserID(userID uuid.UUID) SubscriptionTr
 	return s
 }
 
-func (s *subscriptionTransactions) FilterPaymentMethodID(paymentMethodID uuid.UUID) SubscriptionTransactions {
+func (s *transactions) FilterPaymentMethodID(paymentMethodID uuid.UUID) repo.Transactions {
 	cond := sq.Eq{"payment_method_id": paymentMethodID}
 	s.selector = s.selector.Where(cond)
 	s.updater = s.updater.Where(cond)
@@ -210,7 +191,7 @@ func (s *subscriptionTransactions) FilterPaymentMethodID(paymentMethodID uuid.UU
 	return s
 }
 
-func (s *subscriptionTransactions) FilterStatus(status models.TrnStatus) SubscriptionTransactions {
+func (s *transactions) FilterStatus(status models.TrnStatus) repo.Transactions {
 	cond := sq.Eq{"status": status}
 	s.selector = s.selector.Where(cond)
 	s.updater = s.updater.Where(cond)
@@ -218,7 +199,7 @@ func (s *subscriptionTransactions) FilterStatus(status models.TrnStatus) Subscri
 	return s
 }
 
-func (s *subscriptionTransactions) FilterPaymentProvider(provider models.PaymentProvider) SubscriptionTransactions {
+func (s *transactions) FilterPaymentProvider(provider models.PaymentProvider) repo.Transactions {
 	cond := sq.Eq{"payment_provider": provider}
 	s.selector = s.selector.Where(cond)
 	s.updater = s.updater.Where(cond)
@@ -226,7 +207,7 @@ func (s *subscriptionTransactions) FilterPaymentProvider(provider models.Payment
 	return s
 }
 
-func (s *subscriptionTransactions) Page(limit, offset uint64) SubscriptionTransactions {
+func (s *transactions) Page(limit, offset uint64) repo.Transactions {
 	s.selector = s.selector.Limit(limit).Offset(offset)
 	s.counter = s.counter.Limit(limit).Offset(offset)
 	return s
