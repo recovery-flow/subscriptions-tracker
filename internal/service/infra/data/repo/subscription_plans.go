@@ -87,7 +87,19 @@ func (p *subPlans) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
 }
 
 func (p *subPlans) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
-	res, err := p.sql.New().Filter(p.filters).Select(ctx)
+	if p.filters["id"] != nil {
+		res, err := p.redis.GetByID(ctx, p.filters["id"].(string))
+		if err != nil || errors.Is(err, redis.Nil) {
+			return nil, err
+		}
+		return []models.SubscriptionPlan{*res}, nil
+	}
+
+	if p.filters["type_id"] != nil {
+		return p.redis.GetByTypeID(ctx, p.filters["type_id"].(string))
+	}
+
+	res, err := p.sql.New().Filter(p.filters).Page(uint64(p.limit), uint64(p.skip)).Select(ctx)
 	if err != nil || len(res) == 0 {
 		return nil, err
 	}

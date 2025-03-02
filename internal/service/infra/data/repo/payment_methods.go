@@ -120,6 +120,7 @@ func (m *paymentMethods) Count(ctx context.Context) (int, error) {
 	return m.sql.New().Filter(m.filters).Count(ctx)
 }
 
+// SelectForUser retrieves payment methods for a user MUST use this method to write to the cache nor any other method
 func (m *paymentMethods) SelectForUser(ctx context.Context) ([]models.PaymentMethod, error) {
 	res, err := m.redis.GetByUserID(ctx, m.filters["user_id"].(string))
 	if err != nil {

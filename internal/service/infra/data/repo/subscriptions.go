@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo/cache"
@@ -65,11 +66,15 @@ func (s *subscription) Create(ctx context.Context, sub models.Subscription) erro
 }
 
 func (s *subscription) Delete(ctx context.Context) error {
-	if err := s.sql.New().Delete(ctx); err != nil {
+	if s.filters["user_id"] == nil {
+		return fmt.Errorf("user_id is required to delete a subscription")
+	}
+
+	if err := s.sql.New().Filter(s.filters).Delete(ctx); err != nil {
 		return err
 	}
 
-	if err := s.redis.Delete(ctx, s.filters["user_id"].(string)); err != nil && s.filters["user_id"] != nil {
+	if err := s.redis.Delete(ctx, s.filters["user_id"].(string)); err != nil {
 		s.log.WithField("redis", err).Error("error deleting subscription from cache")
 	}
 
@@ -86,7 +91,7 @@ func (s *subscription) Select(ctx context.Context) ([]models.Subscription, error
 		}
 	}
 
-	return s.sql.New().Filter(s.filters).Select(ctx)
+	return s.sql.New().Filter(s.filters).Page(uint64(s.limit), uint64(s.skip)).Select(ctx)
 }
 
 func (s *subscription) Count(ctx context.Context) (int, error) {
@@ -103,7 +108,17 @@ func (s *subscription) Get(ctx context.Context) (*models.Subscription, error) {
 		}
 	}
 
-	return s.sql.New().Filter(s.filters).Get(ctx)
+	res, err := s.sql.New().Filter(s.filters).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.redis.Add(ctx, *res)
+	if err != nil || !errors.Is(err, redis.Nil) {
+		s.log.WithField("redis", err).Error("error adding subscription to cache")
+	}
+
+	return res, nil
 }
 
 func (s *subscription) Filter(filters map[string]interface{}) Subscription {

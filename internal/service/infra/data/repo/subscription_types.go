@@ -56,7 +56,7 @@ func (t *SubTypes) Create(ctx context.Context, sub models.SubscriptionType) erro
 	}
 
 	err := t.redis.Add(ctx, sub)
-	if err != nil || !errors.Is(err, redis.Nil) {
+	if err != nil {
 		t.log.WithField("redis", err).Error("error adding subscription type to cache")
 	}
 	return nil
@@ -67,7 +67,7 @@ func (t *SubTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
 		return t.redis.Get(ctx, t.filters["id"].(string))
 	}
 
-	return t.sql.New().Get(ctx)
+	return t.sql.New().Filter(t.filters).Get(ctx)
 }
 
 func (t *SubTypes) Select(ctx context.Context) ([]models.SubscriptionType, error) {
@@ -80,7 +80,7 @@ func (t *SubTypes) Select(ctx context.Context) ([]models.SubscriptionType, error
 		}
 	}
 
-	return t.sql.New().Filter(t.filters).Select(ctx)
+	return t.sql.New().Filter(t.filters).Page(uint64(t.limit), uint64(t.skip)).Select(ctx)
 }
 
 func (t *SubTypes) Delete(ctx context.Context) error {
@@ -88,11 +88,11 @@ func (t *SubTypes) Delete(ctx context.Context) error {
 		return t.redis.Delete(ctx, t.filters["id"].(string))
 	}
 
-	return t.sql.New().Delete(ctx)
+	return t.sql.New().Filter(t.filters).Delete(ctx)
 }
 
 func (t *SubTypes) Count(ctx context.Context) (int, error) {
-	return t.sql.New().Count(ctx)
+	return t.sql.New().Filter(t.filters).Count(ctx)
 }
 
 func (t *SubTypes) Filter(filters map[string]any) SubscriptionTypes {

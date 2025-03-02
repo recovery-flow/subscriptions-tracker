@@ -56,7 +56,7 @@ func (b *billingPlan) Delete(ctx context.Context) error {
 }
 
 func (b *billingPlan) Select(ctx context.Context) ([]models.BillingPlan, error) {
-	return b.sql.New().Filter(b.filters).Select(ctx)
+	return b.sql.New().Filter(b.filters).Page(uint64(b.limit), uint64(b.skip)).Select(ctx)
 }
 
 func (b *billingPlan) Count(ctx context.Context) (int, error) {

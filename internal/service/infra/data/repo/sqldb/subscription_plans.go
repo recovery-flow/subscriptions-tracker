@@ -193,6 +193,7 @@ func (p *subPlan) Filter(filters map[string]any) SubPlan {
 	}
 	return p
 }
+
 func (p *subPlan) Transaction(f func() error) error {
 	ctx := context.Background()
 

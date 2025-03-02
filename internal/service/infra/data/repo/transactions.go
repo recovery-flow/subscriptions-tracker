@@ -56,7 +56,7 @@ func (t *transactions) Delete(ctx context.Context) error {
 }
 
 func (t *transactions) Select(ctx context.Context) ([]models.Transaction, error) {
-	return t.sql.New().Filter(t.filters).Select(ctx)
+	return t.sql.New().Filter(t.filters).Page(uint64(t.limit), uint64(t.skip)).Select(ctx)
 }
 
 func (t *transactions) Count(ctx context.Context) (int, error) {
