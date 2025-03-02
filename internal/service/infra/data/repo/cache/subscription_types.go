@@ -10,18 +10,24 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type SubTypes struct {
+type SubTypes interface {
+	Add(ctx context.Context, subPlan models.SubscriptionType) error
+	Get(ctx context.Context, TypeID string) (*models.SubscriptionType, error)
+	Delete(ctx context.Context, TypeID string) error
+}
+
+type subTypes struct {
 	client *redis.Client
 }
 
-func NewSubTypes(client *redis.Client) *SubTypes {
-	return &SubTypes{
+func NewSubTypes(client *redis.Client) SubTypes {
+	return &subTypes{
 		client: client,
 	}
 }
 
-func (s *SubTypes) Add(ctx context.Context, subsType models.SubscriptionType) error {
-	IDKey := fmt.Sprintf("subscription_type:id:%s", subsType.ID.String())
+func (t *subTypes) Add(ctx context.Context, subsType models.SubscriptionType) error {
+	IDKey := fmt.Sprintf("subscription_type:id:%t", subsType.ID.String())
 
 	data := map[string]interface{}{
 		"name":        subsType.Name,
@@ -29,7 +35,7 @@ func (s *SubTypes) Add(ctx context.Context, subsType models.SubscriptionType) er
 		"created_at":  subsType.CreatedAt.Format(time.RFC3339),
 	}
 
-	err := s.client.HSet(ctx, IDKey, data).Err()
+	err := t.client.HSet(ctx, IDKey, data).Err()
 	if err != nil {
 		return fmt.Errorf("error adding subscription type to Redis: %w", err)
 	}
@@ -37,9 +43,9 @@ func (s *SubTypes) Add(ctx context.Context, subsType models.SubscriptionType) er
 	return nil
 }
 
-func (s *SubTypes) Get(ctx context.Context, TypeID string) (*models.SubscriptionType, error) {
-	key := fmt.Sprintf("subscription_type:id:%s", TypeID)
-	vals, err := s.client.HGetAll(ctx, key).Result()
+func (t *subTypes) Get(ctx context.Context, TypeID string) (*models.SubscriptionType, error) {
+	key := fmt.Sprintf("subscription_type:id:%t", TypeID)
+	vals, err := t.client.HGetAll(ctx, key).Result()
 	if err != nil {
 		return nil, fmt.Errorf("error getting subscription type from Redis: %w", err)
 	}
@@ -47,9 +53,9 @@ func (s *SubTypes) Get(ctx context.Context, TypeID string) (*models.Subscription
 	return parseSubsType(TypeID, vals)
 }
 
-func (s *SubTypes) Delete(ctx context.Context, TypeID string) error {
-	key := fmt.Sprintf("subscription_type:id:%s", TypeID)
-	err := s.client.Del(ctx, key).Err()
+func (t *subTypes) Delete(ctx context.Context, TypeID string) error {
+	key := fmt.Sprintf("subscription_type:id:%t", TypeID)
+	err := t.client.Del(ctx, key).Err()
 	if err != nil {
 		return fmt.Errorf("error deleting subscription type from Redis: %w", err)
 	}

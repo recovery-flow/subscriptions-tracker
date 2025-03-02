@@ -10,19 +10,27 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type PayMethods struct {
+type PayMethods interface {
+	Add(ctx context.Context, payMethod models.PaymentMethod) error
+	GetByID(ctx context.Context, methodID string) (*models.PaymentMethod, error)
+	GetByUserID(ctx context.Context, userID string) ([]models.PaymentMethod, error)
+	Delete(ctx context.Context, methodID string) error
+	DeleteByUserID(ctx context.Context, userID string) error
+}
+
+type payMethods struct {
 	client   *redis.Client
 	lifeTime time.Duration
 }
 
-func NewPayMethods(client *redis.Client, lifetime time.Duration) *PayMethods {
-	return &PayMethods{
+func NewPayMethods(client *redis.Client, lifetime time.Duration) PayMethods {
+	return &payMethods{
 		client:   client,
 		lifeTime: lifetime,
 	}
 }
 
-func (m *PayMethods) Add(ctx context.Context, payMethod models.PaymentMethod) error {
+func (m *payMethods) Add(ctx context.Context, payMethod models.PaymentMethod) error {
 	payMethodKey := fmt.Sprintf("payment_method:id:%s", payMethod.ID.String())
 	userIDKey := fmt.Sprintf("payment_method:user_id:%s", payMethod.UserID.String())
 
@@ -57,7 +65,7 @@ func (m *PayMethods) Add(ctx context.Context, payMethod models.PaymentMethod) er
 	return nil
 }
 
-func (m *PayMethods) GetByID(ctx context.Context, methodID string) (*models.PaymentMethod, error) {
+func (m *payMethods) GetByID(ctx context.Context, methodID string) (*models.PaymentMethod, error) {
 	IDKey := fmt.Sprintf("payment_method:id:%s", methodID)
 	vals, err := m.client.HGetAll(ctx, IDKey).Result()
 	if err != nil {
@@ -71,7 +79,7 @@ func (m *PayMethods) GetByID(ctx context.Context, methodID string) (*models.Paym
 	return parsePayMethod(IDKey, vals)
 }
 
-func (m *PayMethods) GetByUserID(ctx context.Context, userID string) ([]models.PaymentMethod, error) {
+func (m *payMethods) GetByUserID(ctx context.Context, userID string) ([]models.PaymentMethod, error) {
 	userIDKey := fmt.Sprintf("payment_method:user_id:%s", userID)
 
 	IDs, err := m.client.SMembers(ctx, userIDKey).Result()
@@ -99,7 +107,7 @@ func (m *PayMethods) GetByUserID(ctx context.Context, userID string) ([]models.P
 	return payMethods, nil
 }
 
-func (m *PayMethods) Delete(ctx context.Context, methodID string) error {
+func (m *payMethods) Delete(ctx context.Context, methodID string) error {
 	payMethodKey := fmt.Sprintf("payment_method:id:%s", methodID)
 
 	userID, err := m.client.HGet(ctx, payMethodKey, "user_id").Result()
@@ -121,7 +129,7 @@ func (m *PayMethods) Delete(ctx context.Context, methodID string) error {
 	return nil
 }
 
-func (m *PayMethods) DeleteByUserID(ctx context.Context, userID string) error {
+func (m *payMethods) DeleteByUserID(ctx context.Context, userID string) error {
 	userIDKey := fmt.Sprintf("payment_method:user_id:%s", userID)
 
 	IDs, err := m.client.SMembers(ctx, userIDKey).Result()

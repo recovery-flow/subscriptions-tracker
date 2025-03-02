@@ -11,17 +11,25 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type SubPlans struct {
+type SubPlans interface {
+	Add(ctx context.Context, subPlan models.SubscriptionPlan) error
+	GetByID(ctx context.Context, planID string) (*models.SubscriptionPlan, error)
+	GetByTypeID(ctx context.Context, TypeID string) ([]models.SubscriptionPlan, error)
+	DeleteByID(ctx context.Context, planID string) error
+	DeleteByType(ctx context.Context, typeID string) error
+}
+
+type subPlans struct {
 	client *redis.Client
 }
 
-func NewSubPlans(client *redis.Client) *SubPlans {
-	return &SubPlans{
+func NewSubPlans(client *redis.Client) SubPlans {
+	return &subPlans{
 		client: client,
 	}
 }
 
-func (p *SubPlans) Add(ctx context.Context, subPlan models.SubscriptionPlan) error {
+func (p *subPlans) Add(ctx context.Context, subPlan models.SubscriptionPlan) error {
 	subPlanKey := fmt.Sprintf("subscription_plan:id:%s", subPlan.ID.String())
 	subTypeKey := fmt.Sprintf("subscription_plan:type_id:%s", subPlan.TypeID.String())
 
@@ -45,7 +53,7 @@ func (p *SubPlans) Add(ctx context.Context, subPlan models.SubscriptionPlan) err
 	return nil
 }
 
-func (p *SubPlans) GetByID(ctx context.Context, planID string) (*models.SubscriptionPlan, error) {
+func (p *subPlans) GetByID(ctx context.Context, planID string) (*models.SubscriptionPlan, error) {
 	IDKey := fmt.Sprintf("subscription_plan:id:%s", planID)
 	vals, err := p.client.HGetAll(ctx, IDKey).Result()
 	if err != nil {
@@ -55,7 +63,7 @@ func (p *SubPlans) GetByID(ctx context.Context, planID string) (*models.Subscrip
 	return parseSubPlan(planID, vals)
 }
 
-func (p *SubPlans) GetByTypeID(ctx context.Context, TypeID string) ([]models.SubscriptionPlan, error) {
+func (p *subPlans) GetByTypeID(ctx context.Context, TypeID string) ([]models.SubscriptionPlan, error) {
 	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", TypeID)
 	IDs, err := p.client.SMembers(ctx, TypeKey).Result()
 	if err != nil {
@@ -82,7 +90,7 @@ func (p *SubPlans) GetByTypeID(ctx context.Context, TypeID string) ([]models.Sub
 	return subPlans, nil
 }
 
-func (p *SubPlans) DeleteByID(ctx context.Context, planID string) error {
+func (p *subPlans) DeleteByID(ctx context.Context, planID string) error {
 	IDKey := fmt.Sprintf("subscription_plan:id:%s", planID)
 
 	subPlan, err := p.GetByID(ctx, planID)
@@ -114,7 +122,7 @@ func (p *SubPlans) DeleteByID(ctx context.Context, planID string) error {
 	return nil
 }
 
-func (p *SubPlans) DeleteByType(ctx context.Context, typeID string) error {
+func (p *subPlans) DeleteByType(ctx context.Context, typeID string) error {
 	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", typeID)
 
 	planIDs, err := p.client.SMembers(ctx, TypeKey).Result()

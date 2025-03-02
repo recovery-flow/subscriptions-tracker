@@ -37,7 +37,7 @@ type subPlan struct {
 	counter  sq.SelectBuilder
 }
 
-func NewSubscriptionPlan(db *sql.DB) SubPlan {
+func NewSubPlan(db *sql.DB) SubPlan {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	return &subPlan{
 		db:       db,
@@ -50,7 +50,7 @@ func NewSubscriptionPlan(db *sql.DB) SubPlan {
 }
 
 func (p *subPlan) New() SubPlan {
-	return NewSubscriptionPlan(p.db)
+	return NewSubPlan(p.db)
 }
 
 func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) error {

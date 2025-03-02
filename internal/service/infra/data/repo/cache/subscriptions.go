@@ -10,19 +10,25 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Subscriptions struct {
+type Subscriptions interface {
+	Add(ctx context.Context, sub models.Subscription) error
+	Get(ctx context.Context, userID string) (*models.Subscription, error)
+	Delete(ctx context.Context, userID string) error
+}
+
+type subscriptions struct {
 	client   *redis.Client
 	lifeTime time.Duration
 }
 
-func NewSubscriptions(client *redis.Client, lifetime time.Duration) *Subscriptions {
-	return &Subscriptions{
+func NewSubscriptions(client *redis.Client, lifetime time.Duration) Subscriptions {
+	return &subscriptions{
 		client:   client,
 		lifeTime: lifetime,
 	}
 }
 
-func (s *Subscriptions) Add(ctx context.Context, sub models.Subscription) error {
+func (s *subscriptions) Add(ctx context.Context, sub models.Subscription) error {
 	subKey := fmt.Sprintf("subscription:user_id:%s", sub.UserID.String())
 
 	data := map[string]interface{}{
@@ -51,7 +57,7 @@ func (s *Subscriptions) Add(ctx context.Context, sub models.Subscription) error 
 	return nil
 }
 
-func (s *Subscriptions) Get(ctx context.Context, userID string) (*models.Subscription, error) {
+func (s *subscriptions) Get(ctx context.Context, userID string) (*models.Subscription, error) {
 	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
 	vals, err := s.client.HGetAll(ctx, subKey).Result()
 	if err != nil {
@@ -63,7 +69,7 @@ func (s *Subscriptions) Get(ctx context.Context, userID string) (*models.Subscri
 	return parseSubscription(userID, vals)
 }
 
-func (s *Subscriptions) Delete(ctx context.Context, userID string) error {
+func (s *subscriptions) Delete(ctx context.Context, userID string) error {
 	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
 
 	if err := s.client.Del(ctx, subKey).Err(); err != nil {

@@ -39,10 +39,10 @@ type paymentMethods struct {
 	log *logrus.Logger
 }
 
-func NewPaymentMethods(redis *cache.PayMethods, sql *sqldb.PaymentMethods, log *logrus.Logger) PaymentMethods {
+func NewPaymentMethods(sql sqldb.PaymentMethods, redis cache.PayMethods, log *logrus.Logger) PaymentMethods {
 	return &paymentMethods{
-		redis:   *redis,
-		sql:     *sql,
+		redis:   redis,
+		sql:     sql,
 		filters: make(map[string]any),
 		limit:   0,
 		skip:    0,

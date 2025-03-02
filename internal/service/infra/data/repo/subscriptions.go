@@ -37,10 +37,10 @@ type subscription struct {
 	log *logrus.Logger
 }
 
-func NewSubscription(redis *cache.Subscriptions, sql *sqldb.Subscriptions, log *logrus.Logger) Subscription {
+func NewSubscription(sql sqldb.Subscriptions, redis cache.Subscriptions, log *logrus.Logger) Subscription {
 	return &subscription{
-		redis:   *redis,
-		sql:     *sql,
+		redis:   redis,
+		sql:     sql,
 		filters: make(map[string]interface{}),
 		limit:   0,
 		skip:    0,
@@ -50,7 +50,7 @@ func NewSubscription(redis *cache.Subscriptions, sql *sqldb.Subscriptions, log *
 }
 
 func (s *subscription) New() Subscription {
-	return NewSubscription(&s.redis, &s.sql, s.log)
+	return NewSubscription(s.redis, s.sql, s.log)
 }
 
 func (s *subscription) Create(ctx context.Context, sub models.Subscription) error {

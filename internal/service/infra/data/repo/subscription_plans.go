@@ -37,10 +37,10 @@ type subPlans struct {
 	log *logrus.Logger
 }
 
-func NewSubPlans(redis *cache.SubPlans, sql *sqldb.SubPlan, log *logrus.Logger) SubPlans {
+func NewSubPlans(sql sqldb.SubPlan, redis cache.SubPlans, log *logrus.Logger) SubPlans {
 	return &subPlans{
-		redis:   *redis,
-		sql:     *sql,
+		redis:   redis,
+		sql:     sql,
 		filters: make(map[string]any),
 		limit:   0,
 		skip:    0,
@@ -50,7 +50,7 @@ func NewSubPlans(redis *cache.SubPlans, sql *sqldb.SubPlan, log *logrus.Logger) 
 }
 
 func (p *subPlans) New() SubPlans {
-	return NewSubPlans(&p.redis, &p.sql, p.log)
+	return NewSubPlans(p.redis, p.sql, p.log)
 }
 
 func (p *subPlans) Create(ctx context.Context, plan models.SubscriptionPlan) error {
