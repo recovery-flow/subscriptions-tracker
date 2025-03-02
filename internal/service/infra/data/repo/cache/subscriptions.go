@@ -24,8 +24,6 @@ func NewSubscriptions(client *redis.Client, lifetime time.Duration) *Subscriptio
 
 func (s *Subscriptions) Add(ctx context.Context, sub models.Subscription) error {
 	subKey := fmt.Sprintf("subscription:user_id:%s", sub.UserID.String())
-	planIndexKey := fmt.Sprintf("subscription:plan_id:%s", sub.PlanID.String())
-	payMethodIndexKey := fmt.Sprintf("subscription:payment_method_id:%s", sub.PaymentMethodID.String())
 
 	data := map[string]interface{}{
 		"plan_id":           sub.PlanID.String(),
@@ -41,19 +39,9 @@ func (s *Subscriptions) Add(ctx context.Context, sub models.Subscription) error 
 		return fmt.Errorf("error adding subscription to Redis: %w", err)
 	}
 
-	if err := s.client.SAdd(ctx, planIndexKey, sub.UserID.String()).Err(); err != nil {
-		return fmt.Errorf("error adding subscription UserID to plan index: %w", err)
-	}
-	if err := s.client.SAdd(ctx, payMethodIndexKey, sub.UserID.String()).Err(); err != nil {
-		return fmt.Errorf("error adding subscription UserID to payment method index: %w", err)
-	}
-
 	if s.lifeTime > 0 {
 		pipe := s.client.Pipeline()
-		keys := []string{subKey, planIndexKey, payMethodIndexKey}
-		for _, key := range keys {
-			pipe.Expire(ctx, key, s.lifeTime)
-		}
+		pipe.Expire(ctx, subKey, s.lifeTime)
 		_, err := pipe.Exec(ctx)
 		if err != nil && err != redis.Nil {
 			return fmt.Errorf("error setting expiration for keys: %w", err)
@@ -63,7 +51,7 @@ func (s *Subscriptions) Add(ctx context.Context, sub models.Subscription) error 
 	return nil
 }
 
-func (s *Subscriptions) GetByUserID(ctx context.Context, userID string) (*models.Subscription, error) {
+func (s *Subscriptions) Get(ctx context.Context, userID string) (*models.Subscription, error) {
 	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
 	vals, err := s.client.HGetAll(ctx, subKey).Result()
 	if err != nil {
@@ -75,71 +63,11 @@ func (s *Subscriptions) GetByUserID(ctx context.Context, userID string) (*models
 	return parseSubscription(userID, vals)
 }
 
-func (s *Subscriptions) GetByPlanID(ctx context.Context, planID string) ([]models.Subscription, error) {
-	planIndexKey := fmt.Sprintf("subscription:plan_id:%s", planID)
-	userIDs, err := s.client.SMembers(ctx, planIndexKey).Result()
-	if err != nil {
-		return nil, fmt.Errorf("error getting subscription UserIDs by plan ID: %w", err)
-	}
-
-	var subs []models.Subscription
-	for _, ID := range userIDs {
-		vals, err := s.client.HGetAll(ctx, ID).Result()
-		if err != nil {
-			return nil, fmt.Errorf("error getting subscription: %w", err)
-		}
-		sub, err := parseSubscription(ID, vals)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing subscription: %w", err)
-		}
-		subs = append(subs, *sub)
-	}
-	return subs, nil
-}
-
-func (s *Subscriptions) GetByPaymentMethodID(ctx context.Context, paymentMethodID string) ([]*models.Subscription, error) {
-	payMethodIndexKey := fmt.Sprintf("subscription:payment_method_id:%s", paymentMethodID)
-	userIDs, err := s.client.SMembers(ctx, payMethodIndexKey).Result()
-	if err != nil {
-		return nil, fmt.Errorf("error getting subscription UserIDs by payment method ID: %w", err)
-	}
-
-	var subs []*models.Subscription
-	for _, userID := range userIDs {
-		vals, err := s.client.HGetAll(ctx, userID).Result()
-		if err != nil {
-			return nil, fmt.Errorf("error getting subscription for user %s: %w", userID, err)
-		}
-		sub, err := parseSubscription(userID, vals)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing subscription: %w", err)
-		}
-		subs = append(subs, sub)
-	}
-	return subs, nil
-}
-
 func (s *Subscriptions) Delete(ctx context.Context, userID string) error {
 	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
 
-	sub, err := s.GetByUserID(ctx, userID)
-	if err != nil {
-		return fmt.Errorf("error getting subscription to delete: %w", err)
-	}
-
-	planIndexKey := fmt.Sprintf("subscription:plan_id:%s", sub.PlanID.String())
-	payMethodIndexKey := fmt.Sprintf("subscription:payment_method_id:%s", sub.PaymentMethodID.String())
-
 	if err := s.client.Del(ctx, subKey).Err(); err != nil {
 		return fmt.Errorf("error deleting subscription key: %w", err)
-	}
-
-	if err := s.client.SRem(ctx, planIndexKey, userID).Err(); err != nil {
-		return fmt.Errorf("error removing UserID from plan index: %w", err)
-	}
-
-	if err := s.client.SRem(ctx, payMethodIndexKey, userID).Err(); err != nil {
-		return fmt.Errorf("error removing UserID from payment method index: %w", err)
 	}
 
 	return nil

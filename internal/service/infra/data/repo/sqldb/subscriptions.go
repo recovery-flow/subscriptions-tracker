@@ -22,10 +22,7 @@ type Subscriptions interface {
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.Subscription, error)
 
-	FilterUserID(userID string) Subscriptions
-	FilterPlanID(planID string) Subscriptions
-	FilterStatus(status string) Subscriptions
-	FilterPaymentMethodID(paymentMethodID string) Subscriptions
+	Filter(filters map[string]any) Subscriptions
 
 	//TODO: Add FilterStartDate, FilterEndDate, FilterCreatedAt, FilterUpdatedAt
 
@@ -189,39 +186,22 @@ func (s *subscriptions) Get(ctx context.Context) (*models.Subscription, error) {
 	return &sub, nil
 }
 
-func (s *subscriptions) FilterUserID(userID string) Subscriptions {
-	cond := sq.Eq{"user_id": userID}
-	s.selector = s.selector.Where(cond)
-	s.updater = s.updater.Where(cond)
-	s.deleter = s.deleter.Where(cond)
-	s.counter = s.counter.Where(cond)
-	return s
-}
-
-func (s *subscriptions) FilterPlanID(planID string) Subscriptions {
-	cond := sq.Eq{"plan_id": planID}
-	s.selector = s.selector.Where(cond)
-	s.updater = s.updater.Where(cond)
-	s.deleter = s.deleter.Where(cond)
-	s.counter = s.counter.Where(cond)
-	return s
-}
-
-func (s *subscriptions) FilterPaymentMethodID(paymentMethodID string) Subscriptions {
-	cond := sq.Eq{"payment_method_id": paymentMethodID}
-	s.selector = s.selector.Where(cond)
-	s.updater = s.updater.Where(cond)
-	s.deleter = s.deleter.Where(cond)
-	s.counter = s.counter.Where(cond)
-	return s
-}
-
-func (s *subscriptions) FilterStatus(status string) Subscriptions {
-	cond := sq.Eq{"status": status}
-	s.selector = s.selector.Where(cond)
-	s.updater = s.updater.Where(cond)
-	s.deleter = s.deleter.Where(cond)
-	s.counter = s.counter.Where(cond)
+func (s *subscriptions) Filter(filters map[string]any) Subscriptions {
+	var validFilters = map[string]bool{
+		"user_id":           true,
+		"plan_id":           true,
+		"payment_method_id": true,
+		"status":            true,
+	}
+	for key, value := range filters {
+		if _, exists := validFilters[key]; !exists {
+			continue
+		}
+		s.selector = s.selector.Where(sq.Eq{key: value})
+		s.counter = s.counter.Where(sq.Eq{key: value})
+		s.deleter = s.deleter.Where(sq.Eq{key: value})
+		s.updater = s.updater.Where(sq.Eq{key: value})
+	}
 	return s
 }
 

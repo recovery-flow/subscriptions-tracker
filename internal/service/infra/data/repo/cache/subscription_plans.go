@@ -7,20 +7,17 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 	"github.com/redis/go-redis/v9"
 )
 
 type SubPlans struct {
-	client   *redis.Client
-	lifeTime time.Duration
+	client *redis.Client
 }
 
-func NewSubPlans(client *redis.Client, lifetime time.Duration) *SubPlans {
+func NewSubPlans(client *redis.Client) *SubPlans {
 	return &SubPlans{
-		client:   client,
-		lifeTime: lifetime,
+		client: client,
 	}
 }
 
@@ -45,17 +42,6 @@ func (p *SubPlans) Add(ctx context.Context, subPlan models.SubscriptionPlan) err
 		return fmt.Errorf("error adding subscription plan ID to set: %w", err)
 	}
 
-	if p.lifeTime > 0 {
-		pipe := p.client.Pipeline()
-		keys := []string{subPlanKey, subTypeKey}
-		for _, key := range keys {
-			pipe.Expire(ctx, key, p.lifeTime)
-		}
-		_, err := pipe.Exec(ctx)
-		if err != nil && !errors.Is(err, redis.Nil) {
-			return fmt.Errorf("error setting expiration for keys: %w", err)
-		}
-	}
 	return nil
 }
 
@@ -96,33 +82,59 @@ func (p *SubPlans) GetByTypeID(ctx context.Context, TypeID string) ([]models.Sub
 	return subPlans, nil
 }
 
-func (p *SubPlans) Delete(ctx context.Context, planID string) error {
+func (p *SubPlans) DeleteByID(ctx context.Context, planID string) error {
 	IDKey := fmt.Sprintf("subscription_plan:id:%s", planID)
 
 	subPlan, err := p.GetByID(ctx, planID)
 	if err != nil {
 		return err
 	}
+	if subPlan == nil {
+		return redis.Nil
+	}
 
-	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", subPlan.TypeID)
+	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", subPlan.TypeID.String())
 
 	exists, err := p.client.Exists(ctx, IDKey).Result()
 	if err != nil {
-		return fmt.Errorf("error checking account existence in Redis: %w", err)
+		return fmt.Errorf("error checking existence in Redis: %w", err)
 	}
-
 	if exists == 0 {
 		return redis.Nil
 	}
 
-	err = p.client.Del(ctx, IDKey).Err()
-	if err != nil {
-		return fmt.Errorf("error deleting subscription plan: %w", err)
+	if err := p.client.Del(ctx, IDKey).Err(); err != nil {
+		return fmt.Errorf("error deleting subscription plan by ID: %w", err)
 	}
 
-	err = p.client.SRem(ctx, TypeKey, planID).Err()
+	if err := p.client.SRem(ctx, TypeKey, planID).Err(); err != nil {
+		return fmt.Errorf("error removing planID from type set: %w", err)
+	}
+
+	return nil
+}
+
+func (p *SubPlans) DeleteByType(ctx context.Context, typeID string) error {
+	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", typeID)
+
+	planIDs, err := p.client.SMembers(ctx, TypeKey).Result()
 	if err != nil {
-		return fmt.Errorf("error deleting subscription plan planID from type set: %w", err)
+		return fmt.Errorf("error getting plan IDs from type set: %w", err)
+	}
+
+	if len(planIDs) == 0 {
+		return nil
+	}
+
+	for _, planID := range planIDs {
+		IDKey := fmt.Sprintf("subscription_plan:id:%s", planID)
+		if err := p.client.Del(ctx, IDKey).Err(); err != nil {
+			return fmt.Errorf("error deleting subscription plan with id %s: %w", planID, err)
+		}
+	}
+
+	if err := p.client.Del(ctx, TypeKey).Err(); err != nil {
+		return fmt.Errorf("error deleting type set for type %s: %w", typeID, err)
 	}
 
 	return nil

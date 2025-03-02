@@ -10,19 +10,17 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type SubsTypes struct {
-	client   *redis.Client
-	lifeTime time.Duration
+type SubTypes struct {
+	client *redis.Client
 }
 
-func NewSubsTypes(client *redis.Client, lifetime time.Duration) *SubsTypes {
-	return &SubsTypes{
-		client:   client,
-		lifeTime: lifetime,
+func NewSubTypes(client *redis.Client) *SubTypes {
+	return &SubTypes{
+		client: client,
 	}
 }
 
-func (s *SubsTypes) Add(ctx context.Context, subsType models.SubscriptionType) error {
+func (s *SubTypes) Add(ctx context.Context, subsType models.SubscriptionType) error {
 	IDKey := fmt.Sprintf("subscription_type:id:%s", subsType.ID.String())
 
 	data := map[string]interface{}{
@@ -36,22 +34,10 @@ func (s *SubsTypes) Add(ctx context.Context, subsType models.SubscriptionType) e
 		return fmt.Errorf("error adding subscription type to Redis: %w", err)
 	}
 
-	if s.lifeTime > 0 {
-		pipe := s.client.Pipeline()
-		keys := []string{IDKey}
-		for _, key := range keys {
-			pipe.Expire(ctx, key, s.lifeTime)
-		}
-		_, err := pipe.Exec(ctx)
-		if err != nil && err != redis.Nil {
-			return fmt.Errorf("error setting expiration for keys: %w", err)
-		}
-	}
-
 	return nil
 }
 
-func (s *SubsTypes) GetByID(ctx context.Context, TypeID string) (*models.SubscriptionType, error) {
+func (s *SubTypes) Get(ctx context.Context, TypeID string) (*models.SubscriptionType, error) {
 	key := fmt.Sprintf("subscription_type:id:%s", TypeID)
 	vals, err := s.client.HGetAll(ctx, key).Result()
 	if err != nil {
@@ -61,7 +47,7 @@ func (s *SubsTypes) GetByID(ctx context.Context, TypeID string) (*models.Subscri
 	return parseSubsType(TypeID, vals)
 }
 
-func (s *SubsTypes) Delete(ctx context.Context, TypeID string) error {
+func (s *SubTypes) Delete(ctx context.Context, TypeID string) error {
 	key := fmt.Sprintf("subscription_type:id:%s", TypeID)
 	err := s.client.Del(ctx, key).Err()
 	if err != nil {

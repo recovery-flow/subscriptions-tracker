@@ -6,14 +6,13 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 )
 
 const subscriptionPlansTable = "subscription_plans"
 
-type SubscriptionPlan interface {
-	New() SubscriptionPlan
+type SubPlan interface {
+	New() SubPlan
 
 	Insert(ctx context.Context, plan models.SubscriptionPlan) error
 	Update(ctx context.Context, plan models.SubscriptionPlan) error
@@ -24,13 +23,12 @@ type SubscriptionPlan interface {
 
 	Transaction(func() error) error
 
-	FilterID(id uuid.UUID) SubscriptionPlan
-	FilterTypeID(typeID uuid.UUID) SubscriptionPlan
+	Filter(filters map[string]any) SubPlan
 
-	Page(limit, offset uint64) SubscriptionPlan
+	Page(limit, offset uint64) SubPlan
 }
 
-type subscriptionPlan struct {
+type subPlan struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -39,9 +37,9 @@ type subscriptionPlan struct {
 	counter  sq.SelectBuilder
 }
 
-func NewSubscriptionPlan(db *sql.DB) SubscriptionPlan {
+func NewSubscriptionPlan(db *sql.DB) SubPlan {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	return &subscriptionPlan{
+	return &subPlan{
 		db:       db,
 		selector: builder.Select("*").From(subscriptionPlansTable),
 		inserter: builder.Insert(subscriptionPlansTable),
@@ -51,11 +49,11 @@ func NewSubscriptionPlan(db *sql.DB) SubscriptionPlan {
 	}
 }
 
-func (p *subscriptionPlan) New() SubscriptionPlan {
+func (p *subPlan) New() SubPlan {
 	return NewSubscriptionPlan(p.db)
 }
 
-func (p *subscriptionPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) error {
+func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) error {
 	values := map[string]interface{}{
 		"id":                    plan.ID,
 		"type_id":               plan.TypeID,
@@ -77,7 +75,7 @@ func (p *subscriptionPlan) Insert(ctx context.Context, plan models.SubscriptionP
 	return nil
 }
 
-func (p *subscriptionPlan) Update(ctx context.Context, plan models.SubscriptionPlan) error {
+func (p *subPlan) Update(ctx context.Context, plan models.SubscriptionPlan) error {
 	updates := map[string]interface{}{
 		"type_id":               plan.TypeID,
 		"price":                 plan.Price,
@@ -96,7 +94,7 @@ func (p *subscriptionPlan) Update(ctx context.Context, plan models.SubscriptionP
 	return nil
 }
 
-func (p *subscriptionPlan) Delete(ctx context.Context) error {
+func (p *subPlan) Delete(ctx context.Context) error {
 	query, args, err := p.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for subscription_plans: %w", err)
@@ -108,7 +106,7 @@ func (p *subscriptionPlan) Delete(ctx context.Context) error {
 	return nil
 }
 
-func (p *subscriptionPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
+func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
 	query, args, err := p.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for subscription_plans: %w", err)
@@ -140,7 +138,7 @@ func (p *subscriptionPlan) Select(ctx context.Context) ([]models.SubscriptionPla
 	return plans, nil
 }
 
-func (p *subscriptionPlan) Count(ctx context.Context) (int, error) {
+func (p *subPlan) Count(ctx context.Context) (int, error) {
 	query, args, err := p.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for subscription_plans: %w", err)
@@ -153,7 +151,7 @@ func (p *subscriptionPlan) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (p *subscriptionPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
+func (p *subPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
 	query, args, err := p.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for subscription_plans: %w", err)
@@ -179,25 +177,23 @@ func (p *subscriptionPlan) Get(ctx context.Context) (*models.SubscriptionPlan, e
 	return &plan, nil
 }
 
-func (p *subscriptionPlan) FilterID(id uuid.UUID) SubscriptionPlan {
-	cond := sq.Eq{"id": id}
-	p.selector = p.selector.Where(cond)
-	p.updater = p.updater.Where(cond)
-	p.deleter = p.deleter.Where(cond)
-	p.counter = p.counter.Where(cond)
+func (p *subPlan) Filter(filters map[string]any) SubPlan {
+	var validFilters = map[string]bool{
+		"id":      true,
+		"type_id": true,
+	}
+	for key, value := range filters {
+		if _, exists := validFilters[key]; !exists {
+			continue
+		}
+		p.selector = p.selector.Where(sq.Eq{key: value})
+		p.counter = p.counter.Where(sq.Eq{key: value})
+		p.deleter = p.deleter.Where(sq.Eq{key: value})
+		p.updater = p.updater.Where(sq.Eq{key: value})
+	}
 	return p
 }
-
-func (p *subscriptionPlan) FilterTypeID(typeID uuid.UUID) SubscriptionPlan {
-	cond := sq.Eq{"type_id": typeID}
-	p.selector = p.selector.Where(cond)
-	p.updater = p.updater.Where(cond)
-	p.deleter = p.deleter.Where(cond)
-	p.counter = p.counter.Where(cond)
-	return p
-}
-
-func (p *subscriptionPlan) Transaction(f func() error) error {
+func (p *subPlan) Transaction(f func() error) error {
 	ctx := context.Background()
 
 	tx, err := p.db.BeginTx(ctx, nil)
@@ -219,7 +215,7 @@ func (p *subscriptionPlan) Transaction(f func() error) error {
 	return nil
 }
 
-func (p *subscriptionPlan) Page(limit, offset uint64) SubscriptionPlan {
+func (p *subPlan) Page(limit, offset uint64) SubPlan {
 	p.selector = p.selector.Limit(limit).Offset(offset)
 	p.counter = p.counter.Limit(limit).Offset(offset)
 	return p

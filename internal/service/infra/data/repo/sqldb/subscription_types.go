@@ -22,7 +22,7 @@ type SubscriptionTypes interface {
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.SubscriptionType, error)
 
-	FilterID(id string) SubscriptionTypes
+	Filter(filters map[string]any) SubscriptionTypes
 
 	Page(limit, offset uint64) SubscriptionTypes
 }
@@ -48,12 +48,12 @@ func NewSubscriptionTypes(db *sql.DB) SubscriptionTypes {
 	}
 }
 
-func (s *subscriptionTypes) New() SubscriptionTypes {
-	return NewSubscriptionTypes(s.db)
+func (t *subscriptionTypes) New() SubscriptionTypes {
+	return NewSubscriptionTypes(t.db)
 }
 
-func (s *subscriptionTypes) Insert(ctx context.Context, sub models.SubscriptionType) error {
-	query, args, err := s.inserter.SetMap(map[string]interface{}{
+func (t *subscriptionTypes) Insert(ctx context.Context, sub models.SubscriptionType) error {
+	query, args, err := t.inserter.SetMap(map[string]interface{}{
 		"id":          sub.ID,
 		"name":        sub.Name,
 		"description": sub.Description,
@@ -63,46 +63,46 @@ func (s *subscriptionTypes) Insert(ctx context.Context, sub models.SubscriptionT
 		return fmt.Errorf("error building insert query for subscription_types: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, query, args...)
+	_, err = t.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return fmt.Errorf("error inserting subscription_type: %w", err)
 	}
 	return nil
 }
 
-func (s *subscriptionTypes) Update(ctx context.Context, updates map[string]any) error {
-	query, args, err := s.updater.SetMap(updates).ToSql()
+func (t *subscriptionTypes) Update(ctx context.Context, updates map[string]any) error {
+	query, args, err := t.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building update query for subscription_types: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, query, args...)
+	_, err = t.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return fmt.Errorf("error updating subscription_type: %w", err)
 	}
 	return nil
 }
 
-func (s *subscriptionTypes) Delete(ctx context.Context) error {
-	query, args, err := s.deleter.ToSql()
+func (t *subscriptionTypes) Delete(ctx context.Context) error {
+	query, args, err := t.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("error building delete query for subscription_types: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, query, args...)
+	_, err = t.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return fmt.Errorf("error deleting subscription_type: %w", err)
 	}
 	return nil
 }
 
-func (s *subscriptionTypes) Select(ctx context.Context) ([]models.SubscriptionType, error) {
-	query, args, err := s.selector.ToSql()
+func (t *subscriptionTypes) Select(ctx context.Context) ([]models.SubscriptionType, error) {
+	query, args, err := t.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building select query for subscription_types: %w", err)
 	}
 
-	rows, err := s.db.QueryContext(ctx, query, args...)
+	rows, err := t.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error executing select query for subscription_types: %w", err)
 	}
@@ -124,31 +124,31 @@ func (s *subscriptionTypes) Select(ctx context.Context) ([]models.SubscriptionTy
 	return types, nil
 }
 
-func (s *subscriptionTypes) Count(ctx context.Context) (int, error) {
-	query, args, err := s.counter.ToSql()
+func (t *subscriptionTypes) Count(ctx context.Context) (int, error) {
+	query, args, err := t.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("error building count query for subscription_types: %w", err)
 	}
 
 	var count int
-	if err := s.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
+	if err := t.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
 		return 0, fmt.Errorf("error counting subscription_types: %w", err)
 	}
 	return count, nil
 }
 
-func (s *subscriptionTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
-	query, args, err := s.selector.ToSql()
+func (t *subscriptionTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
+	query, args, err := t.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building get query for subscription_types: %w", err)
 	}
 
-	var t models.SubscriptionType
-	err = s.db.QueryRowContext(ctx, query, args...).Scan(
-		&t.ID,
-		&t.Name,
-		&t.Description,
-		&t.CreatedAt,
+	var subt models.SubscriptionType
+	err = t.db.QueryRowContext(ctx, query, args...).Scan(
+		&subt.ID,
+		&subt.Name,
+		&subt.Description,
+		&subt.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -156,19 +156,27 @@ func (s *subscriptionTypes) Get(ctx context.Context) (*models.SubscriptionType, 
 		}
 		return nil, fmt.Errorf("error getting subscription_type: %w", err)
 	}
-	return &t, nil
-}
-func (s *subscriptionTypes) FilterID(id string) SubscriptionTypes {
-	cond := sq.Eq{"id": id}
-	s.selector = s.selector.Where(cond)
-	s.updater = s.updater.Where(cond)
-	s.deleter = s.deleter.Where(cond)
-	s.counter = s.counter.Where(cond)
-	return s
+	return &subt, nil
 }
 
-func (s *subscriptionTypes) Page(limit, offset uint64) SubscriptionTypes {
-	s.selector = s.selector.Limit(limit).Offset(offset)
-	s.counter = s.counter.Limit(limit).Offset(offset)
-	return s
+func (t *subscriptionTypes) Filter(filters map[string]any) SubscriptionTypes {
+	var validFilters = map[string]bool{
+		"id": true,
+	}
+	for key, value := range filters {
+		if _, exists := validFilters[key]; !exists {
+			continue
+		}
+		t.selector = t.selector.Where(sq.Eq{key: value})
+		t.counter = t.counter.Where(sq.Eq{key: value})
+		t.deleter = t.deleter.Where(sq.Eq{key: value})
+		t.updater = t.updater.Where(sq.Eq{key: value})
+	}
+	return t
+}
+
+func (t *subscriptionTypes) Page(limit, offset uint64) SubscriptionTypes {
+	t.selector = t.selector.Limit(limit).Offset(offset)
+	t.counter = t.counter.Limit(limit).Offset(offset)
+	return t
 }
