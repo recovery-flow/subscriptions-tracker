@@ -39,10 +39,10 @@ type paymentMethods struct {
 	log *logrus.Logger
 }
 
-func NewPaymentMethods(redis cache.PayMethods, sql sqldb.PaymentMethods, log *logrus.Logger) PaymentMethods {
+func NewPaymentMethods(redis *cache.PayMethods, sql *sqldb.PaymentMethods, log *logrus.Logger) PaymentMethods {
 	return &paymentMethods{
-		redis:   redis,
-		sql:     sql,
+		redis:   *redis,
+		sql:     *sql,
 		filters: make(map[string]any),
 		limit:   0,
 		skip:    0,
@@ -52,7 +52,7 @@ func NewPaymentMethods(redis cache.PayMethods, sql sqldb.PaymentMethods, log *lo
 }
 
 func (m *paymentMethods) New() PaymentMethods {
-	return NewPaymentMethods(m.redis, m.sql, m.log)
+	return NewPaymentMethods(&m.redis, &m.sql, m.log)
 }
 
 func (m *paymentMethods) Create(ctx context.Context, pm models.PaymentMethod) error {

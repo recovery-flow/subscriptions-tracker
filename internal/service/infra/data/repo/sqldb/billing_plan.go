@@ -7,14 +7,12 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo"
 )
 
-const billingSchedulesTable = "billing_schedules"
+const billingPlanTable = "billing_plan"
 
-type billingSchedules struct {
+type BillingPlan struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -23,23 +21,24 @@ type billingSchedules struct {
 	counter  sq.SelectBuilder
 }
 
-func NewBillingSchedules(db *sql.DB) repo.BillingPlan {
+func NewBillingSchedules(db *sql.DB) *BillingPlan {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	return &billingSchedules{
+	res := BillingPlan{
 		db:       db,
-		selector: builder.Select("*").From(billingSchedulesTable),
-		inserter: builder.Insert(billingSchedulesTable),
-		updater:  builder.Update(billingSchedulesTable),
-		deleter:  builder.Delete(billingSchedulesTable),
-		counter:  builder.Select("COUNT(*) AS count").From(billingSchedulesTable),
+		selector: builder.Select("*").From(billingPlanTable),
+		inserter: builder.Insert(billingPlanTable),
+		updater:  builder.Update(billingPlanTable),
+		deleter:  builder.Delete(billingPlanTable),
+		counter:  builder.Select("COUNT(*) AS count").From(billingPlanTable),
 	}
+	return &res
 }
 
-func (b *billingSchedules) New() repo.BillingPlan {
+func (b *BillingPlan) New() *BillingPlan {
 	return NewBillingSchedules(b.db)
 }
 
-func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingPlan) error {
+func (b *BillingPlan) Insert(ctx context.Context, bs models.BillingPlan) error {
 	values := map[string]interface{}{
 		"id":             bs.ID,
 		"user_id":        bs.UserID,
@@ -63,7 +62,7 @@ func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingPlan) er
 	return nil
 }
 
-func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) error {
+func (b *BillingPlan) Update(ctx context.Context, updates map[string]any) error {
 	query, args, err := b.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for billing_schedules: %w", err)
@@ -75,7 +74,7 @@ func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) e
 	return nil
 }
 
-func (b *billingSchedules) Delete(ctx context.Context) error {
+func (b *BillingPlan) Delete(ctx context.Context) error {
 	query, args, err := b.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for billing_schedules: %w", err)
@@ -87,7 +86,7 @@ func (b *billingSchedules) Delete(ctx context.Context) error {
 	return nil
 }
 
-func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingPlan, error) {
+func (b *BillingPlan) Select(ctx context.Context) ([]models.BillingPlan, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for billing_schedules: %w", err)
@@ -121,7 +120,7 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingPlan, er
 	return results, nil
 }
 
-func (b *billingSchedules) Count(ctx context.Context) (int, error) {
+func (b *BillingPlan) Count(ctx context.Context) (int, error) {
 	query, args, err := b.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for billing_schedules: %w", err)
@@ -134,7 +133,7 @@ func (b *billingSchedules) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (b *billingSchedules) Get(ctx context.Context) (*models.BillingPlan, error) {
+func (b *BillingPlan) Get(ctx context.Context) (*models.BillingPlan, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for billing_schedules: %w", err)
@@ -162,34 +161,26 @@ func (b *billingSchedules) Get(ctx context.Context) (*models.BillingPlan, error)
 	return &bs, nil
 }
 
-func (b *billingSchedules) FilterID(id uuid.UUID) repo.BillingPlan {
-	cond := sq.Eq{"id": id}
-	b.selector = b.selector.Where(cond)
-	b.updater = b.updater.Where(cond)
-	b.deleter = b.deleter.Where(cond)
-	b.counter = b.counter.Where(cond)
+func (b *BillingPlan) Filter(filters map[string]any) *BillingPlan {
+	var validFilters = map[string]bool{
+		"id":      true,
+		"user_id": true,
+		"status":  true,
+	}
+
+	for key, value := range filters {
+		if _, exists := validFilters[key]; !exists {
+			continue
+		}
+		b.selector = b.selector.Where(sq.Eq{key: value})
+		b.counter = b.counter.Where(sq.Eq{key: value})
+		b.deleter = b.deleter.Where(sq.Eq{key: value})
+		b.updater = b.updater.Where(sq.Eq{key: value})
+	}
 	return b
 }
 
-func (b *billingSchedules) FilterUserID(userID uuid.UUID) repo.BillingPlan {
-	cond := sq.Eq{"user_id": userID}
-	b.selector = b.selector.Where(cond)
-	b.updater = b.updater.Where(cond)
-	b.deleter = b.deleter.Where(cond)
-	b.counter = b.counter.Where(cond)
-	return b
-}
-
-func (b *billingSchedules) FilterStatus(status string) repo.BillingPlan {
-	cond := sq.Eq{"status": status}
-	b.selector = b.selector.Where(cond)
-	b.updater = b.updater.Where(cond)
-	b.deleter = b.deleter.Where(cond)
-	b.counter = b.counter.Where(cond)
-	return b
-}
-
-func (b *billingSchedules) Page(limit, offset uint64) repo.BillingPlan {
+func (b *BillingPlan) Page(limit, offset uint64) *BillingPlan {
 	b.selector = b.selector.Limit(limit).Offset(offset)
 	b.counter = b.counter.Limit(limit).Offset(offset)
 	return b
