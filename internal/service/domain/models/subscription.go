@@ -8,25 +8,26 @@ import (
 )
 
 type Subscription struct {
-	UserID          uuid.UUID          `json:"user_id"`
-	PlanID          uuid.UUID          `json:"plan_id"`
-	PaymentMethodID uuid.UUID          `json:"payment_method_id"`
-	Status          SubscriptionStatus `json:"status"`
-	StartDate       time.Time          `json:"start_date"`
-	EndDate         time.Time          `json:"end_date"`
-	CreatedAt       time.Time          `json:"created_at"`
-	UpdatedAt       time.Time          `json:"updated_at"`
+	UserID          uuid.UUID         `json:"user_id"`
+	PlanID          uuid.UUID         `json:"plan_id"`
+	PaymentMethodID uuid.UUID         `json:"payment_method_id"`
+	State           SubscriptionState `json:"state"`
+	Availability    PlanAvailability  `json:"availability"`
+	StartDate       time.Time         `json:"start_date"`
+	EndDate         time.Time         `json:"end_date"`
+	CreatedAt       time.Time         `json:"created_at"`
+	UpdatedAt       time.Time         `json:"updated_at"`
 }
 
-type SubscriptionStatus string
+type SubscriptionState string
 
 const (
-	SubscriptionStatusActive   SubscriptionStatus = "active"
-	SubscriptionStatusInactive SubscriptionStatus = "inactive"
-	SubscriptionStatusExpired  SubscriptionStatus = "expired"
+	SubscriptionStatusActive   SubscriptionState = "active"
+	SubscriptionStatusInactive SubscriptionState = "inactive"
+	SubscriptionStatusExpired  SubscriptionState = "expired"
 )
 
-func ParseSubscriptionStatus(status string) (SubscriptionStatus, error) {
+func ParseSubscriptionState(status string) (SubscriptionState, error) {
 	switch status {
 	case "active":
 		return SubscriptionStatusActive, nil
@@ -36,5 +37,26 @@ func ParseSubscriptionStatus(status string) (SubscriptionStatus, error) {
 		return SubscriptionStatusExpired, nil
 	default:
 		return "", fmt.Errorf("invalid subscription status: %s", status)
+	}
+}
+
+type PlanAvailability string
+
+const (
+	PlanAvailable  PlanAvailability = "available"  // Подписка доступна для покупки
+	PlanDeprecated PlanAvailability = "deprecated" // Больше не доступна для новых пользователей
+	PlanRemoved    PlanAvailability = "removed"    // Полностью удалена из системы
+)
+
+func ParsePlanAvailability(availability string) (PlanAvailability, error) {
+	switch availability {
+	case "available":
+		return PlanAvailable, nil
+	case "deprecated":
+		return PlanDeprecated, nil
+	case "removed":
+		return PlanRemoved, nil
+	default:
+		return "", fmt.Errorf("invalid plan availability: %s", availability)
 	}
 }

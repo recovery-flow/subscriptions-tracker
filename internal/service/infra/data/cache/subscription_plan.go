@@ -88,3 +88,12 @@ func (c *subPlanQueryCache) Drop(ctx context.Context) error {
 	}
 	return nil
 }
+
+func KeyPlans(filters map[string]any, limit, skip int) string {
+	key := SubscriptionPlanCollection
+	if len(filters) > 0 {
+		key += fmt.Sprintf(":filters=%v", filters)
+	}
+	key += fmt.Sprintf(":limit=%d:skip=%d", limit, skip)
+	return key
+}

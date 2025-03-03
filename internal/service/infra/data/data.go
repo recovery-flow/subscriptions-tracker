@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo/cache"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo/sqldb"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/cache"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/sqldb"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 )

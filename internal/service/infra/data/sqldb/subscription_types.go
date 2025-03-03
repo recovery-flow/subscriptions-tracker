@@ -24,6 +24,8 @@ type SubTypes interface {
 
 	Filter(filters map[string]any) SubTypes
 
+	Transaction(func() error) error
+
 	Page(limit, offset uint64) SubTypes
 }
 
@@ -178,6 +180,28 @@ func (t *subTypes) Filter(filters map[string]any) SubTypes {
 		t.updater = t.updater.Where(sq.Eq{key: value})
 	}
 	return t
+}
+
+func (t *subTypes) Transaction(f func() error) error {
+	ctx := context.Background()
+
+	tx, err := t.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	if err := f(); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
+		}
+		return fmt.Errorf("transaction failed: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
 }
 
 func (t *subTypes) Page(limit, offset uint64) SubTypes {

@@ -10,10 +10,13 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const SubscriptionCollection = "subscription"
+
 type Subscriptions interface {
 	Add(ctx context.Context, sub models.Subscription) error
 	Get(ctx context.Context, userID string) (*models.Subscription, error)
 	Delete(ctx context.Context, userID string) error
+	Drop(ctx context.Context) error
 }
 
 type subscriptions struct {
@@ -29,12 +32,12 @@ func NewSubscriptions(client *redis.Client, lifetime time.Duration) Subscription
 }
 
 func (s *subscriptions) Add(ctx context.Context, sub models.Subscription) error {
-	subKey := fmt.Sprintf("subscription:user_id:%s", sub.UserID.String())
+	subKey := fmt.Sprintf("%s:user_id:%s", SubscriptionCollection, sub.UserID.String())
 
 	data := map[string]interface{}{
 		"plan_id":           sub.PlanID.String(),
 		"payment_method_id": sub.PaymentMethodID.String(),
-		"status":            sub.Status,
+		"status":            sub.State,
 		"start_date":        sub.StartDate.Format(time.RFC3339),
 		"end_date":          sub.EndDate.Format(time.RFC3339),
 		"created_at":        sub.CreatedAt.Format(time.RFC3339),
@@ -58,7 +61,7 @@ func (s *subscriptions) Add(ctx context.Context, sub models.Subscription) error 
 }
 
 func (s *subscriptions) Get(ctx context.Context, userID string) (*models.Subscription, error) {
-	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
+	subKey := fmt.Sprintf("%s:user_id:%s", SubscriptionCollection, userID)
 	vals, err := s.client.HGetAll(ctx, subKey).Result()
 	if err != nil {
 		return nil, err
@@ -70,12 +73,27 @@ func (s *subscriptions) Get(ctx context.Context, userID string) (*models.Subscri
 }
 
 func (s *subscriptions) Delete(ctx context.Context, userID string) error {
-	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
+	subKey := fmt.Sprintf("%s:user_id:%s", SubscriptionCollection, userID)
 
 	if err := s.client.Del(ctx, subKey).Err(); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (s *subscriptions) Drop(ctx context.Context) error {
+	pattern := fmt.Sprintf("%s:*", SubscriptionPlanCollection)
+	keys, err := s.client.Keys(ctx, pattern).Result()
+	if err != nil {
+		return fmt.Errorf("error fetching keys with pattern %s: %w", pattern, err)
+	}
+	if len(keys) == 0 {
+		return nil
+	}
+	if err := s.client.Del(ctx, keys...).Err(); err != nil {
+		return fmt.Errorf("failed to delete keys with pattern %s: %w", pattern, err)
+	}
 	return nil
 }
 
@@ -115,7 +133,7 @@ func parseSubscription(userID string, vals map[string]string) (*models.Subscript
 		return nil, fmt.Errorf("error parsing user_id: %w", err)
 	}
 
-	status, err := models.ParseSubscriptionStatus(vals["status"])
+	status, err := models.ParseSubscriptionState(vals["status"])
 	if err != nil {
 		return nil, fmt.Errorf("error parsing status: %w", err)
 	}
@@ -124,7 +142,7 @@ func parseSubscription(userID string, vals map[string]string) (*models.Subscript
 		UserID:          uid,
 		PlanID:          planID,
 		PaymentMethodID: paymentMethodID,
-		Status:          status,
+		State:           status,
 		StartDate:       startDate,
 		EndDate:         endDate,
 		CreatedAt:       createdAt,
