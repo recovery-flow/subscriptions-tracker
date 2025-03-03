@@ -16,7 +16,26 @@ type SubscriptionPlan struct {
 	BillingInterval     int8                `json:"billing_interval"`
 	BillingIntervalUnit BillingIntervalUnit `json:"billing_interval_unit"`
 	Currency            string              `json:"currency"`
+	Status              StatusPlan          `json:"status"`
 	CreatedAt           time.Time           `json:"created_at"`
+}
+
+type StatusPlan string
+
+const (
+	StatusPlanActive   StatusPlan = "active"
+	StatusPlanInactive StatusPlan = "inactive"
+)
+
+func ParseStatusPlan(status string) (StatusPlan, error) {
+	switch status {
+	case "active":
+		return StatusPlanActive, nil
+	case "inactive":
+		return StatusPlanInactive, nil
+	default:
+		return "", fmt.Errorf("invalid plan status: %s", status)
+	}
 }
 
 type BillingIntervalUnit string

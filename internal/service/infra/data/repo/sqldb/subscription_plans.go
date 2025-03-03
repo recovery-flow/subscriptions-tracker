@@ -61,6 +61,7 @@ func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) erro
 		"billing_interval":      plan.BillingInterval,
 		"billing_interval_unit": plan.BillingIntervalUnit,
 		"currency":              plan.Currency,
+		"status":                plan.Status,
 		"created_at":            plan.CreatedAt,
 	}
 
@@ -77,11 +78,10 @@ func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) erro
 
 func (p *subPlan) Update(ctx context.Context, plan models.SubscriptionPlan) error {
 	updates := map[string]interface{}{
-		"type_id":               plan.TypeID,
-		"price":                 plan.Price,
-		"billing_interval":      plan.BillingInterval,
-		"billing_interval_unit": plan.BillingIntervalUnit,
-		"currency":              plan.Currency,
+		"type_id":  plan.TypeID,
+		"price":    plan.Price,
+		"status":   plan.Status,
+		"currency": plan.Currency,
 	}
 	query, args, err := p.updater.SetMap(updates).ToSql()
 	if err != nil {
@@ -128,6 +128,7 @@ func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 			&plan.BillingInterval,
 			&plan.BillingIntervalUnit,
 			&plan.Currency,
+			&plan.Status,
 			&plan.CreatedAt,
 		)
 		if err != nil {
@@ -165,6 +166,7 @@ func (p *subPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
 		&plan.BillingInterval,
 		&plan.BillingIntervalUnit,
 		&plan.Currency,
+		&plan.Status,
 		&plan.CreatedAt,
 	)
 	if err != nil {
@@ -181,6 +183,7 @@ func (p *subPlan) Filter(filters map[string]any) SubPlan {
 	var validFilters = map[string]bool{
 		"id":      true,
 		"type_id": true,
+		"status":  true,
 	}
 	for key, value := range filters {
 		if _, exists := validFilters[key]; !exists {

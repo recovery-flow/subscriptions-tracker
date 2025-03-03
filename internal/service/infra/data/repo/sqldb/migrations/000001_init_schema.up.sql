@@ -4,6 +4,7 @@ CREATE TABLE subscription_types (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(100) NOT NULL,
     description TEXT,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive')),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -16,6 +17,7 @@ CREATE TABLE subscription_plans (
     billing_interval INTEGER NOT NULL,
     billing_interval_unit VARCHAR(10) NOT NULL CHECK (billing_interval_unit IN ('once','day','week','month','year')),
     currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive')),
     created_at TIMESTAMP DEFAULT NOW()
 );
 

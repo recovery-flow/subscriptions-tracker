@@ -57,6 +57,7 @@ func (t *subTypes) Insert(ctx context.Context, sub models.SubscriptionType) erro
 		"id":          sub.ID,
 		"name":        sub.Name,
 		"description": sub.Description,
+		"status":      sub.Status,
 		"created_at":  sub.CreatedAt,
 	}).ToSql()
 	if err != nil {
@@ -110,16 +111,17 @@ func (t *subTypes) Select(ctx context.Context) ([]models.SubscriptionType, error
 
 	var types []models.SubscriptionType
 	for rows.Next() {
-		var t models.SubscriptionType
+		var st models.SubscriptionType
 		if err := rows.Scan(
-			&t.ID,
-			&t.Name,
-			&t.Description,
-			&t.CreatedAt,
+			&st.ID,
+			&st.Name,
+			&st.Description,
+			&st.Status,
+			&st.CreatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("error scanning subscription_type row: %w", err)
 		}
-		types = append(types, t)
+		types = append(types, st)
 	}
 	return types, nil
 }
@@ -143,12 +145,13 @@ func (t *subTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
 		return nil, fmt.Errorf("error building get query for subscription_types: %w", err)
 	}
 
-	var subt models.SubscriptionType
+	var st models.SubscriptionType
 	err = t.db.QueryRowContext(ctx, query, args...).Scan(
-		&subt.ID,
-		&subt.Name,
-		&subt.Description,
-		&subt.CreatedAt,
+		&st.ID,
+		&st.Name,
+		&st.Description,
+		&st.Status,
+		&st.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -156,12 +159,14 @@ func (t *subTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
 		}
 		return nil, fmt.Errorf("error getting subscription_type: %w", err)
 	}
-	return &subt, nil
+	return &st, nil
 }
 
 func (t *subTypes) Filter(filters map[string]any) SubscriptionTypes {
 	var validFilters = map[string]bool{
-		"id": true,
+		"id":     true,
+		"status": true,
+		"name":   true,
 	}
 	for key, value := range filters {
 		if _, exists := validFilters[key]; !exists {

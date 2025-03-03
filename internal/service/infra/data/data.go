@@ -40,9 +40,9 @@ func NewData(cfg *config.Config, log *logrus.Logger) (*Data, error) {
 	sqlSubTypes := sqldb.NewSubTypes(db)
 	sqlSub := sqldb.NewSubscriptions(db)
 
-	redisPlans := cache.NewSubPlans(redisClient)
+	redisPlans := cache.NewSubPlanQueryCache(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 	redisSubs := cache.NewSubscriptions(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
-	redisTypes := cache.NewSubTypes(redisClient)
+	redisTypes := cache.NewSubTypesQueryCache(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 
 	return &Data{
 		BillingPlan:    repo.NewBillingPlan(sqlBP),
