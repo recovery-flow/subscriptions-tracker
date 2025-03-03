@@ -10,9 +10,20 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 )
 
-const billingPlanTable = "billing_plan"
+const billingSchedulesTable = "billing_schedules"
 
-type BillingPlan struct {
+type BillingSchedules interface {
+	Insert(ctx context.Context, bs models.BillingSchedule) error
+	Update(ctx context.Context, updates map[string]any) error
+	Delete(ctx context.Context) error
+	Select(ctx context.Context) ([]models.BillingSchedule, error)
+	Count(ctx context.Context) (int, error)
+	Get(ctx context.Context) (*models.BillingSchedule, error)
+	Filter(filters map[string]any) BillingSchedules
+	Page(limit, offset uint64) BillingSchedules
+}
+
+type billingSchedules struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -21,24 +32,23 @@ type BillingPlan struct {
 	counter  sq.SelectBuilder
 }
 
-func NewBillingSchedules(db *sql.DB) *BillingPlan {
+func NewBillingSchedules(db *sql.DB) BillingSchedules {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	res := BillingPlan{
+	return &billingSchedules{
 		db:       db,
-		selector: builder.Select("*").From(billingPlanTable),
-		inserter: builder.Insert(billingPlanTable),
-		updater:  builder.Update(billingPlanTable),
-		deleter:  builder.Delete(billingPlanTable),
-		counter:  builder.Select("COUNT(*) AS count").From(billingPlanTable),
+		selector: builder.Select("*").From(billingSchedulesTable),
+		inserter: builder.Insert(billingSchedulesTable),
+		updater:  builder.Update(billingSchedulesTable),
+		deleter:  builder.Delete(billingSchedulesTable),
+		counter:  builder.Select("COUNT(*) AS count").From(billingSchedulesTable),
 	}
-	return &res
 }
 
-func (b *BillingPlan) New() *BillingPlan {
+func (b *billingSchedules) New() BillingSchedules {
 	return NewBillingSchedules(b.db)
 }
 
-func (b *BillingPlan) Insert(ctx context.Context, bs models.BillingPlan) error {
+func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule) error {
 	values := map[string]interface{}{
 		"id":             bs.ID,
 		"user_id":        bs.UserID,
@@ -62,7 +72,7 @@ func (b *BillingPlan) Insert(ctx context.Context, bs models.BillingPlan) error {
 	return nil
 }
 
-func (b *BillingPlan) Update(ctx context.Context, updates map[string]any) error {
+func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) error {
 	query, args, err := b.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for billing_schedules: %w", err)
@@ -74,7 +84,7 @@ func (b *BillingPlan) Update(ctx context.Context, updates map[string]any) error 
 	return nil
 }
 
-func (b *BillingPlan) Delete(ctx context.Context) error {
+func (b *billingSchedules) Delete(ctx context.Context) error {
 	query, args, err := b.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for billing_schedules: %w", err)
@@ -86,7 +96,7 @@ func (b *BillingPlan) Delete(ctx context.Context) error {
 	return nil
 }
 
-func (b *BillingPlan) Select(ctx context.Context) ([]models.BillingPlan, error) {
+func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for billing_schedules: %w", err)
@@ -98,9 +108,9 @@ func (b *BillingPlan) Select(ctx context.Context) ([]models.BillingPlan, error) 
 	}
 	defer rows.Close()
 
-	var results []models.BillingPlan
+	var results []models.BillingSchedule
 	for rows.Next() {
-		var bs models.BillingPlan
+		var bs models.BillingSchedule
 		var attemptedDate *time.Time
 
 		err := rows.Scan(
@@ -120,7 +130,7 @@ func (b *BillingPlan) Select(ctx context.Context) ([]models.BillingPlan, error) 
 	return results, nil
 }
 
-func (b *BillingPlan) Count(ctx context.Context) (int, error) {
+func (b *billingSchedules) Count(ctx context.Context) (int, error) {
 	query, args, err := b.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for billing_schedules: %w", err)
@@ -133,13 +143,13 @@ func (b *BillingPlan) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (b *BillingPlan) Get(ctx context.Context) (*models.BillingPlan, error) {
+func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for billing_schedules: %w", err)
 	}
 
-	var bs models.BillingPlan
+	var bs models.BillingSchedule
 	var attemptedDate *time.Time
 
 	err = b.db.QueryRowContext(ctx, query, args...).Scan(
@@ -161,7 +171,7 @@ func (b *BillingPlan) Get(ctx context.Context) (*models.BillingPlan, error) {
 	return &bs, nil
 }
 
-func (b *BillingPlan) Filter(filters map[string]any) *BillingPlan {
+func (b *billingSchedules) Filter(filters map[string]any) BillingSchedules {
 	var validFilters = map[string]bool{
 		"id":      true,
 		"user_id": true,
@@ -180,7 +190,7 @@ func (b *BillingPlan) Filter(filters map[string]any) *BillingPlan {
 	return b
 }
 
-func (b *BillingPlan) Page(limit, offset uint64) *BillingPlan {
+func (b *billingSchedules) Page(limit, offset uint64) BillingSchedules {
 	b.selector = b.selector.Limit(limit).Offset(offset)
 	b.counter = b.counter.Limit(limit).Offset(offset)
 	return b

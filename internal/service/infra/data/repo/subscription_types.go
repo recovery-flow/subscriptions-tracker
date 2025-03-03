@@ -32,7 +32,7 @@ type SubTypes interface {
 
 type subTypes struct {
 	redis   cache.SubTypesQueryCache
-	sql     sqldb.SubscriptionTypes
+	sql     sqldb.SubTypes
 	filters map[string]any
 	limit   int64
 	skip    int64
@@ -40,7 +40,7 @@ type subTypes struct {
 	log *logrus.Logger
 }
 
-func NewSubTypes(sql sqldb.SubscriptionTypes, redis cache.SubTypesQueryCache, log *logrus.Logger) SubTypes {
+func NewSubTypes(sql sqldb.SubTypes, redis cache.SubTypesQueryCache, log *logrus.Logger) SubTypes {
 	return &subTypes{
 		redis:   redis,
 		sql:     sql,

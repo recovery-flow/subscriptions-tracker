@@ -11,7 +11,19 @@ import (
 
 const transactionsTable = "subscription_transactions"
 
-type Transactions struct {
+type Transactions interface {
+	New() Transactions
+	Insert(ctx context.Context, trn models.Transaction) error
+	Update(ctx context.Context, updates map[string]any) error
+	Delete(ctx context.Context) error
+	Select(ctx context.Context) ([]models.Transaction, error)
+	Count(ctx context.Context) (int, error)
+	Get(ctx context.Context) (*models.Transaction, error)
+	Filter(filters map[string]any) Transactions
+	Page(limit, offset uint64) Transactions
+}
+
+type transactions struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -20,9 +32,9 @@ type Transactions struct {
 	counter  sq.SelectBuilder
 }
 
-func NewTransactions(db *sql.DB) *Transactions {
+func NewTransactions(db *sql.DB) Transactions {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	res := Transactions{
+	return &transactions{
 		db:       db,
 		selector: builder.Select("*").From(transactionsTable),
 		inserter: builder.Insert(transactionsTable),
@@ -30,14 +42,13 @@ func NewTransactions(db *sql.DB) *Transactions {
 		deleter:  builder.Delete(transactionsTable),
 		counter:  builder.Select("COUNT(*) AS count").From(transactionsTable),
 	}
-	return &res
 }
 
-func (t *Transactions) New() *Transactions {
+func (t *transactions) New() Transactions {
 	return NewTransactions(t.db)
 }
 
-func (t *Transactions) Insert(ctx context.Context, trn models.Transaction) error {
+func (t *transactions) Insert(ctx context.Context, trn models.Transaction) error {
 	values := map[string]interface{}{
 		"id":                trn.ID,
 		"user_id":           trn.UserID,
@@ -61,7 +72,7 @@ func (t *Transactions) Insert(ctx context.Context, trn models.Transaction) error
 	return nil
 }
 
-func (t *Transactions) Update(ctx context.Context, updates map[string]any) error {
+func (t *transactions) Update(ctx context.Context, updates map[string]any) error {
 	query, args, err := t.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for subscription_transactions: %w", err)
@@ -73,7 +84,7 @@ func (t *Transactions) Update(ctx context.Context, updates map[string]any) error
 	return nil
 }
 
-func (t *Transactions) Delete(ctx context.Context) error {
+func (t *transactions) Delete(ctx context.Context) error {
 	query, args, err := t.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for subscription_transactions: %w", err)
@@ -85,7 +96,7 @@ func (t *Transactions) Delete(ctx context.Context) error {
 	return nil
 }
 
-func (t *Transactions) Select(ctx context.Context) ([]models.Transaction, error) {
+func (t *transactions) Select(ctx context.Context) ([]models.Transaction, error) {
 	query, args, err := t.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for subscription_transactions: %w", err)
@@ -121,7 +132,7 @@ func (t *Transactions) Select(ctx context.Context) ([]models.Transaction, error)
 	return results, nil
 }
 
-func (t *Transactions) Count(ctx context.Context) (int, error) {
+func (t *transactions) Count(ctx context.Context) (int, error) {
 	query, args, err := t.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for subscription_transactions: %w", err)
@@ -134,7 +145,7 @@ func (t *Transactions) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (t *Transactions) Get(ctx context.Context) (*models.Transaction, error) {
+func (t *transactions) Get(ctx context.Context) (*models.Transaction, error) {
 	query, args, err := t.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for subscription_transactions: %w", err)
@@ -163,7 +174,7 @@ func (t *Transactions) Get(ctx context.Context) (*models.Transaction, error) {
 	return &trn, nil
 }
 
-func (t *Transactions) Filter(filters map[string]any) *Transactions {
+func (t *transactions) Filter(filters map[string]any) Transactions {
 	var validFilters = map[string]bool{
 		"id":                true,
 		"user_id":           true,
@@ -183,7 +194,7 @@ func (t *Transactions) Filter(filters map[string]any) *Transactions {
 	return t
 }
 
-func (t *Transactions) Page(limit, offset uint64) *Transactions {
+func (t *transactions) Page(limit, offset uint64) Transactions {
 	t.selector = t.selector.Limit(limit).Offset(offset)
 	t.counter = t.counter.Limit(limit).Offset(offset)
 	return t

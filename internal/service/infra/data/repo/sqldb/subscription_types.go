@@ -11,8 +11,8 @@ import (
 
 const subscriptionTypesTable = "subscription_types"
 
-type SubscriptionTypes interface {
-	New() SubscriptionTypes
+type SubTypes interface {
+	New() SubTypes
 
 	Insert(ctx context.Context, sub models.SubscriptionType) error
 	Update(ctx context.Context, updates map[string]any) error
@@ -22,9 +22,9 @@ type SubscriptionTypes interface {
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.SubscriptionType, error)
 
-	Filter(filters map[string]any) SubscriptionTypes
+	Filter(filters map[string]any) SubTypes
 
-	Page(limit, offset uint64) SubscriptionTypes
+	Page(limit, offset uint64) SubTypes
 }
 
 type subTypes struct {
@@ -36,7 +36,7 @@ type subTypes struct {
 	counter  sq.SelectBuilder
 }
 
-func NewSubTypes(db *sql.DB) SubscriptionTypes {
+func NewSubTypes(db *sql.DB) SubTypes {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	return &subTypes{
 		db:       db,
@@ -48,7 +48,7 @@ func NewSubTypes(db *sql.DB) SubscriptionTypes {
 	}
 }
 
-func (t *subTypes) New() SubscriptionTypes {
+func (t *subTypes) New() SubTypes {
 	return NewSubTypes(t.db)
 }
 
@@ -162,7 +162,7 @@ func (t *subTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
 	return &st, nil
 }
 
-func (t *subTypes) Filter(filters map[string]any) SubscriptionTypes {
+func (t *subTypes) Filter(filters map[string]any) SubTypes {
 	var validFilters = map[string]bool{
 		"id":     true,
 		"status": true,
@@ -180,7 +180,7 @@ func (t *subTypes) Filter(filters map[string]any) SubscriptionTypes {
 	return t
 }
 
-func (t *subTypes) Page(limit, offset uint64) SubscriptionTypes {
+func (t *subTypes) Page(limit, offset uint64) SubTypes {
 	t.selector = t.selector.Limit(limit).Offset(offset)
 	t.counter = t.counter.Limit(limit).Offset(offset)
 	return t

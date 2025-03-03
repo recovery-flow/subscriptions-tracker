@@ -15,7 +15,7 @@ type SubPlan interface {
 	New() SubPlan
 
 	Insert(ctx context.Context, plan models.SubscriptionPlan) error
-	Update(ctx context.Context, plan models.SubscriptionPlan) error
+	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 	Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 	Count(ctx context.Context) (int, error)
@@ -76,13 +76,7 @@ func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) erro
 	return nil
 }
 
-func (p *subPlan) Update(ctx context.Context, plan models.SubscriptionPlan) error {
-	updates := map[string]interface{}{
-		"type_id":  plan.TypeID,
-		"price":    plan.Price,
-		"status":   plan.Status,
-		"currency": plan.Currency,
-	}
+func (p *subPlan) Update(ctx context.Context, updates map[string]any) error {
 	query, args, err := p.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for subscription_plans: %w", err)

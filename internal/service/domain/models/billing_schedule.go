@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type BillingPlan struct {
+type BillingSchedule struct {
 	ID            uuid.UUID     `json:"id"`
 	UserID        uuid.UUID     `json:"user_id"`
 	ScheduledDate time.Time     `json:"scheduled_date"`

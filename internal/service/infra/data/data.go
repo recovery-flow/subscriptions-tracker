@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo/cache"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo/sqldb"
 	"github.com/redis/go-redis/v9"
@@ -13,12 +12,23 @@ import (
 )
 
 type Data struct {
-	BillingPlan    repo.BillingPlan
-	Transactions   repo.Transactions
-	PaymentMethods repo.PaymentMethods
-	SubPlans       repo.SubPlan
-	SubTypes       repo.SubTypes
-	Subscription   repo.Subscription
+	SQL   SQLStorage
+	Cache CacheStorage
+}
+
+type SQLStorage struct {
+	Schedule      sqldb.BillingSchedules
+	Transactions  sqldb.Transactions
+	Methods       sqldb.PaymentMethods
+	Plans         sqldb.SubPlan
+	Types         sqldb.SubTypes
+	Subscriptions sqldb.Subscriptions
+}
+
+type CacheStorage struct {
+	Plans         cache.SubPlanQueryCache
+	Subscriptions cache.Subscriptions
+	Types         cache.SubTypesQueryCache
 }
 
 func NewData(cfg *config.Config, log *logrus.Logger) (*Data, error) {
@@ -33,7 +43,7 @@ func NewData(cfg *config.Config, log *logrus.Logger) (*Data, error) {
 		DB:       cfg.Database.Redis.DB,
 	})
 
-	sqlBP := sqldb.NewBillingSchedules(db)
+	sqlSchedule := sqldb.NewBillingSchedules(db)
 	sqlTrans := sqldb.NewTransactions(db)
 	sqlPM := sqldb.NewPaymentMethods(db)
 	sqlSubPlans := sqldb.NewSubPlan(db)
@@ -45,11 +55,18 @@ func NewData(cfg *config.Config, log *logrus.Logger) (*Data, error) {
 	redisTypes := cache.NewSubTypesQueryCache(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 
 	return &Data{
-		BillingPlan:    repo.NewBillingPlan(sqlBP),
-		Transactions:   repo.NewTransactions(sqlTrans),
-		PaymentMethods: repo.NewPaymentMethods(sqlPM, log),
-		SubPlans:       repo.NewSubPlans(sqlSubPlans, redisPlans, log),
-		SubTypes:       repo.NewSubTypes(sqlSubTypes, redisTypes, log),
-		Subscription:   repo.NewSubscription(sqlSub, redisSubs, log),
+		SQL: SQLStorage{
+			Schedule:      sqlSchedule,
+			Transactions:  sqlTrans,
+			Methods:       sqlPM,
+			Plans:         sqlSubPlans,
+			Types:         sqlSubTypes,
+			Subscriptions: sqlSub,
+		},
+		Cache: CacheStorage{
+			Plans:         redisPlans,
+			Subscriptions: redisSubs,
+			Types:         redisTypes,
+		},
 	}, nil
 }

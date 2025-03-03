@@ -19,6 +19,7 @@ type SubPlan interface {
 	Get(ctx context.Context) (*models.SubscriptionPlan, error)
 	Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 	DeleteOne(ctx context.Context) error
+	Update(ctx context.Context, update map[string]any) error
 
 	Count(ctx context.Context) (int, error)
 
@@ -39,7 +40,7 @@ type subPlan struct {
 	log *logrus.Logger
 }
 
-func NewSubPlans(sql sqldb.SubPlan, redis cache.SubPlanQueryCache, log *logrus.Logger) SubPlan {
+func NewSubPlan(sql sqldb.SubPlan, redis cache.SubPlanQueryCache, log *logrus.Logger) SubPlan {
 	return &subPlan{
 		redis:   redis,
 		sql:     sql,
@@ -52,7 +53,7 @@ func NewSubPlans(sql sqldb.SubPlan, redis cache.SubPlanQueryCache, log *logrus.L
 }
 
 func (p *subPlan) New() SubPlan {
-	return NewSubPlans(p.sql, p.redis, p.log)
+	return NewSubPlan(p.sql, p.redis, p.log)
 }
 
 func (p *subPlan) Create(ctx context.Context, plan models.SubscriptionPlan) error {
@@ -61,7 +62,7 @@ func (p *subPlan) Create(ctx context.Context, plan models.SubscriptionPlan) erro
 	}
 
 	if err := p.redis.Drop(ctx); err != nil {
-		p.log.WithField("redis", err).Error("error dropping subscription plans cache")
+		p.log.WithField("redis", err).Error("error dropping subscription plan cache")
 	}
 
 	if err := p.redis.Set(ctx, p.cacheKey(), []models.SubscriptionPlan{plan}); err != nil {
@@ -113,9 +114,17 @@ func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 	return res, nil
 }
 
+func (p *subPlan) Update(ctx context.Context, update map[string]any) error {
+	if err := p.redis.Drop(ctx); err != nil {
+		p.log.WithField("redis", err).Error("error dropping subscription plan cache")
+	}
+
+	return p.sql.New().Filter(p.filters).Update(ctx, update)
+}
+
 func (p *subPlan) DeleteOne(ctx context.Context) error {
 	if err := p.redis.Drop(ctx); err != nil {
-		p.log.WithField("redis", err).Error("error dropping subscription plans cache")
+		p.log.WithField("redis", err).Error("error dropping subscription plan cache")
 	}
 
 	return p.sql.New().Filter(p.filters).Delete(ctx)
@@ -124,7 +133,7 @@ func (p *subPlan) DeleteOne(ctx context.Context) error {
 func (p *subPlan) DropCache(ctx context.Context) error {
 	err := p.redis.Drop(ctx)
 	if err != nil {
-		p.log.WithField("redis", err).Error("error dropping subscription plans cache")
+		p.log.WithField("redis", err).Error("error dropping subscription plan cache")
 	}
 
 	return err
@@ -146,7 +155,7 @@ func (p *subPlan) Page(limit, offset uint64) SubPlan {
 }
 
 func (p *subPlan) cacheKey() string {
-	key := cache.SubscriptionPlansCollection
+	key := cache.SubscriptionPlanCollection
 	if len(p.filters) > 0 {
 		key += fmt.Sprintf(":filters=%v", p.filters)
 	}

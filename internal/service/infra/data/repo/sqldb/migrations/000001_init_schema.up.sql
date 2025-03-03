@@ -36,7 +36,7 @@ CREATE INDEX idx_payment_methods_type ON payment_methods (type);
 
 CREATE TABLE subscriptions (
     user_id UUID PRIMARY KEY,
-    plan_id UUID NOT NULL REFERENCES subscription_plans(id),
+    plan_id UUID NOT NULL REFERENCES subscription_schedule (id),
     payment_method_id UUID NOT NULL REFERENCES payment_methods(id),
     status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive', 'expired')),
     start_date TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -63,7 +63,7 @@ CREATE TABLE subscription_transactions (
 CREATE INDEX idx_subscription_transactions_status ON subscription_transactions (status);
 CREATE INDEX idx_subscription_transactions_date ON subscription_transactions (transaction_date);
 
-CREATE TABLE billing_plan (
+CREATE TABLE billing_schedule (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL,
     scheduled_date TIMESTAMP NOT NULL,
@@ -72,14 +72,14 @@ CREATE TABLE billing_plan (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_billing_plan_scheduled_date ON billing_plan (scheduled_date);
-CREATE INDEX idx_billing_plan_status ON billing_plan (status);
+CREATE INDEX idx_billing_plan_scheduled_date ON billing_schedule (scheduled_date);
+CREATE INDEX idx_billing_plan_status ON billing_schedule (status);
 
 ALTER TABLE subscription_plans
     ADD CONSTRAINT fk_subscription_plans_type FOREIGN KEY (type_id) REFERENCES subscription_types(id) ON DELETE CASCADE;
 
 ALTER TABLE subscriptions
-    ADD CONSTRAINT fk_subscriptions_plan FOREIGN KEY (plan_id) REFERENCES subscription_plans(id);
+    ADD CONSTRAINT fk_subscriptions_plan FOREIGN KEY (plan_id) REFERENCES subscription_schedule (id);
 
 ALTER TABLE subscriptions
     ADD CONSTRAINT fk_subscriptions_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id);
@@ -87,5 +87,5 @@ ALTER TABLE subscriptions
 ALTER TABLE subscription_transactions
     ADD CONSTRAINT fk_subscription_transactions_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id);
 
-ALTER TABLE billing_plan
+ALTER TABLE billing_schedule
     ADD CONSTRAINT fk_billing_plan_subscription FOREIGN KEY (user_id) REFERENCES subscriptions(user_id) ON DELETE CASCADE;

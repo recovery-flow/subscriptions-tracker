@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const SubscriptionPlansCollection = "subscription_plans"
+const SubscriptionPlanCollection = "subscription_plans"
 
 type SubPlanQueryCache interface {
 	Set(ctx context.Context, key string, plans []models.SubscriptionPlan) error
@@ -75,7 +75,7 @@ func (c *subPlanQueryCache) Delete(ctx context.Context, key string) error {
 }
 
 func (c *subPlanQueryCache) Drop(ctx context.Context) error {
-	pattern := fmt.Sprintf("%s:*", SubscriptionPlansCollection)
+	pattern := fmt.Sprintf("%s:*", SubscriptionPlanCollection)
 	keys, err := c.client.Keys(ctx, pattern).Result()
 	if err != nil {
 		return fmt.Errorf("error fetching keys with pattern %s: %w", pattern, err)
