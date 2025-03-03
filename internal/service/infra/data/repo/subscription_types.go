@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/repo/cache"
@@ -18,14 +19,19 @@ type SubTypes interface {
 	Get(ctx context.Context) (*models.SubscriptionType, error)
 	Select(ctx context.Context) ([]models.SubscriptionType, error)
 	Delete(ctx context.Context) error
+	Update(ctx context.Context, update map[string]any) error
 
 	Count(ctx context.Context) (int, error)
 
 	Filter(filters map[string]any) SubTypes
+
+	Page(limit, offset uint64) SubTypes
+
+	DropCache(ctx context.Context) error
 }
 
 type subTypes struct {
-	redis   cache.SubTypes
+	redis   cache.SubTypesQueryCache
 	sql     sqldb.SubscriptionTypes
 	filters map[string]any
 	limit   int64
@@ -34,7 +40,7 @@ type subTypes struct {
 	log *logrus.Logger
 }
 
-func NewSubTypes(sql sqldb.SubscriptionTypes, redis cache.SubTypes, log *logrus.Logger) SubTypes {
+func NewSubTypes(sql sqldb.SubscriptionTypes, redis cache.SubTypesQueryCache, log *logrus.Logger) SubTypes {
 	return &subTypes{
 		redis:   redis,
 		sql:     sql,
@@ -47,45 +53,78 @@ func NewSubTypes(sql sqldb.SubscriptionTypes, redis cache.SubTypes, log *logrus.
 }
 
 func (t *subTypes) New() SubTypes {
-	return NewSubTypes(&t.redis, &t.sql, t.log)
+	return NewSubTypes(t.sql, t.redis, t.log)
 }
 
-func (t *subTypes) Create(ctx context.Context, sub models.SubscriptionType) error {
-	if err := t.sql.New().Insert(ctx, sub); err != nil {
+func (t *subTypes) Create(ctx context.Context, subType models.SubscriptionType) error {
+	if err := t.sql.New().Insert(ctx, subType); err != nil {
 		return err
 	}
 
-	err := t.redis.Add(ctx, sub)
-	if err != nil {
-		t.log.WithField("redis", err).Error("error adding subscription type to cache")
+	if err := t.redis.Drop(ctx); err != nil {
+		t.log.WithField("redis", err).Error("error dropping subscription types cache")
 	}
+
+	if err := t.redis.Set(ctx, t.cacheKey(), []models.SubscriptionType{subType}); err != nil {
+		t.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	}
+
 	return nil
 }
 
 func (t *subTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
-	if t.filters["id"] != nil {
-		return t.redis.Get(ctx, t.filters["id"].(string))
+	resCache, err := t.redis.Get(ctx, t.cacheKey())
+	if err != nil || !errors.Is(err, redis.Nil) {
+		t.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	} else if len(resCache) > 0 {
+		return &resCache[0], nil
 	}
 
-	return t.sql.New().Filter(t.filters).Get(ctx)
+	res, err := t.sql.New().Filter(t.filters).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = t.redis.Set(ctx, t.cacheKey(), []models.SubscriptionType{*res})
+	if err != nil {
+		t.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	}
+
+	return res, nil
 }
 
 func (t *subTypes) Select(ctx context.Context) ([]models.SubscriptionType, error) {
-	if t.filters["id"] != nil {
-		res, err := t.redis.Get(ctx, t.filters["id"].(string))
-		if err != nil || !errors.Is(err, redis.Nil) {
-			t.log.WithField("redis", err).Error("error adding subscription type to cache")
-		} else {
-			return []models.SubscriptionType{*res}, nil
-		}
+	resCache, err := t.redis.Get(ctx, t.cacheKey())
+	if err != nil || !errors.Is(err, redis.Nil) {
+		t.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	} else if resCache != nil {
+		return resCache, nil
 	}
 
-	return t.sql.New().Filter(t.filters).Page(uint64(t.limit), uint64(t.skip)).Select(ctx)
+	res, err := t.sql.New().Filter(t.filters).Page(uint64(t.limit), uint64(t.skip)).Select(ctx)
+	if err != nil || len(res) == 0 {
+		return nil, err
+	}
+
+	err = t.redis.Set(ctx, t.cacheKey(), res)
+	if err != nil {
+		t.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	}
+
+	return res, nil
+}
+
+func (t *subTypes) Update(ctx context.Context, update map[string]any) error {
+	if err := t.redis.Drop(ctx); err != nil {
+		t.log.WithField("redis", err).Error("error dropping subscription types cache")
+	}
+
+	return t.sql.New().Filter(t.filters).Update(ctx, update)
 }
 
 func (t *subTypes) Delete(ctx context.Context) error {
-	if t.filters["id"] != nil {
-		return t.redis.Delete(ctx, t.filters["id"].(string))
+	if err := t.redis.Drop(ctx); err != nil {
+		t.log.WithField("redis", err).Error("error dropping subscription types cache")
 	}
 
 	return t.sql.New().Filter(t.filters).Delete(ctx)
@@ -98,4 +137,28 @@ func (t *subTypes) Count(ctx context.Context) (int, error) {
 func (t *subTypes) Filter(filters map[string]any) SubTypes {
 	t.filters = filters
 	return t
+}
+
+func (t *subTypes) Page(limit, offset uint64) SubTypes {
+	t.limit = int64(limit)
+	t.skip = int64(offset)
+	return t
+}
+
+func (t *subTypes) DropCache(ctx context.Context) error {
+	err := t.redis.Drop(ctx)
+	if err != nil {
+		t.log.WithField("redis", err).Error("error dropping subscription plans cache")
+	}
+
+	return err
+}
+
+func (t *subTypes) cacheKey() string {
+	key := cache.SubscriptionTypesCollection
+	if len(t.filters) > 0 {
+		key += fmt.Sprintf(":filters=%v", t.filters)
+	}
+	key += fmt.Sprintf(":limit=%d:skip=%d", t.limit, t.skip)
+	return key
 }

@@ -50,7 +50,7 @@ func NewSubscription(sql sqldb.Subscriptions, redis cache.Subscriptions, log *lo
 }
 
 func (s *subscription) New() Subscription {
-	return NewSubscription(s.redis, s.sql, s.log)
+	return NewSubscription(s.sql, s.redis, s.log)
 }
 
 func (s *subscription) Create(ctx context.Context, sub models.Subscription) error {
@@ -74,7 +74,7 @@ func (s *subscription) Delete(ctx context.Context) error {
 		return err
 	}
 
-	if err := s.redis.Delete(ctx, s.filters["user_id"].(string)); err != nil {
+	if err := s.redis.Delete(ctx, s.filters["user_id"].(string)); err != nil || !errors.Is(err, redis.Nil) {
 		s.log.WithField("redis", err).Error("error deleting subscription from cache")
 	}
 
@@ -82,15 +82,6 @@ func (s *subscription) Delete(ctx context.Context) error {
 }
 
 func (s *subscription) Select(ctx context.Context) ([]models.Subscription, error) {
-	if s.filters["user_id"] != nil {
-		sub, err := s.redis.Get(ctx, s.filters["user_id"].(string))
-		if err != nil || !errors.Is(err, redis.Nil) {
-			s.log.WithField("redis", err).Error("error getting subscription from cache")
-		} else {
-			return []models.Subscription{*sub}, nil
-		}
-	}
-
 	return s.sql.New().Filter(s.filters).Page(uint64(s.limit), uint64(s.skip)).Select(ctx)
 }
 

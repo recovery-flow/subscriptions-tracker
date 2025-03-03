@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -11,24 +12,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type SubPlans interface {
-	New() SubPlans
+type SubPlan interface {
+	New() SubPlan
 
 	Create(ctx context.Context, plan models.SubscriptionPlan) error
 	Get(ctx context.Context) (*models.SubscriptionPlan, error)
 	Select(ctx context.Context) ([]models.SubscriptionPlan, error)
-	DeleteByID(ctx context.Context) error
-	DeleteByTypeID(ctx context.Context) error
+	DeleteOne(ctx context.Context) error
 
 	Count(ctx context.Context) (int, error)
 
-	Filter(filters map[string]any) SubPlans
+	Filter(filters map[string]any) SubPlan
 
-	Page(limit, offset uint64) SubPlans
+	Page(limit, offset uint64) SubPlan
+
+	DropCache(ctx context.Context) error
 }
 
-type subPlans struct {
-	redis   cache.SubPlans
+type subPlan struct {
+	redis   cache.SubPlanQueryCache
 	sql     sqldb.SubPlan
 	filters map[string]any
 	limit   int64
@@ -37,8 +39,8 @@ type subPlans struct {
 	log *logrus.Logger
 }
 
-func NewSubPlans(sql sqldb.SubPlan, redis cache.SubPlans, log *logrus.Logger) SubPlans {
-	return &subPlans{
+func NewSubPlans(sql sqldb.SubPlan, redis cache.SubPlanQueryCache, log *logrus.Logger) SubPlan {
+	return &subPlan{
 		redis:   redis,
 		sql:     sql,
 		filters: make(map[string]any),
@@ -49,54 +51,53 @@ func NewSubPlans(sql sqldb.SubPlan, redis cache.SubPlans, log *logrus.Logger) Su
 	}
 }
 
-func (p *subPlans) New() SubPlans {
-	return NewSubPlans(p.redis, p.sql, p.log)
+func (p *subPlan) New() SubPlan {
+	return NewSubPlans(p.sql, p.redis, p.log)
 }
 
-func (p *subPlans) Create(ctx context.Context, plan models.SubscriptionPlan) error {
+func (p *subPlan) Create(ctx context.Context, plan models.SubscriptionPlan) error {
 	if err := p.sql.New().Insert(ctx, plan); err != nil {
 		return err
 	}
 
-	err := p.redis.Add(ctx, plan)
-	if err != nil {
-		p.log.WithField("error", err).Error("error adding subscription plan to cache")
+	if err := p.redis.Drop(ctx); err != nil {
+		p.log.WithField("redis", err).Error("error dropping subscription plans cache")
+	}
+
+	if err := p.redis.Set(ctx, p.cacheKey(), []models.SubscriptionPlan{plan}); err != nil {
+		p.log.WithField("redis", err).Error("error setting subscription plan in cache")
 	}
 
 	return nil
 }
 
-func (p *subPlans) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
-	res, err := p.redis.GetByID(ctx, p.filters["id"].(string))
-	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			res = nil
-		} else {
-			p.log.WithField("error", err).Error("error adding subscription plan to cache")
-		}
-	} else {
-		return res, nil
+func (p *subPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
+	resCache, err := p.redis.Get(ctx, p.cacheKey())
+	if err != nil || !errors.Is(err, redis.Nil) {
+		p.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	} else if len(resCache) > 0 {
+		return &resCache[0], nil
 	}
 
-	res, err = p.sql.New().Filter(p.filters).Get(ctx)
+	res, err := p.sql.New().Filter(p.filters).Get(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	err = p.redis.Set(ctx, p.cacheKey(), []models.SubscriptionPlan{*res})
+	if err != nil {
+		p.log.WithField("redis", err).Error("error setting subscription plan in cache")
 	}
 
 	return res, nil
 }
 
-func (p *subPlans) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
-	if p.filters["id"] != nil {
-		res, err := p.redis.GetByID(ctx, p.filters["id"].(string))
-		if err != nil || errors.Is(err, redis.Nil) {
-			return nil, err
-		}
-		return []models.SubscriptionPlan{*res}, nil
-	}
-
-	if p.filters["type_id"] != nil {
-		return p.redis.GetByTypeID(ctx, p.filters["type_id"].(string))
+func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
+	resCache, err := p.redis.Get(ctx, p.cacheKey())
+	if err != nil || !errors.Is(err, redis.Nil) {
+		p.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	} else if resCache != nil {
+		return resCache, nil
 	}
 
 	res, err := p.sql.New().Filter(p.filters).Page(uint64(p.limit), uint64(p.skip)).Select(ctx)
@@ -104,38 +105,51 @@ func (p *subPlans) Select(ctx context.Context) ([]models.SubscriptionPlan, error
 		return nil, err
 	}
 
+	err = p.redis.Set(ctx, p.cacheKey(), res)
+	if err != nil {
+		p.log.WithField("redis", err).Error("error setting subscription plan in cache")
+	}
+
 	return res, nil
 }
 
-func (p *subPlans) DeleteByID(ctx context.Context) error {
-	err := p.redis.DeleteByID(ctx, p.filters["id"].(string))
-	if err != nil {
-		p.log.WithField("error", err).Error("error deleting subscription plan from cache")
+func (p *subPlan) DeleteOne(ctx context.Context) error {
+	if err := p.redis.Drop(ctx); err != nil {
+		p.log.WithField("redis", err).Error("error dropping subscription plans cache")
 	}
 
 	return p.sql.New().Filter(p.filters).Delete(ctx)
 }
 
-func (p *subPlans) DeleteByTypeID(ctx context.Context) error {
-	err := p.redis.DeleteByType(ctx, p.filters["type_id"].(string))
+func (p *subPlan) DropCache(ctx context.Context) error {
+	err := p.redis.Drop(ctx)
 	if err != nil {
-		p.log.WithField("error", err).Error("error deleting subscription plan from cache")
+		p.log.WithField("redis", err).Error("error dropping subscription plans cache")
 	}
 
-	return p.sql.New().Filter(p.filters).Delete(ctx)
+	return err
 }
 
-func (p *subPlans) Count(ctx context.Context) (int, error) {
+func (p *subPlan) Count(ctx context.Context) (int, error) {
 	return p.sql.New().Filter(p.filters).Count(ctx)
 }
 
-func (p *subPlans) Filter(filters map[string]any) SubPlans {
+func (p *subPlan) Filter(filters map[string]any) SubPlan {
 	p.filters = filters
 	return p
 }
 
-func (p *subPlans) Page(limit, offset uint64) SubPlans {
+func (p *subPlan) Page(limit, offset uint64) SubPlan {
 	p.limit = int64(limit)
 	p.skip = int64(offset)
 	return p
+}
+
+func (p *subPlan) cacheKey() string {
+	key := cache.SubscriptionPlansCollection
+	if len(p.filters) > 0 {
+		key += fmt.Sprintf(":filters=%v", p.filters)
+	}
+	key += fmt.Sprintf(":limit=%d:skip=%d", p.limit, p.skip)
+	return key
 }

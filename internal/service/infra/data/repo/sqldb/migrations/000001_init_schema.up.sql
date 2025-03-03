@@ -11,6 +11,8 @@ CREATE TABLE subscription_plans (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     type_id UUID NOT NULL REFERENCES subscription_types(id) ON DELETE CASCADE,
     price DECIMAL(10,2) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
     billing_interval INTEGER NOT NULL,
     billing_interval_unit VARCHAR(10) NOT NULL CHECK (billing_interval_unit IN ('once','day','week','month','year')),
     currency VARCHAR(3) NOT NULL DEFAULT 'USD',

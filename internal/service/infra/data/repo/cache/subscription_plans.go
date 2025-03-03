@@ -2,192 +2,89 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 	"github.com/redis/go-redis/v9"
 )
 
-type SubPlans interface {
-	Add(ctx context.Context, subPlan models.SubscriptionPlan) error
-	GetByID(ctx context.Context, planID string) (*models.SubscriptionPlan, error)
-	GetByTypeID(ctx context.Context, TypeID string) ([]models.SubscriptionPlan, error)
-	DeleteByID(ctx context.Context, planID string) error
-	DeleteByType(ctx context.Context, typeID string) error
+const SubscriptionPlansCollection = "subscription_plans"
+
+type SubPlanQueryCache interface {
+	Set(ctx context.Context, key string, plans []models.SubscriptionPlan) error
+	Get(ctx context.Context, key string) ([]models.SubscriptionPlan, error)
+	Delete(ctx context.Context, key string) error
+	Drop(ctx context.Context) error
 }
 
-type subPlans struct {
-	client *redis.Client
+type subPlanQueryCache struct {
+	client   *redis.Client
+	lifeTime time.Duration
 }
 
-func NewSubPlans(client *redis.Client) SubPlans {
-	return &subPlans{
-		client: client,
+func NewSubPlanQueryCache(client *redis.Client, lifeTime time.Duration) SubPlanQueryCache {
+	return &subPlanQueryCache{
+		client:   client,
+		lifeTime: lifeTime,
 	}
 }
 
-func (p *subPlans) Add(ctx context.Context, subPlan models.SubscriptionPlan) error {
-	subPlanKey := fmt.Sprintf("subscription_plan:id:%s", subPlan.ID.String())
-	subTypeKey := fmt.Sprintf("subscription_plan:type_id:%s", subPlan.TypeID.String())
-
-	data := map[string]interface{}{
-		"type_id":               subPlan.TypeID.String(),
-		"price":                 subPlan.Price,
-		"billing_interval":      subPlan.BillingInterval,
-		"billing_interval_unit": subPlan.BillingIntervalUnit,
-		"currency":              subPlan.Currency,
-		"created_at":            subPlan.CreatedAt.Format(time.RFC3339),
+func (c *subPlanQueryCache) Set(ctx context.Context, key string, plans []models.SubscriptionPlan) error {
+	data, err := json.Marshal(plans)
+	if err != nil {
+		return fmt.Errorf("failed to marshal subscription plans: %w", err)
+	}
+	if err := c.client.Set(ctx, key, data, c.lifeTime).Err(); err != nil {
+		return fmt.Errorf("failed to set subscription plans in cache: %w", err)
 	}
 
-	if err := p.client.HSet(ctx, subPlanKey, data).Err(); err != nil {
-		return fmt.Errorf("error adding subscription plan to Redis: %w", err)
-	}
-
-	if err := p.client.SAdd(ctx, subTypeKey, subPlan.ID.String()).Err(); err != nil {
-		return fmt.Errorf("error adding subscription plan ID to set: %w", err)
+	if c.lifeTime > 0 {
+		pipe := c.client.Pipeline()
+		pipe.Expire(ctx, key, c.lifeTime)
+		_, err := pipe.Exec(ctx)
+		if err != nil && err != redis.Nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (p *subPlans) GetByID(ctx context.Context, planID string) (*models.SubscriptionPlan, error) {
-	IDKey := fmt.Sprintf("subscription_plan:id:%s", planID)
-	vals, err := p.client.HGetAll(ctx, IDKey).Result()
+func (c *subPlanQueryCache) Get(ctx context.Context, key string) ([]models.SubscriptionPlan, error) {
+	data, err := c.client.Get(ctx, key).Result()
 	if err != nil {
-		return nil, fmt.Errorf("error getting subscription plan from Redis: %w", err)
+		if err == redis.Nil {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get subscription plans from cache: %w", err)
 	}
-
-	return parseSubPlan(planID, vals)
+	var plans []models.SubscriptionPlan
+	if err := json.Unmarshal([]byte(data), &plans); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal subscription plans: %w", err)
+	}
+	return plans, nil
 }
 
-func (p *subPlans) GetByTypeID(ctx context.Context, TypeID string) ([]models.SubscriptionPlan, error) {
-	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", TypeID)
-	IDs, err := p.client.SMembers(ctx, TypeKey).Result()
-	if err != nil {
-		return nil, fmt.Errorf("error getting subscription plan from Redis: %w", err)
+func (c *subPlanQueryCache) Delete(ctx context.Context, key string) error {
+	if err := c.client.Del(ctx, key).Err(); err != nil {
+		return fmt.Errorf("failed to delete cache for key %s: %w", key, err)
 	}
-
-	if len(IDs) == 0 {
-		return nil, nil
-	}
-
-	var subPlans []models.SubscriptionPlan
-	for _, ID := range IDs {
-		vals, err := p.client.HGetAll(ctx, ID).Result()
-		if err != nil {
-			return nil, fmt.Errorf("error getting subscription plan: %w", err)
-		}
-		subPlan, err := parseSubPlan(ID, vals)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing subscription plan: %w", err)
-		}
-		subPlans = append(subPlans, *subPlan)
-	}
-
-	return subPlans, nil
-}
-
-func (p *subPlans) DeleteByID(ctx context.Context, planID string) error {
-	IDKey := fmt.Sprintf("subscription_plan:id:%s", planID)
-
-	subPlan, err := p.GetByID(ctx, planID)
-	if err != nil {
-		return err
-	}
-	if subPlan == nil {
-		return redis.Nil
-	}
-
-	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", subPlan.TypeID.String())
-
-	exists, err := p.client.Exists(ctx, IDKey).Result()
-	if err != nil {
-		return fmt.Errorf("error checking existence in Redis: %w", err)
-	}
-	if exists == 0 {
-		return redis.Nil
-	}
-
-	if err := p.client.Del(ctx, IDKey).Err(); err != nil {
-		return fmt.Errorf("error deleting subscription plan by ID: %w", err)
-	}
-
-	if err := p.client.SRem(ctx, TypeKey, planID).Err(); err != nil {
-		return fmt.Errorf("error removing planID from type set: %w", err)
-	}
-
 	return nil
 }
 
-func (p *subPlans) DeleteByType(ctx context.Context, typeID string) error {
-	TypeKey := fmt.Sprintf("subscription_plan:type_id:%s", typeID)
-
-	planIDs, err := p.client.SMembers(ctx, TypeKey).Result()
+func (c *subPlanQueryCache) Drop(ctx context.Context) error {
+	pattern := fmt.Sprintf("%s:*", SubscriptionPlansCollection)
+	keys, err := c.client.Keys(ctx, pattern).Result()
 	if err != nil {
-		return fmt.Errorf("error getting plan IDs from type set: %w", err)
+		return fmt.Errorf("error fetching keys with pattern %s: %w", pattern, err)
 	}
-
-	if len(planIDs) == 0 {
+	if len(keys) == 0 {
 		return nil
 	}
-
-	for _, planID := range planIDs {
-		IDKey := fmt.Sprintf("subscription_plan:id:%s", planID)
-		if err := p.client.Del(ctx, IDKey).Err(); err != nil {
-			return fmt.Errorf("error deleting subscription plan with id %s: %w", planID, err)
-		}
+	if err := c.client.Del(ctx, keys...).Err(); err != nil {
+		return fmt.Errorf("failed to delete keys with pattern %s: %w", pattern, err)
 	}
-
-	if err := p.client.Del(ctx, TypeKey).Err(); err != nil {
-		return fmt.Errorf("error deleting type set for type %s: %w", typeID, err)
-	}
-
 	return nil
-}
-
-func parseSubPlan(ID string, vals map[string]string) (*models.SubscriptionPlan, error) {
-	createdAt, err := time.Parse(time.RFC3339, vals["created_at"])
-	if err != nil {
-		return nil, fmt.Errorf("error parsing created_at: %w", err)
-	}
-
-	planID, err := uuid.Parse(ID)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing ID: %w", err)
-	}
-
-	typeID, err := uuid.Parse(vals["type_id"])
-	if err != nil {
-		return nil, fmt.Errorf("error parsing type_id: %w", err)
-	}
-
-	price, err := strconv.ParseFloat(vals["price"], 64)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing price: %w", err)
-	}
-
-	billingInterval64, err := strconv.ParseInt(vals["billing_interval"], 10, 8) // Основание 10, битность 8
-	if err != nil {
-		return nil, fmt.Errorf("error parsing billing_interval: %w", err)
-	}
-
-	billingIntervalUnit, err := models.ParseBillingIntervalUnit(vals["billing_interval_unit"])
-	if err != nil {
-		return nil, fmt.Errorf("error parsing billing_interval_unit, %s", err)
-	}
-
-	subPlan := models.SubscriptionPlan{
-		ID:                  planID,
-		TypeID:              typeID,
-		Price:               price,
-		BillingInterval:     int8(billingInterval64),
-		BillingIntervalUnit: billingIntervalUnit,
-		Currency:            vals["currency"],
-		CreatedAt:           createdAt,
-	}
-
-	return &subPlan, nil
 }

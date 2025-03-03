@@ -16,7 +16,7 @@ type Data struct {
 	BillingPlan    repo.BillingPlan
 	Transactions   repo.Transactions
 	PaymentMethods repo.PaymentMethods
-	SubPlans       repo.SubPlans
+	SubPlans       repo.SubPlan
 	SubTypes       repo.SubTypes
 	Subscription   repo.Subscription
 }
@@ -40,7 +40,6 @@ func NewData(cfg *config.Config, log *logrus.Logger) (*Data, error) {
 	sqlSubTypes := sqldb.NewSubTypes(db)
 	sqlSub := sqldb.NewSubscriptions(db)
 
-	redisPM := cache.NewPayMethods(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 	redisPlans := cache.NewSubPlans(redisClient)
 	redisSubs := cache.NewSubscriptions(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 	redisTypes := cache.NewSubTypes(redisClient)
@@ -48,7 +47,7 @@ func NewData(cfg *config.Config, log *logrus.Logger) (*Data, error) {
 	return &Data{
 		BillingPlan:    repo.NewBillingPlan(sqlBP),
 		Transactions:   repo.NewTransactions(sqlTrans),
-		PaymentMethods: repo.NewPaymentMethods(sqlPM, redisPM, log),
+		PaymentMethods: repo.NewPaymentMethods(sqlPM, log),
 		SubPlans:       repo.NewSubPlans(sqlSubPlans, redisPlans, log),
 		SubTypes:       repo.NewSubTypes(sqlSubTypes, redisTypes, log),
 		Subscription:   repo.NewSubscription(sqlSub, redisSubs, log),

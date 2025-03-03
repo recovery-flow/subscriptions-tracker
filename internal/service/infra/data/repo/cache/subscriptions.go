@@ -42,7 +42,7 @@ func (s *subscriptions) Add(ctx context.Context, sub models.Subscription) error 
 	}
 
 	if err := s.client.HSet(ctx, subKey, data).Err(); err != nil {
-		return fmt.Errorf("error adding subscription to Redis: %w", err)
+		return err
 	}
 
 	if s.lifeTime > 0 {
@@ -50,7 +50,7 @@ func (s *subscriptions) Add(ctx context.Context, sub models.Subscription) error 
 		pipe.Expire(ctx, subKey, s.lifeTime)
 		_, err := pipe.Exec(ctx)
 		if err != nil && err != redis.Nil {
-			return fmt.Errorf("error setting expiration for keys: %w", err)
+			return err
 		}
 	}
 
@@ -61,7 +61,7 @@ func (s *subscriptions) Get(ctx context.Context, userID string) (*models.Subscri
 	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
 	vals, err := s.client.HGetAll(ctx, subKey).Result()
 	if err != nil {
-		return nil, fmt.Errorf("error getting subscription from Redis: %w", err)
+		return nil, err
 	}
 	if len(vals) == 0 {
 		return nil, redis.Nil
@@ -73,7 +73,7 @@ func (s *subscriptions) Delete(ctx context.Context, userID string) error {
 	subKey := fmt.Sprintf("subscription:user_id:%s", userID)
 
 	if err := s.client.Del(ctx, subKey).Err(); err != nil {
-		return fmt.Errorf("error deleting subscription key: %w", err)
+		return err
 	}
 
 	return nil

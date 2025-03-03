@@ -11,6 +11,8 @@ type SubscriptionPlan struct {
 	ID                  uuid.UUID           `json:"id"`
 	TypeID              uuid.UUID           `json:"type_id"`
 	Price               float64             `json:"price"`
+	Name                string              `json:"name"`
+	Description         string              `json:"description"`
 	BillingInterval     int8                `json:"billing_interval"`
 	BillingIntervalUnit BillingIntervalUnit `json:"billing_interval_unit"`
 	Currency            string              `json:"currency"`
