@@ -13,7 +13,7 @@ import (
 const SubscriptionCollection = "subscription"
 
 type Subscriptions interface {
-	Add(ctx context.Context, sub models.Subscription) error
+	Set(ctx context.Context, sub models.Subscription) error
 	Get(ctx context.Context, userID string) (*models.Subscription, error)
 	Delete(ctx context.Context, userID string) error
 	Drop(ctx context.Context) error
@@ -31,7 +31,7 @@ func NewSubscriptions(client *redis.Client, lifetime time.Duration) Subscription
 	}
 }
 
-func (s *subscriptions) Add(ctx context.Context, sub models.Subscription) error {
+func (s *subscriptions) Set(ctx context.Context, sub models.Subscription) error {
 	subKey := fmt.Sprintf("%s:user_id:%s", SubscriptionCollection, sub.UserID.String())
 
 	data := map[string]interface{}{

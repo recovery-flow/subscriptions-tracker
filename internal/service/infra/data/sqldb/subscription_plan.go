@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -62,7 +63,8 @@ func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) erro
 		"billing_interval_unit": plan.BillingIntervalUnit,
 		"currency":              plan.Currency,
 		"status":                plan.Status,
-		"created_at":            plan.CreatedAt,
+		"created_at":            time.Now().UTC(),
+		"updated_at":            time.Now().UTC(),
 	}
 
 	query, args, err := p.inserter.SetMap(values).ToSql()
@@ -77,6 +79,7 @@ func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) erro
 }
 
 func (p *subPlan) Update(ctx context.Context, updates map[string]any) error {
+	updates["updated_at"] = time.Now().UTC()
 	query, args, err := p.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for subscription_plans: %w", err)
@@ -123,6 +126,7 @@ func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 			&plan.BillingIntervalUnit,
 			&plan.Currency,
 			&plan.Status,
+			&plan.UpdatedAt,
 			&plan.CreatedAt,
 		)
 		if err != nil {
@@ -161,6 +165,7 @@ func (p *subPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
 		&plan.BillingIntervalUnit,
 		&plan.Currency,
 		&plan.Status,
+		&plan.UpdatedAt,
 		&plan.CreatedAt,
 	)
 	if err != nil {

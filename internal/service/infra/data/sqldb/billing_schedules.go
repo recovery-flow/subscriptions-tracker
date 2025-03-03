@@ -54,7 +54,8 @@ func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule
 		"user_id":        bs.UserID,
 		"scheduled_date": bs.ScheduledDate,
 		"status":         bs.Status,
-		"created_at":     bs.CreatedAt,
+		"created_at":     time.Now().UTC(),
+		"updated_at":     time.Now().UTC(),
 	}
 
 	if bs.AttemptedDate != nil {
@@ -73,6 +74,7 @@ func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule
 }
 
 func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) error {
+	updates["updated_at"] = time.Now().UTC()
 	query, args, err := b.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for billing_schedules: %w", err)
@@ -120,6 +122,7 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 			&attemptedDate,
 			&bs.Status,
 			&bs.CreatedAt,
+			&bs.UpdatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scanning billing_schedule row: %w", err)
@@ -159,6 +162,7 @@ func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, er
 		&attemptedDate,
 		&bs.Status,
 		&bs.CreatedAt,
+		&bs.UpdatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

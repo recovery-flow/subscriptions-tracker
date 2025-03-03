@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 )
 
@@ -22,6 +24,9 @@ type Domain interface {
 
 	DeactivateSubType(ctx context.Context, ID uuid.UUID) error
 	DeactivateSubPlan(ctx context.Context, ID uuid.UUID) error
+
+	GetSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error)
+	CreateSubscription(ctx context.Context, sub models.Subscription) (*models.Subscription, error)
 }
 
 type domain struct {
@@ -38,6 +43,7 @@ func NewDomain(infra *infra.Infra, log *logrus.Logger) (Domain, error) {
 
 func (d *domain) CreateSubType(ctx context.Context, subType models.SubscriptionType) error {
 	subType.Status = "inactive"
+
 	err := d.Infra.Data.SQL.Types.Insert(ctx, subType)
 	if err != nil {
 		return err
@@ -53,6 +59,7 @@ func (d *domain) CreateSubType(ctx context.Context, subType models.SubscriptionT
 
 func (d *domain) CreateSubPlan(ctx context.Context, plan models.SubscriptionPlan) error {
 	plan.Status = "inactive"
+
 	err := d.Infra.Data.SQL.Plans.Insert(ctx, plan)
 	if err != nil {
 		return err
@@ -208,4 +215,39 @@ func (d *domain) DeactivateSubPlan(ctx context.Context, ID uuid.UUID) error {
 
 		return nil
 	})
+}
+
+func (d *domain) CreateSubscription(ctx context.Context, sub models.Subscription) (*models.Subscription, error) {
+	err := d.Infra.Data.SQL.Subscriptions.Insert(ctx, sub)
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.Infra.Data.Cache.Subscriptions.Set(ctx, sub)
+	if err != nil {
+		d.log.WithError(err).Error("failed to set subscription to cache")
+	}
+
+	return &sub, nil
+}
+
+func (d *domain) GetSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error) {
+	res, err := d.Infra.Data.Cache.Subscriptions.Get(ctx, userID.String())
+	if err != nil || !errors.Is(err, redis.Nil) {
+		d.log.WithError(err).Error("failed to get user subscription from cache")
+	} else if res != nil {
+		return res, nil
+	}
+
+	res, err = d.Infra.Data.SQL.Subscriptions.Filter(map[string]any{"user_id": userID.String()}).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.Infra.Data.Cache.Subscriptions.Set(ctx, *res)
+	if err != nil || !errors.Is(err, redis.Nil) {
+		d.log.WithError(err).Error("failed to set user subscription to cache")
+	}
+
+	return res, nil
 }

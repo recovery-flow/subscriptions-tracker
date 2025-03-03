@@ -1,23 +1,20 @@
 package infra
 
 import (
-	"github.com/recovery-flow/rerabbit"
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/events"
 	"github.com/sirupsen/logrus"
 )
 
 type Infra struct {
-	Rabbit rerabbit.RabbitBroker
+	Kafka events.Kafka
 
 	Data *data.Data
 }
 
 func NewInfra(cfg *config.Config, log *logrus.Logger) (*Infra, error) {
-	eve, err := rerabbit.NewBroker(cfg.Rabbit.URL)
-	if err != nil {
-		return nil, err
-	}
+	eve := events.NewBroker(cfg)
 
 	db, err := data.NewData(cfg, log)
 	if err != nil {
@@ -25,7 +22,7 @@ func NewInfra(cfg *config.Config, log *logrus.Logger) (*Infra, error) {
 	}
 
 	return &Infra{
-		Rabbit: eve,
-		Data:   db,
+		Kafka: eve,
+		Data:  db,
 	}, nil
 }

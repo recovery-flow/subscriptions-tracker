@@ -12,6 +12,7 @@ type SubscriptionType struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	Status      StatusType `json:"status"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 	CreatedAt   time.Time  `json:"created_at"`
 }
 

@@ -17,6 +17,7 @@ type SubscriptionPlan struct {
 	BillingIntervalUnit BillingIntervalUnit `json:"billing_interval_unit"`
 	Currency            string              `json:"currency"`
 	Status              StatusPlan          `json:"status"`
+	UpdatedAt           time.Time           `json:"updated_at"`
 	CreatedAt           time.Time           `json:"created_at"`
 }
 

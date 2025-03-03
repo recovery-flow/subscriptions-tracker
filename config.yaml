@@ -16,6 +16,18 @@ rabbit:
   password: "Test@1234"
   exchange: "re-news.subscription-tracker"
 
+kafka:
+  brokers:
+    - "localhost:9092"
+    - "localhost:9093"
+  topic: "subscription-events"
+  group_id: "subscriptions-group"
+  dial_timeout: 10s
+  read_timeout: 10s
+  write_timeout: 10s
+  required_acks: "all"
+
+
 database:
   sql:
     url: "postgresql://postgres:postgres@localhost:5556/postgres?sslmode=disable"

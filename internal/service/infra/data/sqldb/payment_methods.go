@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -58,7 +59,7 @@ func (p *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) er
 		"type":           pm.Type,
 		"provider_token": pm.ProviderToken,
 		"is_default":     pm.IsDefault,
-		"created_at":     pm.CreatedAt,
+		"created_at":     time.Now().UTC(),
 	}
 
 	query, args, err := p.inserter.SetMap(values).ToSql()

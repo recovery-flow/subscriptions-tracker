@@ -24,7 +24,7 @@ type Subscriptions interface {
 
 	Filter(filters map[string]any) Subscriptions
 
-	//TODO: Add FilterStartDate, FilterEndDate, FilterCreatedAt, FilterUpdatedAt
+	//TODO: Set FilterStartDate, FilterEndDate, FilterCreatedAt, FilterUpdatedAt
 
 	Page(limit, offset uint64) Subscriptions
 }
@@ -63,8 +63,8 @@ func (s *subscriptions) Insert(ctx context.Context, sub models.Subscription) err
 		"availability":      sub.Availability,
 		"start_date":        sub.StartDate,
 		"end_date":          sub.EndDate,
-		"created_at":        sub.CreatedAt,
-		"updated_at":        sub.UpdatedAt,
+		"created_at":        time.Now().UTC(),
+		"updated_at":        time.Now().UTC(),
 	}).ToSql()
 
 	fmt.Printf("query: %s, args: %v", query, args)
@@ -82,6 +82,7 @@ func (s *subscriptions) Insert(ctx context.Context, sub models.Subscription) err
 }
 
 func (s *subscriptions) Update(ctx context.Context, updates map[string]any) error {
+	updates["updated_at"] = time.Now().UTC()
 	query, args, err := s.updater.
 		SetMap(updates).
 		ToSql()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -60,7 +61,8 @@ func (t *subTypes) Insert(ctx context.Context, sub models.SubscriptionType) erro
 		"name":        sub.Name,
 		"description": sub.Description,
 		"status":      sub.Status,
-		"created_at":  sub.CreatedAt,
+		"updated_at":  time.Now().UTC(),
+		"created_at":  time.Now().UTC(),
 	}).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building insert query for subscription_types: %w", err)
@@ -74,6 +76,7 @@ func (t *subTypes) Insert(ctx context.Context, sub models.SubscriptionType) erro
 }
 
 func (t *subTypes) Update(ctx context.Context, updates map[string]any) error {
+	updates["updated_at"] = time.Now().UTC()
 	query, args, err := t.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building update query for subscription_types: %w", err)
@@ -119,6 +122,7 @@ func (t *subTypes) Select(ctx context.Context) ([]models.SubscriptionType, error
 			&st.Name,
 			&st.Description,
 			&st.Status,
+			&st.UpdatedAt,
 			&st.CreatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("error scanning subscription_type row: %w", err)
@@ -153,6 +157,7 @@ func (t *subTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
 		&st.Name,
 		&st.Description,
 		&st.Status,
+		&st.UpdatedAt,
 		&st.CreatedAt,
 	)
 	if err != nil {

@@ -27,6 +27,16 @@ type JWTConfig struct {
 	} `mapstructure:"access_token"`
 }
 
+type KafkaConfig struct {
+	Brokers      []string      `mapstructure:"brokers"`
+	Topic        string        `mapstructure:"topic"`
+	GroupID      string        `mapstructure:"group_id"`
+	DialTimeout  time.Duration `mapstructure:"dial_timeout"`
+	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout time.Duration `mapstructure:"write_timeout"`
+	RequiredAcks string        `mapstructure:"required_acks"`
+}
+
 type DatabaseConfig struct {
 	SQL struct {
 		URL string `mapstructure:"url"`
@@ -56,7 +66,7 @@ type SwaggerConfig struct {
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
-	Rabbit   RabbitConfig   `mapstructure:"rabbit"`
+	Kafka    KafkaConfig    `mapstructure:"kafka"`
 	Database DatabaseConfig `mapstructure:"database"`
 	Swagger  SwaggerConfig  `mapstructure:"swagger"`
 }
