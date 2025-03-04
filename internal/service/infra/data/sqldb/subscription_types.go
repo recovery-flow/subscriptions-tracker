@@ -25,7 +25,7 @@ type SubTypes interface {
 
 	Filter(filters map[string]any) SubTypes
 
-	Transaction(func() error) error
+	Transaction(fn func(ctx context.Context) error) error
 
 	Page(limit, offset uint64) SubTypes
 }
@@ -68,7 +68,11 @@ func (t *subTypes) Insert(ctx context.Context, sub models.SubscriptionType) erro
 		return fmt.Errorf("error building insert query for subscription_types: %w", err)
 	}
 
-	_, err = t.db.ExecContext(ctx, query, args...)
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = t.db.ExecContext(ctx, query, args...)
+	}
 	if err != nil {
 		return fmt.Errorf("error inserting subscription_type: %w", err)
 	}
@@ -82,7 +86,11 @@ func (t *subTypes) Update(ctx context.Context, updates map[string]any) error {
 		return fmt.Errorf("error building update query for subscription_types: %w", err)
 	}
 
-	_, err = t.db.ExecContext(ctx, query, args...)
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = t.db.ExecContext(ctx, query, args...)
+	}
 	if err != nil {
 		return fmt.Errorf("error updating subscription_type: %w", err)
 	}
@@ -95,7 +103,11 @@ func (t *subTypes) Delete(ctx context.Context) error {
 		return fmt.Errorf("error building delete query for subscription_types: %w", err)
 	}
 
-	_, err = t.db.ExecContext(ctx, query, args...)
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = t.db.ExecContext(ctx, query, args...)
+	}
 	if err != nil {
 		return fmt.Errorf("error deleting subscription_type: %w", err)
 	}
@@ -187,7 +199,7 @@ func (t *subTypes) Filter(filters map[string]any) SubTypes {
 	return t
 }
 
-func (t *subTypes) Transaction(f func() error) error {
+func (t *subTypes) Transaction(fn func(ctx context.Context) error) error {
 	ctx := context.Background()
 
 	tx, err := t.db.BeginTx(ctx, nil)
@@ -195,7 +207,9 @@ func (t *subTypes) Transaction(f func() error) error {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 
-	if err := f(); err != nil {
+	ctxWithTx := context.WithValue(ctx, txKey, tx)
+
+	if err := fn(ctxWithTx); err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
 			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
 		}

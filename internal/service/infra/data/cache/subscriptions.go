@@ -37,7 +37,7 @@ func (s *subscriptions) Set(ctx context.Context, sub models.Subscription) error 
 	data := map[string]interface{}{
 		"plan_id":           sub.PlanID.String(),
 		"payment_method_id": sub.PaymentMethodID.String(),
-		"status":            sub.State,
+		"status":            sub.Status,
 		"start_date":        sub.StartDate.Format(time.RFC3339),
 		"end_date":          sub.EndDate.Format(time.RFC3339),
 		"created_at":        sub.CreatedAt.Format(time.RFC3339),
@@ -133,7 +133,7 @@ func parseSubscription(userID string, vals map[string]string) (*models.Subscript
 		return nil, fmt.Errorf("error parsing user_id: %w", err)
 	}
 
-	status, err := models.ParseSubscriptionState(vals["status"])
+	status, err := models.ParseSubscriptionStatus(vals["status"])
 	if err != nil {
 		return nil, fmt.Errorf("error parsing status: %w", err)
 	}
@@ -142,7 +142,7 @@ func parseSubscription(userID string, vals map[string]string) (*models.Subscript
 		UserID:          uid,
 		PlanID:          planID,
 		PaymentMethodID: paymentMethodID,
-		State:           status,
+		Status:          status,
 		StartDate:       startDate,
 		EndDate:         endDate,
 		CreatedAt:       createdAt,

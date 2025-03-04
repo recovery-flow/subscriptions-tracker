@@ -8,26 +8,26 @@ import (
 )
 
 type Subscription struct {
-	UserID          uuid.UUID         `json:"user_id"`
-	PlanID          uuid.UUID         `json:"plan_id"`
-	PaymentMethodID uuid.UUID         `json:"payment_method_id"`
-	State           SubscriptionState `json:"state"`
-	Availability    PlanAvailability  `json:"availability"`
-	StartDate       time.Time         `json:"start_date"`
-	EndDate         time.Time         `json:"end_date"`
-	CreatedAt       time.Time         `json:"created_at"`
-	UpdatedAt       time.Time         `json:"updated_at"`
+	UserID          uuid.UUID          `json:"user_id"`
+	PlanID          uuid.UUID          `json:"plan_id"`
+	PaymentMethodID uuid.UUID          `json:"payment_method_id"`
+	Status          SubscriptionStatus `json:"status"`
+	Availability    PlanAvailability   `json:"availability"`
+	StartDate       time.Time          `json:"start_date"`
+	EndDate         time.Time          `json:"end_date"`
+	CreatedAt       time.Time          `json:"created_at"`
+	UpdatedAt       time.Time          `json:"updated_at"`
 }
 
-type SubscriptionState string
+type SubscriptionStatus string
 
 const (
-	SubscriptionStatusActive   SubscriptionState = "active"
-	SubscriptionStatusInactive SubscriptionState = "inactive"
-	SubscriptionStatusExpired  SubscriptionState = "expired"
+	SubscriptionStatusActive   SubscriptionStatus = "active"
+	SubscriptionStatusInactive SubscriptionStatus = "inactive"
+	SubscriptionStatusExpired  SubscriptionStatus = "expired"
 )
 
-func ParseSubscriptionState(status string) (SubscriptionState, error) {
+func ParseSubscriptionStatus(status string) (SubscriptionStatus, error) {
 	switch status {
 	case "active":
 		return SubscriptionStatusActive, nil

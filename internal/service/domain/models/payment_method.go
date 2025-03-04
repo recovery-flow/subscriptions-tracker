@@ -19,9 +19,9 @@ type PaymentMethod struct {
 type PayType string
 
 const (
-	PayTypeGoogle  PayType = "google"
-	PayTypeApple   PayType = "apple"
-	PayTypeSamsung PayType = "samsung"
+	PayTypeGoogle  PayType = "google_pay"
+	PayTypeApple   PayType = "apple_pay"
+	PayTypeSamsung PayType = "samsung_pay"
 	PayTypePaypal  PayType = "paypal"
 )
 

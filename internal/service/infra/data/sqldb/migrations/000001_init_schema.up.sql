@@ -5,6 +5,7 @@ CREATE TABLE subscription_types (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive')),
+    updated_at TIMESTAMP DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -18,8 +19,24 @@ CREATE TABLE subscription_plans (
     billing_interval_unit VARCHAR(10) NOT NULL CHECK (billing_interval_unit IN ('once','day','week','month','year')),
     currency VARCHAR(3) NOT NULL DEFAULT 'USD',
     status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive')),
+    updated_at TIMESTAMP DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE subscriptions (
+   user_id UUID PRIMARY KEY,
+   plan_id UUID NOT NULL REFERENCES subscription_plans (id),
+   payment_method_id UUID NOT NULL,
+   status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive', 'expired')),
+   availability VARCHAR(20) NOT NULL CHECK (availability IN ('available', 'deprecated', 'removed')),
+   start_date TIMESTAMP NOT NULL DEFAULT NOW(),
+   end_date TIMESTAMP NOT NULL,
+   updated_at TIMESTAMP DEFAULT NOW(),
+   created_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_subscriptions_status ON subscriptions (status);
+CREATE INDEX idx_subscriptions_end_date ON subscriptions (end_date);
 
 CREATE INDEX idx_subscription_plans_billing_interval_unit ON subscription_plans (billing_interval_unit);
 
@@ -33,20 +50,6 @@ CREATE TABLE payment_methods (
 );
 
 CREATE INDEX idx_payment_methods_type ON payment_methods (type);
-
-CREATE TABLE subscriptions (
-    user_id UUID PRIMARY KEY,
-    plan_id UUID NOT NULL REFERENCES subscription_schedule (id),
-    payment_method_id UUID NOT NULL REFERENCES payment_methods(id),
-    status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive', 'expired')),
-    start_date TIMESTAMP NOT NULL DEFAULT NOW(),
-    end_date TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT NOW(),
-    created_at TIMESTAMP DEFAULT NOW() NOT NULL
-);
-
-CREATE INDEX idx_subscriptions_status ON subscriptions (status);
-CREATE INDEX idx_subscriptions_end_date ON subscriptions (end_date);
 
 CREATE TABLE subscription_transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

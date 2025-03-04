@@ -24,11 +24,11 @@ generate-sqlc:
 
 migrate-up:
 	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscription-tracker/main.go
-	migrate -path internal/service/infra/data/repo/sqldb/migrations -database $(DB_URL) -verbose up
+	migrate -path internal/service/infra/data/sqldb/migrations -database $(DB_URL) -verbose up
 
 migrate-down:
 	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscription-tracker/main.go
-	migrate -path internal/service/infra/data/repo/sqldb/migrations -database $(DB_URL) -verbose down
+	migrate -path internal/service/infra/data/sqldb/migrations -database $(DB_URL) -verbose down
 
 run-server:
 	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscription-tracker/main.go

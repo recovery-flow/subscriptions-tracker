@@ -13,13 +13,19 @@ import (
 const billingSchedulesTable = "billing_schedules"
 
 type BillingSchedules interface {
+	New() BillingSchedules
+
 	Insert(ctx context.Context, bs models.BillingSchedule) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 	Select(ctx context.Context) ([]models.BillingSchedule, error)
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.BillingSchedule, error)
+
 	Filter(filters map[string]any) BillingSchedules
+
+	Transaction(fn func(ctx context.Context) error) error
+
 	Page(limit, offset uint64) BillingSchedules
 }
 
@@ -67,7 +73,12 @@ func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule
 		return fmt.Errorf("building insert query for billing_schedules: %w", err)
 	}
 
-	if _, err := b.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = b.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("inserting billing_schedule: %w", err)
 	}
 	return nil
@@ -80,7 +91,12 @@ func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) e
 		return fmt.Errorf("building update query for billing_schedules: %w", err)
 	}
 
-	if _, err := b.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = b.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("updating billing_schedule: %w", err)
 	}
 	return nil
@@ -92,7 +108,12 @@ func (b *billingSchedules) Delete(ctx context.Context) error {
 		return fmt.Errorf("building delete query for billing_schedules: %w", err)
 	}
 
-	if _, err := b.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = b.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("deleting billing_schedule: %w", err)
 	}
 	return nil
@@ -113,7 +134,7 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 	var results []models.BillingSchedule
 	for rows.Next() {
 		var bs models.BillingSchedule
-		var attemptedDate *time.Time
+		var attemptedDate sql.NullTime
 
 		err := rows.Scan(
 			&bs.ID,
@@ -127,7 +148,13 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 		if err != nil {
 			return nil, fmt.Errorf("scanning billing_schedule row: %w", err)
 		}
-		bs.AttemptedDate = attemptedDate
+
+		if attemptedDate.Valid {
+			bs.AttemptedDate = &attemptedDate.Time
+		} else {
+			bs.AttemptedDate = nil
+		}
+
 		results = append(results, bs)
 	}
 	return results, nil
@@ -173,6 +200,30 @@ func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, er
 	bs.AttemptedDate = attemptedDate
 
 	return &bs, nil
+}
+
+func (b *billingSchedules) Transaction(fn func(ctx context.Context) error) error {
+	ctx := context.Background()
+
+	tx, err := b.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	ctxWithTx := context.WithValue(ctx, txKey, tx)
+
+	if err := fn(ctxWithTx); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
+		}
+		return fmt.Errorf("transaction failed: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
 }
 
 func (b *billingSchedules) Filter(filters map[string]any) BillingSchedules {

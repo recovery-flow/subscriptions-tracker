@@ -10,6 +10,10 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 )
 
+type txKeyType struct{}
+
+var txKey = txKeyType{}
+
 const subscriptionTable = "subscriptions"
 
 type Subscriptions interface {
@@ -23,6 +27,8 @@ type Subscriptions interface {
 	Get(ctx context.Context) (*models.Subscription, error)
 
 	Filter(filters map[string]any) Subscriptions
+
+	Transaction(fn func(ctx context.Context) error) error
 
 	//TODO: Set FilterStartDate, FilterEndDate, FilterCreatedAt, FilterUpdatedAt
 
@@ -59,7 +65,7 @@ func (s *subscriptions) Insert(ctx context.Context, sub models.Subscription) err
 		"user_id":           sub.UserID,
 		"plan_id":           sub.PlanID,
 		"payment_method_id": sub.PaymentMethodID,
-		"state":             sub.State,
+		"status":            sub.Status,
 		"availability":      sub.Availability,
 		"start_date":        sub.StartDate,
 		"end_date":          sub.EndDate,
@@ -67,13 +73,16 @@ func (s *subscriptions) Insert(ctx context.Context, sub models.Subscription) err
 		"updated_at":        time.Now().UTC(),
 	}).ToSql()
 
-	fmt.Printf("query: %s, args: %v", query, args)
-	time.Sleep(1 * time.Second)
 	if err != nil {
 		return fmt.Errorf("error building insert query: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, query, args...)
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = s.db.ExecContext(ctx, query, args...)
+	}
+
 	if err != nil {
 		return fmt.Errorf("error inserting subscription: %w", err)
 	}
@@ -90,7 +99,11 @@ func (s *subscriptions) Update(ctx context.Context, updates map[string]any) erro
 		return fmt.Errorf("error building update query: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, query, args...)
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = s.db.ExecContext(ctx, query, args...)
+	}
 	if err != nil {
 		return fmt.Errorf("error updating subscription: %w", err)
 	}
@@ -104,7 +117,11 @@ func (s *subscriptions) Delete(ctx context.Context) error {
 		return fmt.Errorf("error building delete query: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, query, args...)
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = s.db.ExecContext(ctx, query, args...)
+	}
 	if err != nil {
 		return fmt.Errorf("error deleting subscription: %w", err)
 	}
@@ -146,7 +163,7 @@ func (s *subscriptions) Select(ctx context.Context) ([]models.Subscription, erro
 			&sub.UserID,
 			&sub.PlanID,
 			&sub.PaymentMethodID,
-			&sub.State,
+			&sub.Status,
 			&sub.Availability,
 			&sub.StartDate,
 			&sub.EndDate,
@@ -173,7 +190,7 @@ func (s *subscriptions) Get(ctx context.Context) (*models.Subscription, error) {
 		&sub.UserID,
 		&sub.PlanID,
 		&sub.PaymentMethodID,
-		&sub.State,
+		&sub.Status,
 		&sub.Availability,
 		&sub.StartDate,
 		&sub.EndDate,
@@ -190,12 +207,36 @@ func (s *subscriptions) Get(ctx context.Context) (*models.Subscription, error) {
 	return &sub, nil
 }
 
+func (s *subscriptions) Transaction(fn func(ctx context.Context) error) error {
+	ctx := context.Background()
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	ctxWithTx := context.WithValue(ctx, txKey, tx)
+
+	if err := fn(ctxWithTx); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
+		}
+		return fmt.Errorf("transaction failed: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func (s *subscriptions) Filter(filters map[string]any) Subscriptions {
 	var validFilters = map[string]bool{
 		"user_id":           true,
 		"plan_id":           true,
 		"payment_method_id": true,
-		"state":             true,
+		"status":            true,
 		"availability":      true,
 	}
 	for key, value := range filters {

@@ -13,13 +13,18 @@ const transactionsTable = "subscription_transactions"
 
 type Transactions interface {
 	New() Transactions
+
 	Insert(ctx context.Context, trn models.Transaction) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 	Select(ctx context.Context) ([]models.Transaction, error)
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.Transaction, error)
+
 	Filter(filters map[string]any) Transactions
+
+	Transaction(fn func(ctx context.Context) error) error
+
 	Page(limit, offset uint64) Transactions
 }
 
@@ -52,13 +57,13 @@ func (t *transactions) Insert(ctx context.Context, trn models.Transaction) error
 	values := map[string]interface{}{
 		"id":                trn.ID,
 		"user_id":           trn.UserID,
+		"payment_method_id": trn.PaymentMethodID,
 		"amount":            trn.Amount,
 		"currency":          trn.Currency,
 		"status":            trn.Status,
 		"payment_provider":  trn.PaymentProvider,
-		"transaction_date":  trn.TransactionDate,
 		"payment_id":        trn.PaymentID,
-		"payment_method_id": trn.PaymentMethodID,
+		"transaction_date":  trn.TransactionDate,
 	}
 
 	query, args, err := t.inserter.SetMap(values).ToSql()
@@ -66,7 +71,12 @@ func (t *transactions) Insert(ctx context.Context, trn models.Transaction) error
 		return fmt.Errorf("building insert query for subscription_transactions: %w", err)
 	}
 
-	if _, err := t.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = t.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("inserting subscription_transaction: %w", err)
 	}
 	return nil
@@ -78,7 +88,12 @@ func (t *transactions) Update(ctx context.Context, updates map[string]any) error
 		return fmt.Errorf("building update query for subscription_transactions: %w", err)
 	}
 
-	if _, err := t.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = t.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("updating subscription_transaction: %w", err)
 	}
 	return nil
@@ -90,7 +105,12 @@ func (t *transactions) Delete(ctx context.Context) error {
 		return fmt.Errorf("building delete query for subscription_transactions: %w", err)
 	}
 
-	if _, err := t.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = t.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("deleting subscription_transaction: %w", err)
 	}
 	return nil
@@ -172,6 +192,30 @@ func (t *transactions) Get(ctx context.Context) (*models.Transaction, error) {
 	}
 
 	return &trn, nil
+}
+
+func (t *transactions) Transaction(fn func(ctx context.Context) error) error {
+	ctx := context.Background()
+
+	tx, err := t.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	ctxWithTx := context.WithValue(ctx, txKey, tx)
+
+	if err := fn(ctxWithTx); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
+		}
+		return fmt.Errorf("transaction failed: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
 }
 
 func (t *transactions) Filter(filters map[string]any) Transactions {

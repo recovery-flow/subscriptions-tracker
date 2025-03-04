@@ -22,9 +22,9 @@ type SubPlan interface {
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.SubscriptionPlan, error)
 
-	Transaction(func() error) error
-
 	Filter(filters map[string]any) SubPlan
+
+	Transaction(fn func(ctx context.Context) error) error
 
 	Page(limit, offset uint64) SubPlan
 }
@@ -59,6 +59,8 @@ func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) erro
 		"id":                    plan.ID,
 		"type_id":               plan.TypeID,
 		"price":                 plan.Price,
+		"name":                  plan.Name,
+		"description":           plan.Description,
 		"billing_interval":      plan.BillingInterval,
 		"billing_interval_unit": plan.BillingIntervalUnit,
 		"currency":              plan.Currency,
@@ -72,7 +74,12 @@ func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) erro
 		return fmt.Errorf("building insert query for subscription_plans: %w", err)
 	}
 
-	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = p.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("inserting subscription_plan: %w", err)
 	}
 	return nil
@@ -85,7 +92,12 @@ func (p *subPlan) Update(ctx context.Context, updates map[string]any) error {
 		return fmt.Errorf("building update query for subscription_plans: %w", err)
 	}
 
-	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = p.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("updating subscription_plan: %w", err)
 	}
 	return nil
@@ -97,7 +109,12 @@ func (p *subPlan) Delete(ctx context.Context) error {
 		return fmt.Errorf("building delete query for subscription_plans: %w", err)
 	}
 
-	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = p.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("deleting subscription_plan: %w", err)
 	}
 	return nil
@@ -122,6 +139,8 @@ func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 			&plan.ID,
 			&plan.TypeID,
 			&plan.Price,
+			&plan.Name,
+			&plan.Description,
 			&plan.BillingInterval,
 			&plan.BillingIntervalUnit,
 			&plan.Currency,
@@ -161,6 +180,8 @@ func (p *subPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
 		&plan.ID,
 		&plan.TypeID,
 		&plan.Price,
+		&plan.Name,
+		&plan.Description,
 		&plan.BillingInterval,
 		&plan.BillingIntervalUnit,
 		&plan.Currency,
@@ -183,6 +204,7 @@ func (p *subPlan) Filter(filters map[string]any) SubPlan {
 		"id":      true,
 		"type_id": true,
 		"status":  true,
+		"name":    true,
 	}
 	for key, value := range filters {
 		if _, exists := validFilters[key]; !exists {
@@ -196,7 +218,7 @@ func (p *subPlan) Filter(filters map[string]any) SubPlan {
 	return p
 }
 
-func (p *subPlan) Transaction(f func() error) error {
+func (p *subPlan) Transaction(fn func(ctx context.Context) error) error {
 	ctx := context.Background()
 
 	tx, err := p.db.BeginTx(ctx, nil)
@@ -204,7 +226,9 @@ func (p *subPlan) Transaction(f func() error) error {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 
-	if err := f(); err != nil {
+	ctxWithTx := context.WithValue(ctx, txKey, tx)
+
+	if err := fn(ctxWithTx); err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
 			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
 		}

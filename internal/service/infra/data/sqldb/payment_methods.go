@@ -17,12 +17,13 @@ type PaymentMethods interface {
 
 	Insert(ctx context.Context, pm models.PaymentMethod) error
 	Delete(ctx context.Context) error
-
 	Select(ctx context.Context) ([]models.PaymentMethod, error)
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.PaymentMethod, error)
 
 	Filter(filters map[string]any) PaymentMethods
+
+	Transaction(fn func(ctx context.Context) error) error
 
 	Page(limit, offset uint64) PaymentMethods
 }
@@ -48,11 +49,11 @@ func NewPaymentMethods(db *sql.DB) PaymentMethods {
 	}
 }
 
-func (p *paymentMethods) New() PaymentMethods {
-	return NewPaymentMethods(p.db)
+func (m *paymentMethods) New() PaymentMethods {
+	return NewPaymentMethods(m.db)
 }
 
-func (p *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) error {
+func (m *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) error {
 	values := map[string]interface{}{
 		"id":             pm.ID,
 		"user_id":        pm.UserID,
@@ -62,36 +63,46 @@ func (p *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) er
 		"created_at":     time.Now().UTC(),
 	}
 
-	query, args, err := p.inserter.SetMap(values).ToSql()
+	query, args, err := m.inserter.SetMap(values).ToSql()
 	if err != nil {
 		return fmt.Errorf("building insert query for payment_methods: %w", err)
 	}
 
-	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = m.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("inserting payment_method: %w", err)
 	}
 	return nil
 }
 
-func (p *paymentMethods) Delete(ctx context.Context) error {
-	query, args, err := p.deleter.ToSql()
+func (m *paymentMethods) Delete(ctx context.Context) error {
+	query, args, err := m.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for payment_methods: %w", err)
 	}
 
-	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = m.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
 		return fmt.Errorf("deleting payment_method: %w", err)
 	}
 	return nil
 }
 
-func (p *paymentMethods) Select(ctx context.Context) ([]models.PaymentMethod, error) {
-	query, args, err := p.selector.ToSql()
+func (m *paymentMethods) Select(ctx context.Context) ([]models.PaymentMethod, error) {
+	query, args, err := m.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for payment_methods: %w", err)
 	}
 
-	rows, err := p.db.QueryContext(ctx, query, args...)
+	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("executing select query for payment_methods: %w", err)
 	}
@@ -115,27 +126,27 @@ func (p *paymentMethods) Select(ctx context.Context) ([]models.PaymentMethod, er
 	return results, nil
 }
 
-func (p *paymentMethods) Count(ctx context.Context) (int, error) {
-	query, args, err := p.counter.ToSql()
+func (m *paymentMethods) Count(ctx context.Context) (int, error) {
+	query, args, err := m.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for payment_methods: %w", err)
 	}
 
 	var count int
-	if err := p.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
+	if err := m.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
 		return 0, fmt.Errorf("counting payment_methods: %w", err)
 	}
 	return count, nil
 }
 
-func (p *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error) {
-	query, args, err := p.selector.ToSql()
+func (m *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error) {
+	query, args, err := m.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building get query for payment_methods: %w", err)
 	}
 
 	var pm models.PaymentMethod
-	err = p.db.QueryRowContext(ctx, query, args...).Scan(
+	err = m.db.QueryRowContext(ctx, query, args...).Scan(
 		&pm.ID,
 		&pm.UserID,
 		&pm.Type,
@@ -152,7 +163,31 @@ func (p *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error)
 	return &pm, nil
 }
 
-func (p *paymentMethods) Filter(filters map[string]any) PaymentMethods {
+func (m *paymentMethods) Transaction(fn func(ctx context.Context) error) error {
+	ctx := context.Background()
+
+	tx, err := m.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	ctxWithTx := context.WithValue(ctx, txKey, tx)
+
+	if err := fn(ctxWithTx); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
+		}
+		return fmt.Errorf("transaction failed: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (m *paymentMethods) Filter(filters map[string]any) PaymentMethods {
 	var validFilters = map[string]bool{
 		"id":      true,
 		"user_id": true,
@@ -161,16 +196,16 @@ func (p *paymentMethods) Filter(filters map[string]any) PaymentMethods {
 		if _, exists := validFilters[key]; !exists {
 			continue
 		}
-		p.selector = p.selector.Where(sq.Eq{key: value})
-		p.counter = p.counter.Where(sq.Eq{key: value})
-		p.deleter = p.deleter.Where(sq.Eq{key: value})
-		p.updater = p.updater.Where(sq.Eq{key: value})
+		m.selector = m.selector.Where(sq.Eq{key: value})
+		m.counter = m.counter.Where(sq.Eq{key: value})
+		m.deleter = m.deleter.Where(sq.Eq{key: value})
+		m.updater = m.updater.Where(sq.Eq{key: value})
 	}
-	return p
+	return m
 }
 
-func (p *paymentMethods) Page(limit, offset uint64) PaymentMethods {
-	p.selector = p.selector.Limit(limit).Offset(offset)
-	p.counter = p.counter.Limit(limit).Offset(offset)
-	return p
+func (m *paymentMethods) Page(limit, offset uint64) PaymentMethods {
+	m.selector = m.selector.Limit(limit).Offset(offset)
+	m.counter = m.counter.Limit(limit).Offset(offset)
+	return m
 }

@@ -30,32 +30,34 @@ type TopicConfig struct {
 }
 
 func NewBroker(cfg *config.Config) Kafka {
-	var reqAcks kafka.RequiredAcks
-	switch cfg.Kafka.RequiredAcks {
-	case "all":
-		reqAcks = kafka.RequireAll
-	case "1":
-		reqAcks = kafka.RequireOne
-	case "0":
-		reqAcks = kafka.RequireNone
-	default:
-		reqAcks = kafka.RequireAll
-	}
+	//var reqAcks kafka.RequiredAcks
+	//switch cfg.Kafka.RequiredAcks {
+	//case "all":
+	//	reqAcks = kafka.RequireAll
+	//case "1":
+	//	reqAcks = kafka.RequireOne
+	//case "0":
+	//	reqAcks = kafka.RequireNone
+	//default:
+	//	reqAcks = kafka.RequireAll
+	//}
 
 	writer := &kafka.Writer{
-		Addr:         kafka.TCP(cfg.Kafka.Brokers...),
-		Topic:        cfg.Kafka.Topic,
-		Balancer:     &kafka.LeastBytes{},
-		ReadTimeout:  cfg.Kafka.ReadTimeout,
-		WriteTimeout: cfg.Kafka.WriteTimeout,
-		RequiredAcks: reqAcks,
+		Addr:                   kafka.TCP(cfg.Kafka.Brokers...),
+		Topic:                  "subscription_transactions",
+		Balancer:               &kafka.LeastBytes{}, // Оптимальный балансировщик
+		RequiredAcks:           kafka.RequireNone,   // Не ждет подтверждения от брокера
+		BatchSize:              1,                   // Отправляет сообщения по одному
+		BatchTimeout:           0,                   // Не ждет накопления сообщений
+		Async:                  true,                // Асинхронный режим (не ждет завершения отправки)
+		AllowAutoTopicCreation: true,                // Если топик не существует, создаст его автоматически
 	}
 
 	// Reader: здесь используется DialTimeout
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: cfg.Kafka.Brokers,
-		GroupID: cfg.Kafka.GroupID,
-		Topic:   cfg.Kafka.Topic,
+		GroupID: "test",
+		Topic:   "test",
 	})
 
 	return &broker{
@@ -86,7 +88,6 @@ func (b *broker) SubscriptionCreated(body evebody.CreateSubscription) error {
 		Value: data,
 	}
 
-	// Отправляем сообщение
 	return b.sendMessage(msg)
 }
 
