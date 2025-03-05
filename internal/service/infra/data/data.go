@@ -16,18 +16,18 @@ type Data struct {
 }
 
 type SQLStorage struct {
-	Schedule      sqldb.BillingSchedules
-	Transactions  sqldb.Transactions
-	Methods       sqldb.PaymentMethods
-	Plans         sqldb.SubPlan
-	Types         sqldb.SubTypes
-	Subscriptions sqldb.Subscriptions
+	Schedule       sqldb.BillingSchedules
+	Transactions   sqldb.Transactions
+	PaymentMethods sqldb.PaymentMethods
+	Plans          sqldb.SubPlan
+	Types          sqldb.SubTypes
+	Subscriptions  sqldb.Subscriptions
 }
 
 type CacheStorage struct {
-	Plans         cache.SubPlanQueryCache
+	Plans         cache.Plans
 	Subscriptions cache.Subscriptions
-	Types         cache.SubTypesQueryCache
+	Types         cache.Types
 }
 
 func NewData(cfg *config.Config) (*Data, error) {
@@ -55,12 +55,12 @@ func NewData(cfg *config.Config) (*Data, error) {
 
 	return &Data{
 		SQL: SQLStorage{
-			Schedule:      sqlSchedule,
-			Transactions:  sqlTrans,
-			Methods:       sqlPM,
-			Plans:         sqlSubPlans,
-			Types:         sqlSubTypes,
-			Subscriptions: sqlSub,
+			Schedule:       sqlSchedule,
+			Transactions:   sqlTrans,
+			PaymentMethods: sqlPM,
+			Plans:          sqlSubPlans,
+			Types:          sqlSubTypes,
+			Subscriptions:  sqlSub,
 		},
 		Cache: CacheStorage{
 			Plans:         redisPlans,

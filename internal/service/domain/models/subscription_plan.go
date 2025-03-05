@@ -42,25 +42,25 @@ func ParseStatusPlan(status string) (StatusPlan, error) {
 type BillingIntervalUnit string
 
 const (
-	Once  BillingIntervalUnit = "once"
-	Day   BillingIntervalUnit = "day"
-	Week  BillingIntervalUnit = "week"
-	Month BillingIntervalUnit = "month"
-	Year  BillingIntervalUnit = "year"
+	IntervalOnce  BillingIntervalUnit = "once"
+	IntervalDay   BillingIntervalUnit = "day"
+	IntervalWeek  BillingIntervalUnit = "week"
+	IntervalMonth BillingIntervalUnit = "month"
+	IntervalYear  BillingIntervalUnit = "year"
 )
 
 func ParseBillingIntervalUnit(unit string) (BillingIntervalUnit, error) {
 	switch unit {
 	case "once":
-		return Once, nil
+		return IntervalOnce, nil
 	case "day":
-		return Day, nil
+		return IntervalDay, nil
 	case "week":
-		return Week, nil
+		return IntervalWeek, nil
 	case "month":
-		return Month, nil
+		return IntervalMonth, nil
 	case "year":
-		return Year, nil
+		return IntervalYear, nil
 	default:
 		return "", fmt.Errorf("invalid billing interval unit: %s", unit)
 	}

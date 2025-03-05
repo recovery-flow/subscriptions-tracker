@@ -15,7 +15,7 @@ const subscriptionTypesTable = "subscription_types"
 type SubTypes interface {
 	New() SubTypes
 
-	Insert(ctx context.Context, sub models.SubscriptionType) error
+	Insert(ctx context.Context, sub *models.SubscriptionType) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 
@@ -55,7 +55,7 @@ func (t *subTypes) New() SubTypes {
 	return NewSubTypes(t.db)
 }
 
-func (t *subTypes) Insert(ctx context.Context, sub models.SubscriptionType) error {
+func (t *subTypes) Insert(ctx context.Context, sub *models.SubscriptionType) error {
 	query, args, err := t.inserter.SetMap(map[string]interface{}{
 		"id":          sub.ID,
 		"name":        sub.Name,

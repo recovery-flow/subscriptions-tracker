@@ -80,7 +80,7 @@ func (b *broker) sendMessage(msg kafka.Message) error {
 func (b *broker) SubscriptionCreated(body evebody.CreateSubscription) error {
 	data, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("failed to marshal CreateSubscription event: %w", err)
+		return fmt.Errorf("failed to marshal ActivateSubscription event: %w", err)
 	}
 
 	msg := kafka.Message{

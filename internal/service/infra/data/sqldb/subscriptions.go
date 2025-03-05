@@ -19,7 +19,7 @@ const subscriptionTable = "subscriptions"
 type Subscriptions interface {
 	New() Subscriptions
 
-	Insert(ctx context.Context, sub models.Subscription) error
+	Insert(ctx context.Context, sub *models.Subscription) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 
@@ -61,7 +61,7 @@ func (s *subscriptions) New() Subscriptions {
 	return NewSubscriptions(s.db)
 }
 
-func (s *subscriptions) Insert(ctx context.Context, sub models.Subscription) error {
+func (s *subscriptions) Insert(ctx context.Context, sub *models.Subscription) error {
 	query, args, err := s.inserter.SetMap(map[string]interface{}{
 		"user_id":           sub.UserID,
 		"plan_id":           sub.PlanID,

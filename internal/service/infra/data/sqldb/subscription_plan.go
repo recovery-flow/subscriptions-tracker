@@ -15,7 +15,7 @@ const subscriptionPlansTable = "subscription_plans"
 type SubPlan interface {
 	New() SubPlan
 
-	Insert(ctx context.Context, plan models.SubscriptionPlan) error
+	Insert(ctx context.Context, plan *models.SubscriptionPlan) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 	Select(ctx context.Context) ([]models.SubscriptionPlan, error)
@@ -54,7 +54,7 @@ func (p *subPlan) New() SubPlan {
 	return NewSubPlan(p.db)
 }
 
-func (p *subPlan) Insert(ctx context.Context, plan models.SubscriptionPlan) error {
+func (p *subPlan) Insert(ctx context.Context, plan *models.SubscriptionPlan) error {
 	values := map[string]interface{}{
 		"id":                    plan.ID,
 		"type_id":               plan.TypeID,

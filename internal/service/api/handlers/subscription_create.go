@@ -86,7 +86,7 @@ func SubscriptionCreate(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:       time.Now(),
 	}
 
-	subscription, err := Domain(r).CreateSubscription(r.Context(), res)
+	subscription, err := Domain(r).ActivateSubscription(r.Context(), res)
 	if err != nil {
 		Log(r).WithError(err).Error("Failed to create subscription")
 		httpkit.RenderErr(w, problems.InternalError())

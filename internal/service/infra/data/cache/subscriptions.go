@@ -15,7 +15,11 @@ const SubscriptionCollection = "subscription"
 type Subscriptions interface {
 	Set(ctx context.Context, sub models.Subscription) error
 	Get(ctx context.Context, userID string) (*models.Subscription, error)
+
+	Update(ctx context.Context, userID string, fields map[string]string) error
+
 	Delete(ctx context.Context, userID string) error
+
 	Drop(ctx context.Context) error
 }
 
@@ -54,6 +58,39 @@ func (s *subscriptions) Set(ctx context.Context, sub models.Subscription) error 
 		_, err := pipe.Exec(ctx)
 		if err != nil && err != redis.Nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *subscriptions) Update(ctx context.Context, userID string, fields map[string]string) error {
+	allowed := map[string]bool{
+		"plan_id":           true,
+		"payment_method_id": true,
+		"status":            true,
+		"start_date":        true,
+		"end_date":          true,
+		"updated_at":        true,
+	}
+
+	updates := make(map[string]interface{})
+	for key, value := range fields {
+		if !allowed[key] {
+			return fmt.Errorf("field %q cannot be updated", key)
+		}
+		updates[key] = value
+	}
+
+	subKey := fmt.Sprintf("%s:user_id:%s", SubscriptionCollection, userID)
+
+	if err := s.client.HSet(ctx, subKey, updates).Err(); err != nil {
+		return fmt.Errorf("error updating subscription in cache: %w", err)
+	}
+
+	if s.lifeTime > 0 {
+		if err := s.client.Expire(ctx, subKey, s.lifeTime).Err(); err != nil && err != redis.Nil {
+			return fmt.Errorf("error updating expiration for key %s: %w", subKey, err)
 		}
 	}
 

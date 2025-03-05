@@ -3,97 +3,162 @@ package domain
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/cache"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/events/evebody"
-	"github.com/redis/go-redis/v9"
 )
 
 type SubscriptionsTracker interface {
 	GetSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error)
-	CreateSubscription(ctx context.Context, sub models.Subscription) (*models.Subscription, error)
+	ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID) (*models.Subscription, error)
+	DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error
+	CanceledSubscription(ctx context.Context, UserID uuid.UUID) error
+
+	AddPaymentMethod(ctx context.Context, userID uuid.UUID, paymentMethod models.PaymentMethod) error
+	DeletePaymentMethod(ctx context.Context, userID uuid.UUID, paymentMethodID uuid.UUID) error
+	GetPaymentMethod(ctx context.Context, ID uuid.UUID) (*models.PaymentMethod, error)
+	GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([]models.PaymentMethod, error)
 }
 
-func (d *domain) CreateSubscription(ctx context.Context, sub models.Subscription) (*models.Subscription, error) {
+func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID) (*models.Subscription, error) {
+	var subscription *models.Subscription
 	err := d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
-		if err := d.Infra.Data.SQL.Subscriptions.New().Insert(ctx, sub); err != nil {
+		sType, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{
+			"id": PlanID.String(),
+		}).Get(ctx)
+		if err != nil {
+			return err
+		}
+		if sType == nil {
+			return fmt.Errorf("subscription type not found %s", PlanID)
+		}
+
+		if sType.Status != models.StatusTypeActive {
+			return fmt.Errorf("subscription type is not active %s", PlanID)
+		}
+
+		//Get the Subscription Plan
+
+		sPlan, err := d.Infra.Data.SQL.Plans.New().Filter(map[string]any{
+			"id": PlanID.String(),
+		}).Get(ctx)
+		if err != nil {
+			return err
+		}
+		if sPlan == nil {
+			return fmt.Errorf("subscription plan not found %s", PlanID)
+		}
+
+		//Get the Payment Method
+
+		pMethod, err := d.Infra.Data.SQL.PaymentMethods.New().Filter(map[string]any{
+			"id": PaymentMethodID.String(),
+		}).Get(ctx)
+		if err != nil {
 			return err
 		}
 
-		var typeID uuid.UUID
-
-		plans, err := d.Infra.Data.Cache.Plans.Get(ctx, cache.KeyPlans(
-			map[string]any{"id": sub.PlanID.String()}, 1, 1,
-		))
-		if err != nil && !errors.Is(err, redis.Nil) {
-			d.log.WithField("redis", err).Error("failed to get subscription plan from cache")
+		if pMethod.UserID != UserID {
+			return fmt.Errorf("payment method does not belong to user %s", PaymentMethodID)
 		}
 
-		if plans != nil && len(plans) == 1 {
-			typeID = plans[0].TypeID
-		} else {
-			plans, err = d.Infra.Data.SQL.Plans.New().Filter(map[string]any{
-				"id": sub.PlanID.String(),
-			}).Select(ctx)
-			if err != nil {
-				return err
-			}
-			if len(plans) == 0 {
-				return fmt.Errorf("subscription plan not found %s %s", sub.PlanID, err)
-			}
+		//TODO integrate payment for the subscription
 
-			typeID = plans[0].TypeID
+		//Main logic for the subscription activation
 
-			if err := d.Infra.Data.Cache.Plans.Set(
-				ctx,
-				cache.KeyPlans(map[string]any{"id": sub.PlanID.String()}, 1, 1),
-				plans,
-			); err != nil {
-				d.log.WithField("redis", err).Error("failed to set subscription plan to cache")
-			}
+		var endDate time.Time
+		uInterval := sPlan.BillingIntervalUnit
+		interval := sPlan.BillingInterval
+
+		switch uInterval {
+		case models.IntervalOnce:
+			endDate = time.Now().AddDate(100, 0, 0)
+		case models.IntervalDay:
+			endDate = time.Now().AddDate(0, 0, 1*int(interval))
+		case models.IntervalWeek:
+			endDate = time.Now().AddDate(0, 0, 7*int(interval))
+		case models.IntervalMonth:
+			endDate = time.Now().AddDate(0, int(interval), 0)
+		case models.IntervalYear:
+			endDate = time.Now().AddDate(int(interval), 0, 0)
+		default:
+			return fmt.Errorf("invalid billing interval unit %s || %d", uInterval, interval)
 		}
 
-		if err := d.Infra.Kafka.SubscriptionCreated(evebody.CreateSubscription{
-			UserID:    sub.UserID.String(),
-			PlanID:    sub.PlanID.String(),
-			TypeID:    typeID.String(),
-			CreatedAt: sub.CreatedAt,
-		}); err != nil {
+		subscription = &models.Subscription{
+			UserID:          UserID,
+			PlanID:          PlanID,
+			PaymentMethodID: PaymentMethodID,
+			Status:          models.SubscriptionStatusActive,
+			Availability:    models.SubPlanAvailable,
+			StartDate:       time.Now().UTC(),
+			EndDate:         endDate,
+		}
+
+		if err := d.Infra.Data.SQL.Subscriptions.New().Insert(ctx, subscription); err != nil {
 			return err
 		}
+
+		//TODO to supplement the work with Kafka
+		//if err := d.Infra.Kafka.SubscriptionCreated(evebody.CreateSubscription{
+		//	UserID:    subscription.UserID.String(),
+		//	PlanID:    subscription.PlanID.String(),
+		//	TypeID:    typeID.String(),
+		//	CreatedAt: subscription.CreatedAt,
+		//}); err != nil {
+		//	return err
+		//}
 
 		return nil
 	})
 
-	if err := d.Infra.Data.Cache.Subscriptions.Set(ctx, sub); err != nil {
-		d.log.WithField("redis", err).Error("failed to set subscription to cache")
-	}
-
 	if err != nil {
 		return nil, err
 	}
-	return &sub, nil
+	return subscription, nil
+}
+
+func (d *domain) DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error {
+	err := d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
+		if err := d.Infra.Data.SQL.Subscriptions.New().Filter(map[string]any{
+			"user_id": UserID,
+		}).Update(ctx, map[string]any{
+			"status": models.SubscriptionStatusInactive,
+		}); err != nil {
+			return err
+		}
+
+		//TODO to supplement the work with Kafka
+
+		return nil
+	})
+
+	return err
+}
+
+func (d *domain) CanceledSubscription(ctx context.Context, UserID uuid.UUID) error {
+	err := d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
+		if err := d.Infra.Data.SQL.Subscriptions.New().Filter(map[string]any{
+			"user_id": UserID,
+		}).Update(ctx, map[string]any{
+			"status": models.SubscriptionStatusCanceled,
+		}); err != nil {
+			return err
+		}
+
+		//TODO to supplement the work with Kafka
+
+		return nil
+	})
+
+	return err
 }
 
 func (d *domain) GetSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error) {
-	res, err := d.Infra.Data.Cache.Subscriptions.Get(ctx, userID.String())
-	if err != nil || !errors.Is(err, redis.Nil) {
-		d.log.WithError(err).Error("failed to get user subscription from cache")
-	} else if res != nil {
-		return res, nil
-	}
-
-	res, err = d.Infra.Data.SQL.Subscriptions.Filter(map[string]any{"user_id": userID.String()}).Get(ctx)
+	res, err := d.Infra.Data.SQL.Subscriptions.Filter(map[string]any{"user_id": userID.String()}).Get(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	err = d.Infra.Data.Cache.Subscriptions.Set(ctx, *res)
-	if err != nil || !errors.Is(err, redis.Nil) {
-		d.log.WithError(err).Error("failed to set user subscription to cache")
 	}
 
 	return res, nil
