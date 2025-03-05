@@ -22,6 +22,7 @@ type Subscriptions interface {
 	Insert(ctx context.Context, sub models.Subscription) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
+
 	Select(ctx context.Context) ([]models.Subscription, error)
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.Subscription, error)
@@ -129,21 +130,6 @@ func (s *subscriptions) Delete(ctx context.Context) error {
 	return nil
 }
 
-func (s *subscriptions) Count(ctx context.Context) (int, error) {
-	query, args, err := s.counter.ToSql()
-	if err != nil {
-		return 0, fmt.Errorf("error building count query: %w", err)
-	}
-
-	var count int
-	err = s.db.QueryRowContext(ctx, query, args...).Scan(&count)
-	if err != nil {
-		return 0, fmt.Errorf("error counting subscriptions: %w", err)
-	}
-
-	return count, nil
-}
-
 func (s *subscriptions) Select(ctx context.Context) ([]models.Subscription, error) {
 	query, args, err := s.selector.ToSql()
 	if err != nil {
@@ -179,6 +165,21 @@ func (s *subscriptions) Select(ctx context.Context) ([]models.Subscription, erro
 	return subs, nil
 }
 
+func (s *subscriptions) Count(ctx context.Context) (int, error) {
+	query, args, err := s.counter.ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("error building count query: %w", err)
+	}
+
+	var count int
+	err = s.db.QueryRowContext(ctx, query, args...).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("error counting subscriptions: %w", err)
+	}
+
+	return count, nil
+}
+
 func (s *subscriptions) Get(ctx context.Context) (*models.Subscription, error) {
 	query, args, err := s.selector.ToSql()
 	if err != nil {
@@ -207,6 +208,26 @@ func (s *subscriptions) Get(ctx context.Context) (*models.Subscription, error) {
 	return &sub, nil
 }
 
+func (s *subscriptions) Filter(filters map[string]any) Subscriptions {
+	var validFilters = map[string]bool{
+		"user_id":           true,
+		"plan_id":           true,
+		"payment_method_id": true,
+		"status":            true,
+		"availability":      true,
+	}
+	for key, value := range filters {
+		if _, exists := validFilters[key]; !exists {
+			continue
+		}
+		s.selector = s.selector.Where(sq.Eq{key: value})
+		s.counter = s.counter.Where(sq.Eq{key: value})
+		s.deleter = s.deleter.Where(sq.Eq{key: value})
+		s.updater = s.updater.Where(sq.Eq{key: value})
+	}
+	return s
+}
+
 func (s *subscriptions) Transaction(fn func(ctx context.Context) error) error {
 	ctx := context.Background()
 
@@ -229,26 +250,6 @@ func (s *subscriptions) Transaction(fn func(ctx context.Context) error) error {
 	}
 
 	return nil
-}
-
-func (s *subscriptions) Filter(filters map[string]any) Subscriptions {
-	var validFilters = map[string]bool{
-		"user_id":           true,
-		"plan_id":           true,
-		"payment_method_id": true,
-		"status":            true,
-		"availability":      true,
-	}
-	for key, value := range filters {
-		if _, exists := validFilters[key]; !exists {
-			continue
-		}
-		s.selector = s.selector.Where(sq.Eq{key: value})
-		s.counter = s.counter.Where(sq.Eq{key: value})
-		s.deleter = s.deleter.Where(sq.Eq{key: value})
-		s.updater = s.updater.Where(sq.Eq{key: value})
-	}
-	return s
 }
 
 func (s *subscriptions) Page(limit, offset uint64) Subscriptions {

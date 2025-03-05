@@ -8,7 +8,6 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/cache"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/data/sqldb"
 	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
 )
 
 type Data struct {
@@ -31,7 +30,7 @@ type CacheStorage struct {
 	Types         cache.SubTypesQueryCache
 }
 
-func NewData(cfg *config.Config, log *logrus.Logger) (*Data, error) {
+func NewData(cfg *config.Config) (*Data, error) {
 	db, err := sql.Open("postgres", cfg.Database.SQL.URL)
 	if err != nil {
 		return nil, err
