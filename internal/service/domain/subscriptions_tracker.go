@@ -15,10 +15,11 @@ type SubscriptionsTracker interface {
 	DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error
 	CanceledSubscription(ctx context.Context, UserID uuid.UUID) error
 
-	AddPaymentMethod(ctx context.Context, userID uuid.UUID, paymentMethod models.PaymentMethod) error
+	AddPaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) error
 	DeletePaymentMethod(ctx context.Context, userID uuid.UUID, paymentMethodID uuid.UUID) error
 	GetPaymentMethod(ctx context.Context, ID uuid.UUID) (*models.PaymentMethod, error)
 	GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([]models.PaymentMethod, error)
+	SetPaymentMethodAsDefault(ctx context.Context, userID, paymentMethodID uuid.UUID) error
 }
 
 func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID) (*models.Subscription, error) {
@@ -162,4 +163,104 @@ func (d *domain) GetSubscription(ctx context.Context, userID uuid.UUID) (*models
 	}
 
 	return res, nil
+}
+
+func (d *domain) AddPaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) (*models.PaymentMethod, error) {
+	var method *models.PaymentMethod
+	pType, err := models.ParsePayType(payType)
+	if err != nil {
+		return nil, err
+	}
+
+	errTrn := d.Infra.Data.SQL.PaymentMethods.New().Transaction(func(ctx context.Context) error {
+		method = &models.PaymentMethod{
+			ID:            uuid.New(),
+			UserID:        userID,
+			Type:          pType,
+			ProviderToken: token,
+			IsDefault:     false,
+			CreatedAt:     time.Now().UTC(),
+			UpdatedAt:     time.Now().UTC(),
+		}
+
+		err := d.Infra.Data.SQL.PaymentMethods.New().Insert(ctx, method)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if errTrn != nil {
+		return nil, errTrn
+	}
+
+	return method, nil
+}
+
+func (d *domain) DeletePaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) error {
+	err := d.Infra.Data.SQL.PaymentMethods.New().Filter(map[string]any{
+		"id":      paymentMethodID.String(),
+		"user_id": userID.String(),
+	}).Delete(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *domain) GetPaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) (*models.PaymentMethod, error) {
+	res, err := d.Infra.Data.SQL.PaymentMethods.Filter(map[string]any{
+		"id":      paymentMethodID.String(),
+		"user_id": userID.String(),
+	}).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (d *domain) GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([]models.PaymentMethod, error) {
+	res, err := d.Infra.Data.SQL.PaymentMethods.Filter(map[string]any{
+		"user_id": userID.String(),
+	}).Select(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (d *domain) SetPaymentMethodAsDefault(ctx context.Context, userID, paymentMethodID uuid.UUID) error {
+	err := d.Infra.Data.SQL.PaymentMethods.Transaction(func(ctx context.Context) error {
+		err := d.Infra.Data.SQL.PaymentMethods.New().Filter(map[string]any{
+			"user_id": userID.String(),
+		}).Update(ctx, map[string]any{
+			"is_default": false,
+		})
+		if err != nil {
+			return err
+		}
+
+		err = d.Infra.Data.SQL.PaymentMethods.New().Filter(map[string]any{
+			"user_id": userID.String(),
+			"id":      paymentMethodID.String(),
+		}).Update(ctx, map[string]any{
+			"is_default": true,
+		})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

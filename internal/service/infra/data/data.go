@@ -49,7 +49,7 @@ func NewData(cfg *config.Config) (*Data, error) {
 	sqlSubTypes := sqldb.NewSubTypes(db)
 	sqlSub := sqldb.NewSubscriptions(db)
 
-	redisPlans := cache.NewSubPlanQueryCache(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
+	redisPlans := cache.NewPlansCache(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 	redisSubs := cache.NewSubscriptions(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 	redisTypes := cache.NewSubTypesQueryCache(redisClient, time.Duration(cfg.Database.Redis.Lifetime)*time.Minute)
 

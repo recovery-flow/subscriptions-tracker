@@ -15,13 +15,15 @@ const paymentMethodsTable = "payment_methods"
 type PaymentMethods interface {
 	New() PaymentMethods
 
-	Insert(ctx context.Context, pm models.PaymentMethod) error
+	Insert(ctx context.Context, pm *models.PaymentMethod) error
 	Delete(ctx context.Context) error
 	Select(ctx context.Context) ([]models.PaymentMethod, error)
 	Count(ctx context.Context) (int, error)
 	Get(ctx context.Context) (*models.PaymentMethod, error)
 
 	Filter(filters map[string]any) PaymentMethods
+
+	Update(ctx context.Context, updates map[string]any) error
 
 	Transaction(fn func(ctx context.Context) error) error
 
@@ -53,7 +55,7 @@ func (m *paymentMethods) New() PaymentMethods {
 	return NewPaymentMethods(m.db)
 }
 
-func (m *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) error {
+func (m *paymentMethods) Insert(ctx context.Context, pm *models.PaymentMethod) error {
 	values := map[string]interface{}{
 		"id":             pm.ID,
 		"user_id":        pm.UserID,
@@ -65,7 +67,7 @@ func (m *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) er
 
 	query, args, err := m.inserter.SetMap(values).ToSql()
 	if err != nil {
-		return fmt.Errorf("building insert query for payment_methods: %w", err)
+		return fmt.Errorf("building insert query for %s: %w", paymentMethodsTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -74,7 +76,25 @@ func (m *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) er
 		_, err = m.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("inserting payment_method: %w", err)
+		return fmt.Errorf("inserting %s: %w", paymentMethodsTable, err)
+	}
+	return nil
+}
+
+func (m *paymentMethods) Update(ctx context.Context, updates map[string]any) error {
+	updates["updated_at"] = time.Now().UTC()
+	query, args, err := m.updater.SetMap(updates).ToSql()
+	if err != nil {
+		return fmt.Errorf("building update query for %s: %w", paymentMethodsTable, err)
+	}
+
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
+		_, err = tx.ExecContext(ctx, query, args...)
+	} else {
+		_, err = m.db.ExecContext(ctx, query, args...)
+	}
+	if err != nil {
+		return fmt.Errorf("updating %s: %w", paymentMethodsTable, err)
 	}
 	return nil
 }
@@ -82,7 +102,7 @@ func (m *paymentMethods) Insert(ctx context.Context, pm models.PaymentMethod) er
 func (m *paymentMethods) Delete(ctx context.Context) error {
 	query, args, err := m.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("building delete query for payment_methods: %w", err)
+		return fmt.Errorf("building delete query for %s: %w", paymentMethodsTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -91,7 +111,7 @@ func (m *paymentMethods) Delete(ctx context.Context) error {
 		_, err = m.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("deleting payment_method: %w", err)
+		return fmt.Errorf("deleting %s: %w", paymentMethodsTable, err)
 	}
 	return nil
 }
@@ -99,12 +119,12 @@ func (m *paymentMethods) Delete(ctx context.Context) error {
 func (m *paymentMethods) Select(ctx context.Context) ([]models.PaymentMethod, error) {
 	query, args, err := m.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building select query for payment_methods: %w", err)
+		return nil, fmt.Errorf("building select query for %s: %w", paymentMethodsTable, err)
 	}
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("executing select query for payment_methods: %w", err)
+		return nil, fmt.Errorf("executing select query for %s: %w", paymentMethodsTable, err)
 	}
 	defer rows.Close()
 
@@ -119,7 +139,7 @@ func (m *paymentMethods) Select(ctx context.Context) ([]models.PaymentMethod, er
 			&pm.IsDefault,
 			&pm.CreatedAt,
 		); err != nil {
-			return nil, fmt.Errorf("scanning payment_method row: %w", err)
+			return nil, fmt.Errorf("scanning %s row: %w", paymentMethodsTable, err)
 		}
 		results = append(results, pm)
 	}
@@ -129,12 +149,12 @@ func (m *paymentMethods) Select(ctx context.Context) ([]models.PaymentMethod, er
 func (m *paymentMethods) Count(ctx context.Context) (int, error) {
 	query, args, err := m.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("building count query for payment_methods: %w", err)
+		return 0, fmt.Errorf("building count query for %s: %w", paymentMethodsTable, err)
 	}
 
 	var count int
 	if err := m.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
-		return 0, fmt.Errorf("counting payment_methods: %w", err)
+		return 0, fmt.Errorf("counting %s: %w", paymentMethodsTable, err)
 	}
 	return count, nil
 }
@@ -142,7 +162,7 @@ func (m *paymentMethods) Count(ctx context.Context) (int, error) {
 func (m *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error) {
 	query, args, err := m.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building get query for payment_methods: %w", err)
+		return nil, fmt.Errorf("building get query for %s: %w", paymentMethodsTable, err)
 	}
 
 	var pm models.PaymentMethod
@@ -158,7 +178,7 @@ func (m *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error)
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("getting payment_method: %w", err)
+		return nil, fmt.Errorf("getting %s: %w", paymentMethodsTable, err)
 	}
 	return &pm, nil
 }

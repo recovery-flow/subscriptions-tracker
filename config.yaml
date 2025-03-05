@@ -43,6 +43,11 @@ database:
     password: "example"
     db: 0
 
+payment:
+  pay_pal:
+    client_id: "example"
+    client_secret: "example"
+
 swagger:
   enabled: true
   url: "/swagger"

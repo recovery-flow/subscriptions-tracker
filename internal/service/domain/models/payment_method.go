@@ -14,15 +14,16 @@ type PaymentMethod struct {
 	ProviderToken string    `json:"provider_token"`
 	IsDefault     bool      `json:"is_default"`
 	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type PayType string
 
 const (
-	PayTypeGoogle  PayType = "google_pay"
+	PayTypeGoogle  PayType = "paypal"
 	PayTypeApple   PayType = "apple_pay"
-	PayTypeSamsung PayType = "samsung_pay"
-	PayTypePaypal  PayType = "paypal"
+	PayTypeSamsung PayType = "google_pay"
+	PayTypePaypal  PayType = "samsung_pay"
 )
 
 func ParsePayType(s string) (PayType, error) {
