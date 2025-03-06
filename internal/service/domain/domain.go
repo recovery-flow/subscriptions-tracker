@@ -8,6 +8,7 @@ import (
 type Domain interface {
 	SubscriptionsCatalog
 	SubscriptionsTracker
+	SubscriptionSchedule
 }
 
 type domain struct {

@@ -19,9 +19,8 @@ type BillingSchedule struct {
 type BillingStatus string
 
 const (
-	BillingStatusPlanned BillingStatus = "planned"
-	BillingStatusFailed  BillingStatus = "failed"
-	//BillingStatusSuccess    BillingStatus = "success"
+	BillingStatusPlanned    BillingStatus = "planned"
+	BillingStatusFailed     BillingStatus = "failed"
 	BillingStatusProcessing BillingStatus = "processing"
 )
 

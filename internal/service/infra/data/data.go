@@ -16,7 +16,7 @@ type Data struct {
 }
 
 type SQLStorage struct {
-	Schedule       sqldb.BillingSchedules
+	Schedules      sqldb.BillingSchedules
 	Transactions   sqldb.Transactions
 	PaymentMethods sqldb.PaymentMethods
 	Plans          sqldb.SubPlan
@@ -55,7 +55,7 @@ func NewData(cfg *config.Config) (*Data, error) {
 
 	return &Data{
 		SQL: SQLStorage{
-			Schedule:       sqlSchedule,
+			Schedules:      sqlSchedule,
 			Transactions:   sqlTrans,
 			PaymentMethods: sqlPM,
 			Plans:          sqlSubPlans,

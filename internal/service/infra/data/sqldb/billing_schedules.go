@@ -23,6 +23,7 @@ type BillingSchedules interface {
 	Get(ctx context.Context) (*models.BillingSchedule, error)
 
 	Filter(filters map[string]any) BillingSchedules
+	FilterTime(field string, after bool, date time.Time) BillingSchedules
 
 	Transaction(fn func(ctx context.Context) error) error
 
@@ -237,6 +238,30 @@ func (b *billingSchedules) Filter(filters map[string]any) BillingSchedules {
 		b.counter = b.counter.Where(sq.Eq{key: value})
 		b.deleter = b.deleter.Where(sq.Eq{key: value})
 		b.updater = b.updater.Where(sq.Eq{key: value})
+	}
+	return b
+}
+
+func (b *billingSchedules) FilterTime(field string, after bool, date time.Time) BillingSchedules {
+	var validFields = map[string]bool{
+		"scheduled_date": true,
+		"created_at":     true,
+		"attempted_date": true,
+	}
+	if _, exists := validFields[field]; !exists {
+		return b
+	}
+
+	if after {
+		b.selector = b.selector.Where(sq.Gt{field: date})
+		b.counter = b.counter.Where(sq.Gt{field: date})
+		b.deleter = b.deleter.Where(sq.Gt{field: date})
+		b.updater = b.updater.Where(sq.Gt{field: date})
+	} else {
+		b.selector = b.selector.Where(sq.Lt{field: date})
+		b.counter = b.counter.Where(sq.Lt{field: date})
+		b.deleter = b.deleter.Where(sq.Lt{field: date})
+		b.updater = b.updater.Where(sq.Lt{field: date})
 	}
 	return b
 }

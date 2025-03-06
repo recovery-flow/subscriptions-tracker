@@ -10,7 +10,7 @@ import (
 )
 
 type SubscriptionsTracker interface {
-	GetSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error)
+	GetUserSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error)
 	ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error)
 	DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error
 	CanceledSubscription(ctx context.Context, UserID uuid.UUID) error
@@ -19,6 +19,7 @@ type SubscriptionsTracker interface {
 	DeletePaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) error
 	GetPaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) (*models.PaymentMethod, error)
 	GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([]models.PaymentMethod, error)
+	GetUserDefaultPaymentMethod(ctx context.Context, userID uuid.UUID) (*models.PaymentMethod, error)
 	SetPaymentMethodAsDefault(ctx context.Context, userID, paymentMethodID uuid.UUID) error
 }
 
@@ -104,14 +105,14 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 			ScheduledDate: time.Now().UTC().Add(frePeriod),
 			Status:        models.BillingStatusPlanned,
 		}
-		err = d.Infra.Data.SQL.Schedule.New().Insert(ctx, bc)
+		err = d.Infra.Data.SQL.Schedules.New().Insert(ctx, bc)
 		if err != nil {
 			return err
 		}
 
-		//Create Billing Schedule for the Subscription
+		//Create Billing Schedules for the Subscription
 		if frePeriod == 0 {
-			err = d.Infra.Data.SQL.Schedule.New().Insert(ctx, bc)
+			err = d.Infra.Data.SQL.Schedules.New().Insert(ctx, bc)
 			if err != nil {
 				return err
 			}
@@ -205,7 +206,7 @@ func (d *domain) CanceledSubscription(ctx context.Context, UserID uuid.UUID) err
 	return err
 }
 
-func (d *domain) GetSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error) {
+func (d *domain) GetUserSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error) {
 	res, err := d.Infra.Data.SQL.Subscriptions.Filter(map[string]any{"user_id": userID.String()}).Get(ctx)
 	if err != nil {
 		return nil, err
@@ -276,6 +277,18 @@ func (d *domain) GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([
 	res, err := d.Infra.Data.SQL.PaymentMethods.Filter(map[string]any{
 		"user_id": userID.String(),
 	}).Select(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (d *domain) GetUserDefaultPaymentMethod(ctx context.Context, userID uuid.UUID) (*models.PaymentMethod, error) {
+	res, err := d.Infra.Data.SQL.PaymentMethods.Filter(map[string]any{
+		"user_id":    userID.String(),
+		"is_default": true,
+	}).Get(ctx)
 	if err != nil {
 		return nil, err
 	}
