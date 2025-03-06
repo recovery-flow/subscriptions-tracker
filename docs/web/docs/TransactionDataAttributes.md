@@ -4,20 +4,19 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**UserId** | Pointer to **string** | User ID | [optional] 
-**PlanId** | Pointer to **string** | Plan ID | [optional] 
-**SubId** | Pointer to **string** | Subscriber ID | [optional] 
+**UserId** | **string** | User ID | 
+**PlanId** | **string** | Plan ID | 
+**PaymentId** | **string** | Payment ID | 
 **Amount** | **float32** | Transaction amount | 
 **Currency** | **string** | Transaction currency | 
-**PaymentMethod** | **string** | Payment method | 
 **ProviderTransactionId** | **string** | Provider transaction ID | 
-**CreatedAt** | **time.Time** | Transaction creation date | 
+**TransactionDate** | **time.Time** | Transaction creation date | 
 
 ## Methods
 
 ### NewTransactionDataAttributes
 
-`func NewTransactionDataAttributes(amount float32, currency string, paymentMethod string, providerTransactionId string, createdAt time.Time, ) *TransactionDataAttributes`
+`func NewTransactionDataAttributes(userId string, planId string, paymentId string, amount float32, currency string, providerTransactionId string, transactionDate time.Time, ) *TransactionDataAttributes`
 
 NewTransactionDataAttributes instantiates a new TransactionDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -51,11 +50,6 @@ and a boolean to check if the value has been set.
 
 SetUserId sets UserId field to given value.
 
-### HasUserId
-
-`func (o *TransactionDataAttributes) HasUserId() bool`
-
-HasUserId returns a boolean if a field has been set.
 
 ### GetPlanId
 
@@ -76,36 +70,26 @@ and a boolean to check if the value has been set.
 
 SetPlanId sets PlanId field to given value.
 
-### HasPlanId
 
-`func (o *TransactionDataAttributes) HasPlanId() bool`
+### GetPaymentId
 
-HasPlanId returns a boolean if a field has been set.
+`func (o *TransactionDataAttributes) GetPaymentId() string`
 
-### GetSubId
+GetPaymentId returns the PaymentId field if non-nil, zero value otherwise.
 
-`func (o *TransactionDataAttributes) GetSubId() string`
+### GetPaymentIdOk
 
-GetSubId returns the SubId field if non-nil, zero value otherwise.
+`func (o *TransactionDataAttributes) GetPaymentIdOk() (*string, bool)`
 
-### GetSubIdOk
-
-`func (o *TransactionDataAttributes) GetSubIdOk() (*string, bool)`
-
-GetSubIdOk returns a tuple with the SubId field if it's non-nil, zero value otherwise
+GetPaymentIdOk returns a tuple with the PaymentId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetSubId
+### SetPaymentId
 
-`func (o *TransactionDataAttributes) SetSubId(v string)`
+`func (o *TransactionDataAttributes) SetPaymentId(v string)`
 
-SetSubId sets SubId field to given value.
+SetPaymentId sets PaymentId field to given value.
 
-### HasSubId
-
-`func (o *TransactionDataAttributes) HasSubId() bool`
-
-HasSubId returns a boolean if a field has been set.
 
 ### GetAmount
 
@@ -147,26 +131,6 @@ and a boolean to check if the value has been set.
 SetCurrency sets Currency field to given value.
 
 
-### GetPaymentMethod
-
-`func (o *TransactionDataAttributes) GetPaymentMethod() string`
-
-GetPaymentMethod returns the PaymentMethod field if non-nil, zero value otherwise.
-
-### GetPaymentMethodOk
-
-`func (o *TransactionDataAttributes) GetPaymentMethodOk() (*string, bool)`
-
-GetPaymentMethodOk returns a tuple with the PaymentMethod field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPaymentMethod
-
-`func (o *TransactionDataAttributes) SetPaymentMethod(v string)`
-
-SetPaymentMethod sets PaymentMethod field to given value.
-
-
 ### GetProviderTransactionId
 
 `func (o *TransactionDataAttributes) GetProviderTransactionId() string`
@@ -187,24 +151,24 @@ and a boolean to check if the value has been set.
 SetProviderTransactionId sets ProviderTransactionId field to given value.
 
 
-### GetCreatedAt
+### GetTransactionDate
 
-`func (o *TransactionDataAttributes) GetCreatedAt() time.Time`
+`func (o *TransactionDataAttributes) GetTransactionDate() time.Time`
 
-GetCreatedAt returns the CreatedAt field if non-nil, zero value otherwise.
+GetTransactionDate returns the TransactionDate field if non-nil, zero value otherwise.
 
-### GetCreatedAtOk
+### GetTransactionDateOk
 
-`func (o *TransactionDataAttributes) GetCreatedAtOk() (*time.Time, bool)`
+`func (o *TransactionDataAttributes) GetTransactionDateOk() (*time.Time, bool)`
 
-GetCreatedAtOk returns a tuple with the CreatedAt field if it's non-nil, zero value otherwise
+GetTransactionDateOk returns a tuple with the TransactionDate field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetCreatedAt
+### SetTransactionDate
 
-`func (o *TransactionDataAttributes) SetCreatedAt(v time.Time)`
+`func (o *TransactionDataAttributes) SetTransactionDate(v time.Time)`
 
-SetCreatedAt sets CreatedAt field to given value.
+SetTransactionDate sets TransactionDate field to given value.
 
 
 

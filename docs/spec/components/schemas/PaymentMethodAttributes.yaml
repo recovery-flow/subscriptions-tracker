@@ -24,5 +24,3 @@ properties:
     format: date-time
     description: "Created at"
     example: "2020-01-01T00:00:00Z"
-    readOnly: true
-    writeOnly: true

@@ -15,18 +15,18 @@ paths:
       summary: Test
 components:
   schemas:
-    Subscriber:
+    SubType:
       properties:
         data:
-          $ref: '#/components/schemas/Subscriber_data'
+          $ref: '#/components/schemas/SubType_data'
       required:
       - data
       type: object
-    SubscribersCollection:
+    SubTypesCollection:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/Subscriber/properties/data'
+            $ref: '#/components/schemas/SubType/properties/data'
           type: array
         links:
           $ref: '#/components/schemas/LinksPagination'
@@ -34,25 +34,25 @@ components:
       - data
       - links
       type: object
-    SubscriberUpdate:
+    SubTypeUpdate:
       properties:
         data:
-          $ref: '#/components/schemas/SubscriberUpdate_data'
+          $ref: '#/components/schemas/SubTypeUpdate_data'
       required:
       - data
       type: object
-    SubscriptionPlan:
+    SubPlan:
       properties:
         data:
-          $ref: '#/components/schemas/SubscriptionPlan_data'
+          $ref: '#/components/schemas/SubPlan_data'
       required:
       - data
       type: object
-    SubscriptionPlansCollection:
+    SubPlansCollection:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/SubscriptionPlan/properties/data'
+            $ref: '#/components/schemas/SubPlan/properties/data'
           type: array
         links:
           $ref: '#/components/schemas/LinksPagination'
@@ -60,10 +60,81 @@ components:
       - data
       - links
       type: object
-    SubscriptionPlanUpdate:
+    SubPlanUpdate:
       properties:
         data:
-          $ref: '#/components/schemas/SubscriptionPlanUpdate_data'
+          $ref: '#/components/schemas/SubPlanUpdate_data'
+      required:
+      - data
+      type: object
+    Subscription:
+      properties:
+        data:
+          $ref: '#/components/schemas/Subscription_data'
+      required:
+      - data
+      type: object
+    SubscriptionsCollection:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Subscription/properties/data'
+          type: array
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+      required:
+      - data
+      - links
+      type: object
+    SubscriptionUpdate:
+      properties:
+        data:
+          $ref: '#/components/schemas/SubscriptionUpdate_data'
+      required:
+      - data
+      type: object
+    PaymentMethod:
+      properties:
+        data:
+          $ref: '#/components/schemas/PaymentMethod_data'
+      required:
+      - data
+      type: object
+    PaymentMethodsCollection:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/PaymentMethod/properties/data'
+          type: array
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+      required:
+      - data
+      - links
+      type: object
+    BillingSchedule:
+      properties:
+        data:
+          $ref: '#/components/schemas/BillingSchedule'
+      required:
+      - data
+      type: object
+    BillingSchedulesCollection:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/BillingSchedulesCollection_data_inner'
+          type: array
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+      required:
+      - data
+      - links
+      type: object
+    BillingScheduleUpdate:
+      properties:
+        data:
+          $ref: '#/components/schemas/BillingScheduleUpdate_data'
       required:
       - data
       type: object
@@ -120,146 +191,126 @@ components:
       required:
       - self
       type: object
-    Subscriber_data_attributes:
+    SubType_data_attributes:
       properties:
-        user_id:
-          description: User ID UUID
-          format: uuid
+        name:
+          description: Name
           type: string
-        plan_id:
-          description: Plan ID object ID
-          format: ObjectId
+        description:
+          description: Description
           type: string
-        streak_months:
-          description: Streak months
-          type: integer
         status:
           description: Status
-          enum:
-          - active
-          - inactive
-          - cancelled
-          type: string
-        start_at:
-          description: Start at
-          format: date-time
-          type: string
-        end_at:
-          description: End at
-          format: date-time
           type: string
         updated_at:
-          description: Updated at
+          description: Updated At
           format: date-time
           type: string
         created_at:
-          description: Created at
+          description: Created At
           format: date-time
           type: string
       required:
       - created_at
-      - end_at
-      - plan_id
-      - start_at
+      - description
+      - name
       - status
-      - streak_months
-      - user_id
+      - updated_at
       type: object
-    Subscriber_data:
+    SubType_data:
       properties:
         id:
-          description: Subscriber ID
+          description: Subscription type ID
           format: uuid
           type: string
         type:
           enum:
-          - subscriber
+          - subscription_type
           type: string
         attributes:
-          $ref: '#/components/schemas/Subscriber_data_attributes'
+          $ref: '#/components/schemas/SubType_data_attributes'
       required:
       - attributes
       - id
       - type
       type: object
-    SubscriberUpdate_data_attributes:
+    SubTypeUpdate_data_attributes:
       properties:
-        plan_id:
-          description: Plan ID object ID
-          format: ObjectId
+        name:
+          description: Name
           type: string
-        streak_months:
-          description: Streak months
-          type: integer
         status:
           description: Status
-          enum:
-          - active
-          - inactive
-          - cancelled
           type: string
-        start_at:
-          description: Start at
-          format: date-time
-          type: string
-        end_at:
-          description: End at
+        updated_at:
+          description: Updated At
           format: date-time
           type: string
       type: object
-    SubscriberUpdate_data:
+    SubTypeUpdate_data:
       properties:
         type:
           enum:
-          - subscriber_update
+          - subscription_type_update
           type: string
         attributes:
-          $ref: '#/components/schemas/SubscriberUpdate_data_attributes'
+          $ref: '#/components/schemas/SubTypeUpdate_data_attributes'
       required:
       - attributes
       - type
       type: object
-    SubscriptionPlan_data_attributes:
+    SubPlan_data_attributes:
       properties:
-        title:
-          description: Title
+        type_id:
+          description: Subscription Plan ID
+          format: uuid
+          type: string
+        name:
+          description: Subscription Plan Name
+          type: string
+        desc:
+          description: Subscription Plan Description
           type: string
         price:
-          description: Price
+          description: Subscription Plan Price
+          format: float64
           type: number
         currency:
-          description: Currency
+          description: Subscription Plan Currency
           type: string
-        pay_frequency:
-          description: Pay frequency
+        billing_cycle:
+          description: Subscription Plan Billing Interval
           type: string
+        billing_interval:
+          description: Subscription Plan Billing Interval
+          type: integer
         status:
-          description: Status
+          description: Subscription Plan Status
           enum:
           - active
           - inactive
-          - cancelled
           type: string
         updated_at:
-          description: Updated at
-          format: date-time
-          type: string
-        deleted_at:
+          description: Subscription Plan Updated At
           format: date-time
           type: string
         created_at:
-          description: Created at
+          description: Subscription Plan Created At
           format: date-time
           type: string
       required:
+      - billing_cycle
+      - billing_interval
       - created_at
       - currency
-      - pay_frequency
+      - desc
+      - name
       - price
       - status
-      - title
+      - type_id
+      - updated_at
       type: object
-    SubscriptionPlan_data:
+    SubPlan_data:
       properties:
         id:
           description: Subscription Plan ID
@@ -270,16 +321,19 @@ components:
           - subscription_plan
           type: string
         attributes:
-          $ref: '#/components/schemas/SubscriptionPlan_data_attributes'
+          $ref: '#/components/schemas/SubPlan_data_attributes'
       required:
       - attributes
       - id
       - type
       type: object
-    SubscriptionPlanUpdate_data_attributes:
+    SubPlanUpdate_data_attributes:
       properties:
-        title:
-          description: Title
+        name:
+          description: Name
+          type: string
+        desc:
+          description: Description
           type: string
         price:
           description: Price
@@ -287,8 +341,90 @@ components:
         currency:
           description: Currency
           type: string
-        pay_frequency:
-          description: Pay frequency
+        status:
+          description: Status
+          type: string
+      type: object
+    SubPlanUpdate_data:
+      properties:
+        type:
+          enum:
+          - subscription_plan_update
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SubPlanUpdate_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
+    Subscription_data_attributes:
+      properties:
+        plan_id:
+          description: Plan ID
+          format: uuid
+          type: string
+        payment_method_id:
+          description: Payment Method ID
+          format: uuid
+          type: string
+        status:
+          description: State
+          enum:
+          - active
+          - inactive
+          - canceled
+          - expired
+          type: string
+        availability:
+          description: Availability
+          enum:
+          - available
+          - unavailable
+          - removed
+          type: string
+        start_at:
+          description: Start at
+          format: date-time
+          type: string
+        updated_at:
+          description: Updated at
+          format: date-time
+          type: string
+        created_at:
+          description: Created at
+          format: date-time
+          type: string
+      required:
+      - availability
+      - created_at
+      - payment_method_id
+      - plan_id
+      - start_date
+      - status
+      - updated_at
+      type: object
+    Subscription_data:
+      properties:
+        id:
+          description: User ID
+          format: uuid
+          type: string
+        type:
+          enum:
+          - subscriber
+          type: string
+        attributes:
+          $ref: '#/components/schemas/Subscription_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+      type: object
+    SubscriptionUpdate_data_attributes:
+      properties:
+        plan_id:
+          description: Plan ID object ID
+          format: ObjectId
           type: string
         status:
           description: Status
@@ -297,18 +433,129 @@ components:
           - inactive
           - cancelled
           type: string
+        payment_method_id:
+          description: Payment Method ID
+          format: uuid
+          type: string
       type: object
-    SubscriptionPlanUpdate_data:
+    SubscriptionUpdate_data:
       properties:
         type:
           enum:
-          - subscription_plan_update
+          - subscriber_update
           type: string
         attributes:
-          $ref: '#/components/schemas/SubscriptionPlanUpdate_data_attributes'
+          $ref: '#/components/schemas/SubscriptionUpdate_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
+    PaymentMethod_data_attributes:
+      properties:
+        user_id:
+          description: User ID
+          format: uuid
+          type: string
+        type:
+          enum:
+          - payment_method
+          type: string
+        provider_token:
+          description: Provider token
+          type: string
+        is_default:
+          description: Is default
+          type: boolean
+        created_at:
+          description: Created at
+          example: 2020-01-01T00:00:00Z
+          format: date-time
+          type: string
+      required:
+      - created_at
+      - is_default
+      - provider_token
+      - type
+      - user_id
+      type: object
+    PaymentMethod_data:
+      properties:
+        id:
+          description: payment method ID
+          format: uuid
+          type: string
+        type:
+          enum:
+          - payment_method
+          type: string
+        attributes:
+          $ref: '#/components/schemas/PaymentMethod_data_attributes'
       required:
       - attributes
       - id
+      - type
+      type: object
+    BillingSchedulesCollection_data_inner:
+      properties:
+        id:
+          description: schedules ID
+          format: uuid
+          type: string
+        type:
+          enum:
+          - billing_schedule
+          type: string
+        attributes:
+          $ref: '#/components/schemas/BillingScheduleUpdate/properties/data/properties/attributes'
+      required:
+      - attributes
+      - id
+      - type
+    BillingScheduleUpdate_data_attributes:
+      properties:
+        user_id:
+          description: User ID
+          format: uuid
+          type: string
+        schedules_date:
+          description: Billing Schedule Date
+          format: date-time
+          type: string
+        attempted_date:
+          description: Billing Schedule Attempted Date
+          format: date-time
+          type: string
+        status:
+          description: Billing Schedule Status
+          enum:
+          - active
+          - inactive
+          type: string
+        updated_at:
+          description: Billing Schedule Updated At
+          format: date-time
+          type: string
+        created_at:
+          description: Billing Schedule Created At
+          format: date-time
+          type: string
+      required:
+      - created_at
+      - schedules_date
+      - status
+      - updated_at
+      - user_id
+      type: object
+    BillingScheduleUpdate_data:
+      properties:
+        type:
+          enum:
+          - billing_schedule_update
+          type: string
+        attributes:
+          $ref: '#/components/schemas/BillingScheduleUpdate_data_attributes'
+      required:
+      - attributes
       - type
       type: object
     Transaction_data_attributes:
@@ -321,8 +568,8 @@ components:
           description: Plan ID
           format: ObjectId
           type: string
-        sub_id:
-          description: Subscriber ID
+        payment_id:
+          description: Payment ID
           format: ObjectId
           type: string
         amount:
@@ -332,22 +579,21 @@ components:
         currency:
           description: Transaction currency
           type: string
-        payment_method:
-          description: Payment method
-          type: string
         provider_transaction_id:
           description: Provider transaction ID
           type: string
-        created_at:
+        transaction_date:
           description: Transaction creation date
           format: date-time
           type: string
       required:
       - amount
-      - created_at
       - currency
-      - payment_method
+      - payment_id
+      - plan_id
       - provider_transaction_id
+      - transaction_date
+      - user_id
       type: object
     Transaction_data:
       properties:

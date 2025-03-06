@@ -87,16 +87,18 @@ components:
               enum:
                 - subscription_type_update
             attributes:
-              name:
-                type: string
-                description: Name
-              status:
-                type: string
-                description: Status
-              updated_at:
-                type: string
-                format: date-time
-                description: Updated At
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name
+                status:
+                  type: string
+                  description: Status
+                updated_at:
+                  type: string
+                  format: date-time
+                  description: Updated At
     SubPlan:
       type: object
       required:
@@ -372,8 +374,6 @@ components:
                   format: date-time
                   description: Created at
                   example: '2020-01-01T00:00:00Z'
-                  readOnly: true
-                  writeOnly: true
     PaymentMethodsCollection:
       type: object
       required:
