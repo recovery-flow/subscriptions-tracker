@@ -6,9 +6,13 @@ import (
 
 	"github.com/recovery-flow/subscriptions-tracker/internal/service"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/api"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/workers/billing"
 )
 
 func runServices(ctx context.Context, srv *service.Service, wg *sync.WaitGroup) {
+	var (
+		billingSchedules = make(chan struct{})
+	)
 	run := func(f func()) {
 		wg.Add(1)
 		go func() {
@@ -17,7 +21,8 @@ func runServices(ctx context.Context, srv *service.Service, wg *sync.WaitGroup) 
 		}()
 	}
 
-	run(func() { api.Run(ctx, srv) })
+	run(func() { billing.Run(ctx, srv, billingSchedules) })
+	<-billingSchedules
 
-	//run(func() { listener.Listener(ctx, srv) })
+	run(func() { api.Run(ctx, srv) })
 }

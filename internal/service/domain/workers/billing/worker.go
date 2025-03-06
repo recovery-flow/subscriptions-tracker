@@ -2,48 +2,60 @@ package billing
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"sync"
+	"time"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
+	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/workers/cron"
 )
 
-type Worker struct {
-	id      int
-	tasks   <-chan Task
-	service *service.Service
-}
+func Run(ctx context.Context, svc *service.Service, sig chan struct{}) {
+	cron.Init(svc.Log.WithField("billing", "cron"))
+	log := svc.Log.WithField("who", "billing")
 
-func NewWorker(id int, tasks <-chan Task, svc *service.Service) *Worker {
-	return &Worker{
-		id:      id,
-		tasks:   tasks,
-		service: svc,
-	}
-}
-
-func (w *Worker) Start(ctx context.Context) {
-	log.Printf("Worker %d started", w.id)
-	for {
-		select {
-		case task, ok := <-w.tasks:
-			if !ok {
-				log.Printf("Worker %d: task channel closed", w.id)
+	_, err := cron.NewJob(
+		gocron.DailyJob(1, gocron.NewAtTimes(gocron.NewAtTime(0, 15, 0))),
+		gocron.NewTask(func() {
+			schedules, err := svc.Domain.SelectSchedule(ctx, false, time.Now().UTC())
+			if err != nil {
+				log.WithError(err).Error("failed to get schedules")
 				return
 			}
-			// Обработка задачи списания
-			w.processTask(ctx, task)
-		case <-ctx.Done():
-			log.Printf("Worker %d: context cancelled", w.id)
-			return
-		}
-	}
-}
 
-func (w *Worker) processTask(ctx context.Context, task Task) {
-	err := w.service.Domain.MadeTransaction(ctx, task.UserID)
+			if len(schedules) == 0 {
+				log.Info("No schedules to process")
+				return
+			}
+
+			const concurrencyLimit = 10
+			sem := make(chan struct{}, concurrencyLimit)
+			var wg sync.WaitGroup
+
+			for _, schedule := range schedules {
+				wg.Add(1)
+				sem <- struct{}{}
+				go func(sched models.BillingSchedule) {
+					defer wg.Done()
+					err := svc.Domain.MadeTransaction(ctx, sched.UserID)
+					if err != nil {
+						log.WithError(err).Errorf("failed to make transaction for user %s", sched.UserID)
+					} else {
+						log.Infof("Transaction processed successfully for user %s", sched.UserID)
+					}
+					<-sem
+				}(schedule)
+			}
+			wg.Wait()
+		}),
+		gocron.WithName("billing"),
+	)
 	if err != nil {
-		log.Printf("Worker %d: error processing transaction for user %s: %v", w.id, task.UserID, err)
-	} else {
-		log.Printf("Worker %d: transaction processed successfully for user %s", w.id, task.UserID)
+		panic(fmt.Errorf("failed to initialize daily job: %w", err))
 	}
+	sig <- struct{}{}
+
+	cron.Start(ctx)
 }

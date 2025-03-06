@@ -11,7 +11,7 @@ import (
 type SubscriptionSchedule interface {
 	GetUserSchedule(ctx context.Context, userID uuid.UUID) (*models.BillingSchedule, error)
 
-	SelectSchedule(ctx context.Context, after bool, date time.Time) (*models.BillingSchedule, error)
+	SelectSchedule(ctx context.Context, after bool, date time.Time) ([]models.BillingSchedule, error)
 	MadeTransaction(ctx context.Context, userID uuid.UUID) error
 }
 
@@ -21,8 +21,8 @@ func (d *domain) GetUserSchedule(ctx context.Context, userID uuid.UUID) (*models
 	}).Get(ctx)
 }
 
-func (d *domain) SelectSchedule(ctx context.Context, after bool, date time.Time) (*models.BillingSchedule, error) {
-	return d.Infra.Data.SQL.Schedules.New().FilterTime("scheduled_date", after, date).Get(ctx)
+func (d *domain) SelectSchedule(ctx context.Context, after bool, date time.Time) ([]models.BillingSchedule, error) {
+	return d.Infra.Data.SQL.Schedules.New().FilterTime("scheduled_date", after, date).Select(ctx)
 }
 
 func (d *domain) MadeTransaction(ctx context.Context, userID uuid.UUID) error {
