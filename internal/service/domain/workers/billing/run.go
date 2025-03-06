@@ -11,7 +11,7 @@ import (
 const WorkerCount = 10
 
 func Run(ctx context.Context, svc *service.Service, interval time.Duration) {
-	tasks := make(chan BillingTask, 100)
+	tasks := make(chan Task, 100)
 
 	for i := 0; i < WorkerCount; i++ {
 		worker := NewWorker(i+1, tasks, svc)
@@ -38,7 +38,7 @@ func Run(ctx context.Context, svc *service.Service, interval time.Duration) {
 				log.Println("Worker pool: no due billing schedule found")
 				continue
 			}
-			task := BillingTask{
+			task := Task{
 				Schedule: *schedule,
 				UserID:   schedule.UserID,
 			}

@@ -9,11 +9,11 @@ import (
 
 type Worker struct {
 	id      int
-	tasks   <-chan BillingTask
+	tasks   <-chan Task
 	service *service.Service
 }
 
-func NewWorker(id int, tasks <-chan BillingTask, svc *service.Service) *Worker {
+func NewWorker(id int, tasks <-chan Task, svc *service.Service) *Worker {
 	return &Worker{
 		id:      id,
 		tasks:   tasks,
@@ -39,7 +39,7 @@ func (w *Worker) Start(ctx context.Context) {
 	}
 }
 
-func (w *Worker) processTask(ctx context.Context, task BillingTask) {
+func (w *Worker) processTask(ctx context.Context, task Task) {
 	err := w.service.Domain.MadeTransaction(ctx, task.UserID)
 	if err != nil {
 		log.Printf("Worker %d: error processing transaction for user %s: %v", w.id, task.UserID, err)

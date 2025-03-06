@@ -5,7 +5,7 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 )
 
-type BillingTask struct {
+type Task struct {
 	Schedule models.BillingSchedule
 	UserID   uuid.UUID
 }
