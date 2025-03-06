@@ -71,7 +71,7 @@ func (p *subPlan) Insert(ctx context.Context, plan *models.SubscriptionPlan) err
 
 	query, args, err := p.inserter.SetMap(values).ToSql()
 	if err != nil {
-		return fmt.Errorf("building insert query for subscription_plans: %w", err)
+		return fmt.Errorf("building insert query for %s: %w", subscriptionPlansTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -80,7 +80,7 @@ func (p *subPlan) Insert(ctx context.Context, plan *models.SubscriptionPlan) err
 		_, err = p.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("inserting subscription_plan: %w", err)
+		return fmt.Errorf("inserting %s: %w", subscriptionPlansTable, err)
 	}
 	return nil
 }
@@ -89,7 +89,7 @@ func (p *subPlan) Update(ctx context.Context, updates map[string]any) error {
 	updates["updated_at"] = time.Now().UTC()
 	query, args, err := p.updater.SetMap(updates).ToSql()
 	if err != nil {
-		return fmt.Errorf("building update query for subscription_plans: %w", err)
+		return fmt.Errorf("building update query for %s: %w", subscriptionPlansTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -98,7 +98,7 @@ func (p *subPlan) Update(ctx context.Context, updates map[string]any) error {
 		_, err = p.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("updating subscription_plan: %w", err)
+		return fmt.Errorf("updating %s: %w", subscriptionPlansTable, err)
 	}
 	return nil
 }
@@ -106,7 +106,7 @@ func (p *subPlan) Update(ctx context.Context, updates map[string]any) error {
 func (p *subPlan) Delete(ctx context.Context) error {
 	query, args, err := p.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("building delete query for subscription_plans: %w", err)
+		return fmt.Errorf("building delete query for %s: %w", subscriptionPlansTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -115,7 +115,7 @@ func (p *subPlan) Delete(ctx context.Context) error {
 		_, err = p.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("deleting subscription_plan: %w", err)
+		return fmt.Errorf("deleting %s: %w", subscriptionPlansTable, err)
 	}
 	return nil
 }
@@ -123,12 +123,12 @@ func (p *subPlan) Delete(ctx context.Context) error {
 func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error) {
 	query, args, err := p.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building select query for subscription_plans: %w", err)
+		return nil, fmt.Errorf("building select query for %s: %w", subscriptionPlansTable, err)
 	}
 
 	rows, err := p.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("executing select query for subscription_plans: %w", err)
+		return nil, fmt.Errorf("executing select query for %s: %w", subscriptionPlansTable, err)
 	}
 	defer rows.Close()
 
@@ -149,7 +149,7 @@ func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 			&plan.CreatedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("scanning subscription_plan row: %w", err)
+			return nil, fmt.Errorf("scanning %s row: %w", subscriptionPlansTable, err)
 		}
 		plans = append(plans, plan)
 	}
@@ -159,12 +159,12 @@ func (p *subPlan) Select(ctx context.Context) ([]models.SubscriptionPlan, error)
 func (p *subPlan) Count(ctx context.Context) (int, error) {
 	query, args, err := p.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("building count query for subscription_plans: %w", err)
+		return 0, fmt.Errorf("building count query for %s: %w", subscriptionPlansTable, err)
 	}
 
 	var count int
 	if err := p.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
-		return 0, fmt.Errorf("counting subscription_plans: %w", err)
+		return 0, fmt.Errorf("counting %s: %w", subscriptionPlansTable, err)
 	}
 	return count, nil
 }
@@ -172,7 +172,7 @@ func (p *subPlan) Count(ctx context.Context) (int, error) {
 func (p *subPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
 	query, args, err := p.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building get query for subscription_plans: %w", err)
+		return nil, fmt.Errorf("building get query for %s: %w", subscriptionPlansTable, err)
 	}
 
 	var plan models.SubscriptionPlan
@@ -193,7 +193,7 @@ func (p *subPlan) Get(ctx context.Context) (*models.SubscriptionPlan, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("getting subscription_plan: %w", err)
+		return nil, fmt.Errorf("getting %s: %w", subscriptionPlansTable, err)
 	}
 
 	return &plan, nil

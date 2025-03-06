@@ -1,13 +1,13 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type BillingSchedule struct {
-	ID            uuid.UUID     `json:"id"`
 	UserID        uuid.UUID     `json:"user_id"`
 	ScheduledDate time.Time     `json:"scheduled_date"`
 	AttemptedDate *time.Time    `json:"attempted_date,omitempty"`
@@ -21,5 +21,21 @@ type BillingStatus string
 const (
 	BillingStatusPlanned BillingStatus = "planned"
 	BillingStatusFailed  BillingStatus = "failed"
-	BillingStatusPaid    BillingStatus = "success"
+	//BillingStatusSuccess    BillingStatus = "success"
+	BillingStatusProcessing BillingStatus = "processing"
 )
+
+func ParseBillingStatus(status string) (BillingStatus, error) {
+	switch status {
+	case "planned":
+		return BillingStatusPlanned, nil
+	case "failed":
+		return BillingStatusFailed, nil
+	//case "success":
+	//	return BillingStatusSuccess, nil
+	case "processing":
+		return BillingStatusProcessing, nil
+	default:
+		return "", fmt.Errorf("invalid billing status: %s", status)
+	}
+}

@@ -14,7 +14,7 @@ const transactionsTable = "subscription_transactions"
 type Transactions interface {
 	New() Transactions
 
-	Insert(ctx context.Context, trn models.Transaction) error
+	Insert(ctx context.Context, trn *models.Transaction) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 	Select(ctx context.Context) ([]models.Transaction, error)
@@ -53,7 +53,7 @@ func (t *transactions) New() Transactions {
 	return NewTransactions(t.db)
 }
 
-func (t *transactions) Insert(ctx context.Context, trn models.Transaction) error {
+func (t *transactions) Insert(ctx context.Context, trn *models.Transaction) error {
 	values := map[string]interface{}{
 		"id":                trn.ID,
 		"user_id":           trn.UserID,
@@ -68,7 +68,7 @@ func (t *transactions) Insert(ctx context.Context, trn models.Transaction) error
 
 	query, args, err := t.inserter.SetMap(values).ToSql()
 	if err != nil {
-		return fmt.Errorf("building insert query for subscription_transactions: %w", err)
+		return fmt.Errorf("building insert query for %s: %w", transactionsTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -77,7 +77,7 @@ func (t *transactions) Insert(ctx context.Context, trn models.Transaction) error
 		_, err = t.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("inserting subscription_transaction: %w", err)
+		return fmt.Errorf("inserting %s: %w", transactionsTable, err)
 	}
 	return nil
 }
@@ -85,7 +85,7 @@ func (t *transactions) Insert(ctx context.Context, trn models.Transaction) error
 func (t *transactions) Update(ctx context.Context, updates map[string]any) error {
 	query, args, err := t.updater.SetMap(updates).ToSql()
 	if err != nil {
-		return fmt.Errorf("building update query for subscription_transactions: %w", err)
+		return fmt.Errorf("building update query for %s: %w", transactionsTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -94,7 +94,7 @@ func (t *transactions) Update(ctx context.Context, updates map[string]any) error
 		_, err = t.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("updating subscription_transaction: %w", err)
+		return fmt.Errorf("updating %s: %w", transactionsTable, err)
 	}
 	return nil
 }
@@ -102,7 +102,7 @@ func (t *transactions) Update(ctx context.Context, updates map[string]any) error
 func (t *transactions) Delete(ctx context.Context) error {
 	query, args, err := t.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("building delete query for subscription_transactions: %w", err)
+		return fmt.Errorf("building delete query for %s: %w", transactionsTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -111,7 +111,7 @@ func (t *transactions) Delete(ctx context.Context) error {
 		_, err = t.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("deleting subscription_transaction: %w", err)
+		return fmt.Errorf("deleting %s: %w", transactionsTable, err)
 	}
 	return nil
 }
@@ -119,12 +119,12 @@ func (t *transactions) Delete(ctx context.Context) error {
 func (t *transactions) Select(ctx context.Context) ([]models.Transaction, error) {
 	query, args, err := t.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building select query for subscription_transactions: %w", err)
+		return nil, fmt.Errorf("building select query for %s: %w", transactionsTable, err)
 	}
 
 	rows, err := t.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("executing select query for subscription_transactions: %w", err)
+		return nil, fmt.Errorf("executing select query for %s: %w", transactionsTable, err)
 	}
 	defer rows.Close()
 
@@ -144,7 +144,7 @@ func (t *transactions) Select(ctx context.Context) ([]models.Transaction, error)
 			&trn.TransactionDate,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("scanning subscription_transaction: %w", err)
+			return nil, fmt.Errorf("scanning %s: %w", transactionsTable, err)
 		}
 
 		results = append(results, trn)
@@ -155,12 +155,12 @@ func (t *transactions) Select(ctx context.Context) ([]models.Transaction, error)
 func (t *transactions) Count(ctx context.Context) (int, error) {
 	query, args, err := t.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("building count query for subscription_transactions: %w", err)
+		return 0, fmt.Errorf("building count query for %s: %w", transactionsTable, err)
 	}
 
 	var count int
 	if err := t.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
-		return 0, fmt.Errorf("counting subscription_transactions: %w", err)
+		return 0, fmt.Errorf("counting %s: %w", transactionsTable, err)
 	}
 	return count, nil
 }
@@ -168,7 +168,7 @@ func (t *transactions) Count(ctx context.Context) (int, error) {
 func (t *transactions) Get(ctx context.Context) (*models.Transaction, error) {
 	query, args, err := t.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building get query for subscription_transactions: %w", err)
+		return nil, fmt.Errorf("building get query for %s: %w", transactionsTable, err)
 	}
 
 	var trn models.Transaction
@@ -188,7 +188,7 @@ func (t *transactions) Get(ctx context.Context) (*models.Transaction, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("getting subscription_transaction: %w", err)
+		return nil, fmt.Errorf("getting %s: %w", transactionsTable, err)
 	}
 
 	return &trn, nil

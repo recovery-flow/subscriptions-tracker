@@ -15,7 +15,7 @@ const billingSchedulesTable = "billing_schedules"
 type BillingSchedules interface {
 	New() BillingSchedules
 
-	Insert(ctx context.Context, bs models.BillingSchedule) error
+	Insert(ctx context.Context, bs *models.BillingSchedule) error
 	Update(ctx context.Context, updates map[string]any) error
 	Delete(ctx context.Context) error
 	Select(ctx context.Context) ([]models.BillingSchedule, error)
@@ -54,9 +54,8 @@ func (b *billingSchedules) New() BillingSchedules {
 	return NewBillingSchedules(b.db)
 }
 
-func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule) error {
+func (b *billingSchedules) Insert(ctx context.Context, bs *models.BillingSchedule) error {
 	values := map[string]interface{}{
-		"id":             bs.ID,
 		"user_id":        bs.UserID,
 		"scheduled_date": bs.ScheduledDate,
 		"status":         bs.Status,
@@ -70,7 +69,7 @@ func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule
 
 	query, args, err := b.inserter.SetMap(values).ToSql()
 	if err != nil {
-		return fmt.Errorf("building insert query for billing_schedules: %w", err)
+		return fmt.Errorf("building insert query for %s: %w", billingSchedulesTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -79,7 +78,7 @@ func (b *billingSchedules) Insert(ctx context.Context, bs models.BillingSchedule
 		_, err = b.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("inserting billing_schedule: %w", err)
+		return fmt.Errorf("inserting %s: %w", billingSchedulesTable, err)
 	}
 	return nil
 }
@@ -88,7 +87,7 @@ func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) e
 	updates["updated_at"] = time.Now().UTC()
 	query, args, err := b.updater.SetMap(updates).ToSql()
 	if err != nil {
-		return fmt.Errorf("building update query for billing_schedules: %w", err)
+		return fmt.Errorf("building update query for %s: %w", billingSchedulesTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -97,7 +96,7 @@ func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) e
 		_, err = b.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("updating billing_schedule: %w", err)
+		return fmt.Errorf("updating %s: %w", billingSchedulesTable, err)
 	}
 	return nil
 }
@@ -105,7 +104,7 @@ func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) e
 func (b *billingSchedules) Delete(ctx context.Context) error {
 	query, args, err := b.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("building delete query for billing_schedules: %w", err)
+		return fmt.Errorf("building delete query for %s: %w", billingSchedulesTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -114,7 +113,7 @@ func (b *billingSchedules) Delete(ctx context.Context) error {
 		_, err = b.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("deleting billing_schedule: %w", err)
+		return fmt.Errorf("deleting %s: %w", billingSchedulesTable, err)
 	}
 	return nil
 }
@@ -122,12 +121,12 @@ func (b *billingSchedules) Delete(ctx context.Context) error {
 func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building select query for billing_schedules: %w", err)
+		return nil, fmt.Errorf("building select query for %s: %w", billingSchedulesTable, err)
 	}
 
 	rows, err := b.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("executing select query for billing_schedules: %w", err)
+		return nil, fmt.Errorf("executing select query for %s: %w", billingSchedulesTable, err)
 	}
 	defer rows.Close()
 
@@ -137,7 +136,6 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 		var attemptedDate sql.NullTime
 
 		err := rows.Scan(
-			&bs.ID,
 			&bs.UserID,
 			&bs.ScheduledDate,
 			&attemptedDate,
@@ -146,7 +144,7 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 			&bs.UpdatedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("scanning billing_schedule row: %w", err)
+			return nil, fmt.Errorf("scanning %s row: %w", billingSchedulesTable, err)
 		}
 
 		if attemptedDate.Valid {
@@ -163,12 +161,12 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 func (b *billingSchedules) Count(ctx context.Context) (int, error) {
 	query, args, err := b.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("building count query for billing_schedules: %w", err)
+		return 0, fmt.Errorf("building count query for %s: %w", billingSchedulesTable, err)
 	}
 
 	var count int
 	if err := b.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
-		return 0, fmt.Errorf("counting billing_schedules: %w", err)
+		return 0, fmt.Errorf("counting %s: %w", billingSchedulesTable, err)
 	}
 	return count, nil
 }
@@ -176,14 +174,13 @@ func (b *billingSchedules) Count(ctx context.Context) (int, error) {
 func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, error) {
 	query, args, err := b.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building get query for billing_schedules: %w", err)
+		return nil, fmt.Errorf("building get query for %s: %w", billingSchedulesTable, err)
 	}
 
 	var bs models.BillingSchedule
 	var attemptedDate *time.Time
 
 	err = b.db.QueryRowContext(ctx, query, args...).Scan(
-		&bs.ID,
 		&bs.UserID,
 		&bs.ScheduledDate,
 		&attemptedDate,
@@ -195,7 +192,7 @@ func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, er
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("getting billing_schedule: %w", err)
+		return nil, fmt.Errorf("getting %s: %w", billingSchedulesTable, err)
 	}
 	bs.AttemptedDate = attemptedDate
 
@@ -228,7 +225,6 @@ func (b *billingSchedules) Transaction(fn func(ctx context.Context) error) error
 
 func (b *billingSchedules) Filter(filters map[string]any) BillingSchedules {
 	var validFilters = map[string]bool{
-		"id":      true,
 		"user_id": true,
 		"status":  true,
 	}

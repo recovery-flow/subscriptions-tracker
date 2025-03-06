@@ -27,8 +27,8 @@ CREATE TABLE subscriptions (
    user_id UUID PRIMARY KEY,
    plan_id UUID NOT NULL REFERENCES subscription_plans (id),
    payment_method_id UUID NOT NULL,
-   status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive', 'expired')),
-   availability VARCHAR(20) NOT NULL CHECK (availability IN ('available', 'deprecated', 'removed')),
+   status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive', 'canceled', 'expired')),
+   availability VARCHAR(20) NOT NULL CHECK (availability IN ('available', 'unavailable', 'removed')),
    start_date TIMESTAMP NOT NULL DEFAULT NOW(),
    end_date TIMESTAMP NOT NULL,
    updated_at TIMESTAMP DEFAULT NOW(),
@@ -46,6 +46,7 @@ CREATE TABLE payment_methods (
     type VARCHAR(50) NOT NULL CHECK (type IN ('google_pay', 'apple_pay', 'samsung_pay', 'paypal')),
     provider_token VARCHAR(255) NOT NULL,
     is_default BOOLEAN DEFAULT TRUE,
+    updated_at TIMESTAMP DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -58,7 +59,7 @@ CREATE TABLE subscription_transactions (
     amount DECIMAL(10,2) NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'USD',
     status VARCHAR(20) NOT NULL CHECK (status IN ('success', 'failed')),
-    payment_provider VARCHAR(50) NOT NULL CHECK (payment_provider IN ('Stripe', 'PayPal')),
+    payment_provider VARCHAR(50) NOT NULL CHECK (payment_provider IN ('stripe', 'paypal')),
     payment_id VARCHAR(100) UNIQUE,
     transaction_date TIMESTAMP DEFAULT NOW()
 );
@@ -67,11 +68,10 @@ CREATE INDEX idx_subscription_transactions_status ON subscription_transactions (
 CREATE INDEX idx_subscription_transactions_date ON subscription_transactions (transaction_date);
 
 CREATE TABLE billing_schedule (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,
+    user_id UUID PRIMARY KEY NOT NULL,
     scheduled_date TIMESTAMP NOT NULL,
     attempted_date TIMESTAMP,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('planned', 'success', 'failed')),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('planned', 'processing', 'success', 'failed')),
     created_at TIMESTAMP DEFAULT NOW()
 );
 

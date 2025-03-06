@@ -11,18 +11,18 @@ import (
 
 type SubscriptionsTracker interface {
 	GetSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error)
-	ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID) (*models.Subscription, error)
+	ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error)
 	DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error
 	CanceledSubscription(ctx context.Context, UserID uuid.UUID) error
 
-	AddPaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) error
-	DeletePaymentMethod(ctx context.Context, userID uuid.UUID, paymentMethodID uuid.UUID) error
-	GetPaymentMethod(ctx context.Context, ID uuid.UUID) (*models.PaymentMethod, error)
+	AddPaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) (*models.PaymentMethod, error)
+	DeletePaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) error
+	GetPaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) (*models.PaymentMethod, error)
 	GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([]models.PaymentMethod, error)
 	SetPaymentMethodAsDefault(ctx context.Context, userID, paymentMethodID uuid.UUID) error
 }
 
-func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID) (*models.Subscription, error) {
+func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error) {
 	var subscription *models.Subscription
 	err := d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
 		sType, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{
@@ -64,9 +64,7 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 			return fmt.Errorf("payment method does not belong to user %s", PaymentMethodID)
 		}
 
-		//TODO integrate payment for the subscription
-
-		//Main logic for the subscription activation
+		//Create a new subscription
 
 		var endDate time.Time
 		uInterval := sPlan.BillingIntervalUnit
@@ -99,6 +97,57 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 
 		if err := d.Infra.Data.SQL.Subscriptions.New().Insert(ctx, subscription); err != nil {
 			return err
+		}
+
+		bc := &models.BillingSchedule{
+			UserID:        UserID,
+			ScheduledDate: time.Now().UTC().Add(frePeriod),
+			Status:        models.BillingStatusPlanned,
+		}
+		err = d.Infra.Data.SQL.Schedule.New().Insert(ctx, bc)
+		if err != nil {
+			return err
+		}
+
+		//Create Billing Schedule for the Subscription
+		if frePeriod == 0 {
+			err = d.Infra.Data.SQL.Schedule.New().Insert(ctx, bc)
+			if err != nil {
+				return err
+			}
+			//TODO there should have been a payment :)
+			//pay, payErr := code.SomePaymentMethod(pMethod)
+			//if payErr != nil {
+			//	err = d.Infra.Data.SQL.Transactions.New().Insert(ctx , &models.Transaction{
+			//		ID: uuid.New(),
+			//		UserID: UserID,
+			//		PaymentMethodID: PaymentMethodID,
+			//		Amount: sPlan.Price,
+			//		Currency: sPlan.Currency,
+			//		Status: models.TrnStatusFailed,
+			//		PaymentProvider: "TODO",
+			//		PaymentID: "TODO",
+			//		TransactionDate: time.Now().UTC(),
+			//	})
+			//	if err != nil {
+			//		d.log.WithError(err).Error("failed to insert transaction")
+			//	}
+			//	return payErr
+			//}
+			//err = d.Infra.Data.SQL.Transactions.New().Insert(ctx , &models.Transaction{
+			//	ID: uuid.New(),
+			//	UserID: UserID,
+			//	PaymentMethodID: PaymentMethodID,
+			//	Amount: sPlan.Price,
+			//	Currency: sPlan.Currency,
+			//	Status: models.TrnStatusSuccess,
+			//	PaymentProvider: "TODO",
+			//	PaymentID: "TODO",
+			//	TransactionDate: time.Now().UTC(),
+			//})
+			//if err != nil {
+			//	d.log.WithError(err).Error("failed to insert transaction")
+			//}
 		}
 
 		//TODO to supplement the work with Kafka

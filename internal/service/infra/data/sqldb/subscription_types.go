@@ -65,7 +65,7 @@ func (t *subTypes) Insert(ctx context.Context, sub *models.SubscriptionType) err
 		"created_at":  time.Now().UTC(),
 	}).ToSql()
 	if err != nil {
-		return fmt.Errorf("error building insert query for subscription_types: %w", err)
+		return fmt.Errorf("error building insert query for %s: %w", subscriptionTypesTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -74,7 +74,7 @@ func (t *subTypes) Insert(ctx context.Context, sub *models.SubscriptionType) err
 		_, err = t.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("error inserting subscription_type: %w", err)
+		return fmt.Errorf("error inserting %s: %w", subscriptionTypesTable, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func (t *subTypes) Update(ctx context.Context, updates map[string]any) error {
 	updates["updated_at"] = time.Now().UTC()
 	query, args, err := t.updater.SetMap(updates).ToSql()
 	if err != nil {
-		return fmt.Errorf("error building update query for subscription_types: %w", err)
+		return fmt.Errorf("error building update query for %s: %w", subscriptionTypesTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -92,7 +92,7 @@ func (t *subTypes) Update(ctx context.Context, updates map[string]any) error {
 		_, err = t.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("error updating subscription_type: %w", err)
+		return fmt.Errorf("error updating %s: %w", subscriptionTypesTable, err)
 	}
 	return nil
 }
@@ -100,7 +100,7 @@ func (t *subTypes) Update(ctx context.Context, updates map[string]any) error {
 func (t *subTypes) Delete(ctx context.Context) error {
 	query, args, err := t.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("error building delete query for subscription_types: %w", err)
+		return fmt.Errorf("error building delete query for %s: %w", subscriptionTypesTable, err)
 	}
 
 	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
@@ -109,7 +109,7 @@ func (t *subTypes) Delete(ctx context.Context) error {
 		_, err = t.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("error deleting subscription_type: %w", err)
+		return fmt.Errorf("error deleting %s: %w", subscriptionTypesTable, err)
 	}
 	return nil
 }
@@ -117,12 +117,12 @@ func (t *subTypes) Delete(ctx context.Context) error {
 func (t *subTypes) Select(ctx context.Context) ([]models.SubscriptionType, error) {
 	query, args, err := t.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("error building select query for subscription_types: %w", err)
+		return nil, fmt.Errorf("error building select query for %s: %w", subscriptionTypesTable, err)
 	}
 
 	rows, err := t.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error executing select query for subscription_types: %w", err)
+		return nil, fmt.Errorf("error executing select query for %s: %w", subscriptionTypesTable, err)
 	}
 	defer rows.Close()
 
@@ -137,7 +137,7 @@ func (t *subTypes) Select(ctx context.Context) ([]models.SubscriptionType, error
 			&st.UpdatedAt,
 			&st.CreatedAt,
 		); err != nil {
-			return nil, fmt.Errorf("error scanning subscription_type row: %w", err)
+			return nil, fmt.Errorf("error scanning %s row: %w", subscriptionTypesTable, err)
 		}
 		types = append(types, st)
 	}
@@ -147,12 +147,12 @@ func (t *subTypes) Select(ctx context.Context) ([]models.SubscriptionType, error
 func (t *subTypes) Count(ctx context.Context) (int, error) {
 	query, args, err := t.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("error building count query for subscription_types: %w", err)
+		return 0, fmt.Errorf("error building count query for %s: %w", subscriptionTypesTable, err)
 	}
 
 	var count int
 	if err := t.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
-		return 0, fmt.Errorf("error counting subscription_types: %w", err)
+		return 0, fmt.Errorf("error counting %s: %w", subscriptionTypesTable, err)
 	}
 	return count, nil
 }
@@ -160,7 +160,7 @@ func (t *subTypes) Count(ctx context.Context) (int, error) {
 func (t *subTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
 	query, args, err := t.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("error building get query for subscription_types: %w", err)
+		return nil, fmt.Errorf("error building get query for %s: %w", subscriptionTypesTable, err)
 	}
 
 	var st models.SubscriptionType
@@ -176,7 +176,7 @@ func (t *subTypes) Get(ctx context.Context) (*models.SubscriptionType, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("error getting subscription_type: %w", err)
+		return nil, fmt.Errorf("error getting %s: %w", subscriptionTypesTable, err)
 	}
 	return &st, nil
 }

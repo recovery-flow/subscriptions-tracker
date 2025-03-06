@@ -85,7 +85,7 @@ func (s *subscriptions) Insert(ctx context.Context, sub *models.Subscription) er
 	}
 
 	if err != nil {
-		return fmt.Errorf("error inserting subscription: %w", err)
+		return fmt.Errorf("error inserting %s: %w", subscriptionTable, err)
 	}
 
 	return nil
@@ -106,7 +106,7 @@ func (s *subscriptions) Update(ctx context.Context, updates map[string]any) erro
 		_, err = s.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("error updating subscription: %w", err)
+		return fmt.Errorf("error updating %s: %w", subscriptionTable, err)
 	}
 
 	return nil
@@ -124,7 +124,7 @@ func (s *subscriptions) Delete(ctx context.Context) error {
 		_, err = s.db.ExecContext(ctx, query, args...)
 	}
 	if err != nil {
-		return fmt.Errorf("error deleting subscription: %w", err)
+		return fmt.Errorf("error deleting %s: %w", subscriptionTable, err)
 	}
 
 	return nil
@@ -157,7 +157,7 @@ func (s *subscriptions) Select(ctx context.Context) ([]models.Subscription, erro
 			&sub.UpdatedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error scanning subscription row: %w", err)
+			return nil, fmt.Errorf("error scanning %s row: %w", subscriptionTable, err)
 		}
 		subs = append(subs, sub)
 	}
@@ -174,7 +174,7 @@ func (s *subscriptions) Count(ctx context.Context) (int, error) {
 	var count int
 	err = s.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("error counting subscriptions: %w", err)
+		return 0, fmt.Errorf("error counting %s: %w", subscriptionTable, err)
 	}
 
 	return count, nil
@@ -202,7 +202,7 @@ func (s *subscriptions) Get(ctx context.Context) (*models.Subscription, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("error getting subscription: %w", err)
+		return nil, fmt.Errorf("error getting %s: %w", subscriptionTable, err)
 	}
 
 	return &sub, nil
