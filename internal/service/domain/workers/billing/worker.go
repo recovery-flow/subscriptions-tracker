@@ -13,7 +13,7 @@ import (
 )
 
 func Run(ctx context.Context, svc *service.Service, sig chan struct{}) {
-	cron.Init(svc.Log.WithField("billing", "cron"))
+	cron.Init(svc.Log)
 	log := svc.Log.WithField("who", "billing")
 
 	_, err := cron.NewJob(

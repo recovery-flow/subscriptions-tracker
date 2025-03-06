@@ -1,8 +1,6 @@
 package cron
 
-import (
-	"github.com/sirupsen/logrus"
-)
+import "github.com/sirupsen/logrus"
 
 type logger struct {
 	in *logrus.Entry

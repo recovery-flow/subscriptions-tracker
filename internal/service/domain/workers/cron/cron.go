@@ -22,7 +22,7 @@ var sin = struct {
 	log       *logrus.Entry
 }{}
 
-func Init(log *logrus.Entry) {
+func Init(log *logrus.Logger) {
 	sin.mu.Lock()
 	defer sin.mu.Unlock()
 
@@ -33,12 +33,12 @@ func Init(log *logrus.Entry) {
 	var err error
 	sin.scheduler, err = gocron.NewScheduler(
 		gocron.WithLocation(time.UTC),
-		gocron.WithLogger(newLogger(log)),
+		gocron.WithLogger(newLogger(log.WithField("module", "cron"))),
 	)
 	if err != nil {
 		panic(fmt.Errorf("failed to initialize scheduler: %w", err))
 	}
-	//sin.log = log.WithField("who", "cron-scheduler")
+	sin.log = log.WithField("who", "cron-scheduler")
 	sin.init = true
 }
 
