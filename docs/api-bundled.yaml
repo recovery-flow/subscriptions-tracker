@@ -13,7 +13,7 @@ paths:
           description: Ok
 components:
   schemas:
-    SubType:
+    SubscriptionType:
       type: object
       required:
         - data
@@ -37,7 +37,7 @@ components:
               type: object
               required:
                 - name
-                - description
+                - desc
                 - status
                 - updated_at
                 - created_at
@@ -45,7 +45,7 @@ components:
                 name:
                   type: string
                   description: Name
-                description:
+                desc:
                   type: string
                   description: Description
                 status:
@@ -59,19 +59,34 @@ components:
                   type: string
                   format: date-time
                   description: Created At
-    SubTypesCollection:
+    SubscriptionTypesCollection:
       type: object
       required:
         - data
         - links
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubType/properties/data'
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscription_types_collection
+            attributes:
+              type: object
+              required:
+                - subscription_types
+              properties:
+                subscription_types:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SubscriptionType/properties/data'
         links:
           $ref: '#/components/schemas/LinksPagination'
-    SubTypeUpdate:
+    SubscriptionTypeUpdate:
       type: object
       required:
         - data
@@ -99,7 +114,7 @@ components:
                   type: string
                   format: date-time
                   description: Updated At
-    SubPlan:
+    SubscriptionPlan:
       type: object
       required:
         - data
@@ -145,7 +160,7 @@ components:
                   description: Subscription Plan Description
                 price:
                   type: number
-                  format: float64
+                  format: float32
                   description: Subscription Plan Price
                 currency:
                   type: string
@@ -170,19 +185,34 @@ components:
                   type: string
                   format: date-time
                   description: Subscription Plan Created At
-    SubPlansCollection:
+    SubscriptionPlansCollection:
       type: object
       required:
         - data
         - links
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubPlan/properties/data'
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscription_plans_collection
+            attributes:
+              type: object
+              required:
+                - subscription_plans
+              properties:
+                subscription_plans:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SubscriptionPlan/properties/data'
         links:
           $ref: '#/components/schemas/LinksPagination'
-    SubPlanUpdate:
+    SubscriptionPlanUpdate:
       type: object
       required:
         - data
@@ -269,10 +299,14 @@ components:
                     - unavailable
                     - removed
                   description: Availability
-                start_at:
+                start_date:
                   type: string
                   format: date-time
                   description: Start at
+                end_date:
+                  type: string
+                  format: date-time
+                  description: End at
                 updated_at:
                   type: string
                   format: date-time
@@ -288,9 +322,24 @@ components:
         - links
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Subscription/properties/data'
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscriptions_collection
+            attributes:
+              type: object
+              required:
+                - subscriptions
+              properties:
+                subscriptions:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Subscription/properties/data'
         links:
           $ref: '#/components/schemas/LinksPagination'
     SubscriptionUpdate:
@@ -381,50 +430,6 @@ components:
         - links
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentMethod/properties/data'
-        links:
-          $ref: '#/components/schemas/LinksPagination'
-    BillingSchedule:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          $ref: '#/components/schemas/BillingSchedule'
-    BillingSchedulesCollection:
-      type: object
-      required:
-        - data
-        - links
-      properties:
-        data:
-          type: array
-          items:
-            required:
-              - id
-              - type
-              - attributes
-            properties:
-              id:
-                type: string
-                format: uuid
-                description: schedules ID
-              type:
-                type: string
-                enum:
-                  - billing_schedule
-              attributes:
-                $ref: '#/components/schemas/BillingScheduleUpdate/properties/data/properties/attributes'
-        links:
-          $ref: '#/components/schemas/LinksPagination'
-    BillingScheduleUpdate:
-      type: object
-      required:
-        - data
-      properties:
-        data:
           type: object
           required:
             - type
@@ -433,7 +438,37 @@ components:
             type:
               type: string
               enum:
-                - billing_schedule_update
+                - payment_methods
+            attributes:
+              type: object
+              required:
+                - payment_methods
+              properties:
+                payment_methods:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PaymentMethod/properties/data'
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+    BillingSchedule:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: user ID
+            type:
+              type: string
+              enum:
+                - billing_schedule
             attributes:
               type: object
               required:
@@ -443,10 +478,6 @@ components:
                 - updated_at
                 - created_at
               properties:
-                user_id:
-                  type: string
-                  format: uuid
-                  description: User ID
                 schedules_date:
                   type: string
                   format: date-time
@@ -469,6 +500,48 @@ components:
                   type: string
                   format: date-time
                   description: Billing Schedule Created At
+    BillingSchedulesCollection:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - billing_schedules
+            attributes:
+              type: object
+              required:
+                - billing_schedule
+              properties:
+                billing_schedule:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/BillingSchedule/properties/data'
+        links:
+          $ref: '#/components/schemas/LinksPagination'
+    BillingScheduleUpdate:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - billing_schedule_update
     Transaction:
       type: object
       required:
@@ -493,10 +566,11 @@ components:
               type: object
               required:
                 - user_id
-                - plan_id
                 - payment_id
                 - amount
                 - currency
+                - status
+                - payment_provider
                 - provider_transaction_id
                 - transaction_date
               properties:
@@ -504,13 +578,9 @@ components:
                   type: string
                   format: uuid
                   description: User ID
-                plan_id:
-                  type: string
-                  format: ObjectId
-                  description: Plan ID
                 payment_id:
                   type: string
-                  format: ObjectId
+                  format: uuid
                   description: Payment ID
                 amount:
                   type: number
@@ -519,6 +589,12 @@ components:
                 currency:
                   type: string
                   description: Transaction currency
+                status:
+                  type: string
+                  description: Transaction status
+                payment_provider:
+                  type: string
+                  description: Payment provider
                 provider_transaction_id:
                   type: string
                   description: Provider transaction ID
@@ -533,9 +609,24 @@ components:
         - links
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Transaction/properties/data'
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - transaction_collection
+            attributes:
+              type: object
+              required:
+                - transaction_plans
+              properties:
+                transaction_plans:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Transaction/properties/data'
         links:
           $ref: '#/components/schemas/LinksPagination'
     LinksSelf:

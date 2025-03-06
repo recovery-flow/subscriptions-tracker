@@ -4,8 +4,22 @@ required:
   - links
 properties:
   data:
-    type: array
-    items:
-      $ref: './BillingScheduleData.yaml'
+    type: object
+    required:
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ billing_schedules ]
+      attributes:
+        type: object
+        required:
+          - billing_schedule
+        properties:
+          billing_schedule:
+            type: array
+            items:
+              $ref: './BillingScheduleData.yaml'
   links:
     $ref: './LinksPagination.yaml'

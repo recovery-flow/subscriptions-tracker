@@ -22,7 +22,6 @@ var _ MappedNullable = &BillingScheduleUpdateData{}
 // BillingScheduleUpdateData struct for BillingScheduleUpdateData
 type BillingScheduleUpdateData struct {
 	Type string `json:"type"`
-	Attributes BillingScheduleUpdateDataAttributes `json:"attributes"`
 }
 
 type _BillingScheduleUpdateData BillingScheduleUpdateData
@@ -31,10 +30,9 @@ type _BillingScheduleUpdateData BillingScheduleUpdateData
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBillingScheduleUpdateData(type_ string, attributes BillingScheduleUpdateDataAttributes) *BillingScheduleUpdateData {
+func NewBillingScheduleUpdateData(type_ string) *BillingScheduleUpdateData {
 	this := BillingScheduleUpdateData{}
 	this.Type = type_
-	this.Attributes = attributes
 	return &this
 }
 
@@ -70,30 +68,6 @@ func (o *BillingScheduleUpdateData) SetType(v string) {
 	o.Type = v
 }
 
-// GetAttributes returns the Attributes field value
-func (o *BillingScheduleUpdateData) GetAttributes() BillingScheduleUpdateDataAttributes {
-	if o == nil {
-		var ret BillingScheduleUpdateDataAttributes
-		return ret
-	}
-
-	return o.Attributes
-}
-
-// GetAttributesOk returns a tuple with the Attributes field value
-// and a boolean to check if the value has been set.
-func (o *BillingScheduleUpdateData) GetAttributesOk() (*BillingScheduleUpdateDataAttributes, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Attributes, true
-}
-
-// SetAttributes sets field value
-func (o *BillingScheduleUpdateData) SetAttributes(v BillingScheduleUpdateDataAttributes) {
-	o.Attributes = v
-}
-
 func (o BillingScheduleUpdateData) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -105,7 +79,6 @@ func (o BillingScheduleUpdateData) MarshalJSON() ([]byte, error) {
 func (o BillingScheduleUpdateData) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["type"] = o.Type
-	toSerialize["attributes"] = o.Attributes
 	return toSerialize, nil
 }
 
@@ -115,7 +88,6 @@ func (o *BillingScheduleUpdateData) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"type",
-		"attributes",
 	}
 
 	allProperties := make(map[string]interface{})

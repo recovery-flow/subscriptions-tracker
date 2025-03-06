@@ -8,7 +8,8 @@ Name | Type | Description | Notes
 **PaymentMethodId** | **string** | Payment Method ID | 
 **Status** | **string** | State | 
 **Availability** | **string** | Availability | 
-**StartAt** | Pointer to **time.Time** | Start at | [optional] 
+**StartDate** | **time.Time** | Start at | 
+**EndDate** | Pointer to **time.Time** | End at | [optional] 
 **UpdatedAt** | **time.Time** | Updated at | 
 **CreatedAt** | **time.Time** | Created at | 
 
@@ -16,7 +17,7 @@ Name | Type | Description | Notes
 
 ### NewSubscriptionDataAttributes
 
-`func NewSubscriptionDataAttributes(planId string, paymentMethodId string, status string, availability string, updatedAt time.Time, createdAt time.Time, ) *SubscriptionDataAttributes`
+`func NewSubscriptionDataAttributes(planId string, paymentMethodId string, status string, availability string, startDate time.Time, updatedAt time.Time, createdAt time.Time, ) *SubscriptionDataAttributes`
 
 NewSubscriptionDataAttributes instantiates a new SubscriptionDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -111,30 +112,50 @@ and a boolean to check if the value has been set.
 SetAvailability sets Availability field to given value.
 
 
-### GetStartAt
+### GetStartDate
 
-`func (o *SubscriptionDataAttributes) GetStartAt() time.Time`
+`func (o *SubscriptionDataAttributes) GetStartDate() time.Time`
 
-GetStartAt returns the StartAt field if non-nil, zero value otherwise.
+GetStartDate returns the StartDate field if non-nil, zero value otherwise.
 
-### GetStartAtOk
+### GetStartDateOk
 
-`func (o *SubscriptionDataAttributes) GetStartAtOk() (*time.Time, bool)`
+`func (o *SubscriptionDataAttributes) GetStartDateOk() (*time.Time, bool)`
 
-GetStartAtOk returns a tuple with the StartAt field if it's non-nil, zero value otherwise
+GetStartDateOk returns a tuple with the StartDate field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetStartAt
+### SetStartDate
 
-`func (o *SubscriptionDataAttributes) SetStartAt(v time.Time)`
+`func (o *SubscriptionDataAttributes) SetStartDate(v time.Time)`
 
-SetStartAt sets StartAt field to given value.
+SetStartDate sets StartDate field to given value.
 
-### HasStartAt
 
-`func (o *SubscriptionDataAttributes) HasStartAt() bool`
+### GetEndDate
 
-HasStartAt returns a boolean if a field has been set.
+`func (o *SubscriptionDataAttributes) GetEndDate() time.Time`
+
+GetEndDate returns the EndDate field if non-nil, zero value otherwise.
+
+### GetEndDateOk
+
+`func (o *SubscriptionDataAttributes) GetEndDateOk() (*time.Time, bool)`
+
+GetEndDateOk returns a tuple with the EndDate field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEndDate
+
+`func (o *SubscriptionDataAttributes) SetEndDate(v time.Time)`
+
+SetEndDate sets EndDate field to given value.
+
+### HasEndDate
+
+`func (o *SubscriptionDataAttributes) HasEndDate() bool`
+
+HasEndDate returns a boolean if a field has been set.
 
 ### GetUpdatedAt
 

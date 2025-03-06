@@ -26,7 +26,7 @@ CREATE TABLE subscription_plans (
 CREATE TABLE subscriptions (
    user_id UUID PRIMARY KEY,
    plan_id UUID NOT NULL REFERENCES subscription_plans (id),
-   payment_method_id UUID NOT NULL,
+   payment_method_id UUID NOT NULL DEFAULT uuid_nil(),
    status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive', 'canceled', 'expired')),
    availability VARCHAR(20) NOT NULL CHECK (availability IN ('available', 'unavailable', 'removed')),
    start_date TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -85,7 +85,7 @@ ALTER TABLE subscriptions
     ADD CONSTRAINT fk_subscriptions_plan FOREIGN KEY (plan_id) REFERENCES subscription_schedule (id);
 
 ALTER TABLE subscriptions
-    ADD CONSTRAINT fk_subscriptions_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id);
+    ADD CONSTRAINT fk_subscriptions_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id) ON DELETE SET DEFAULT;
 
 ALTER TABLE subscription_transactions
     ADD CONSTRAINT fk_subscription_transactions_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id);

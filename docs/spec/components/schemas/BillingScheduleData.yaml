@@ -6,7 +6,7 @@ properties:
   id:
     type: string
     format: uuid
-    description: "schedules ID"
+    description: "user ID"
   type:
     type: string
     enum: [ billing_schedule ]

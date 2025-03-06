@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - type
+  - attributes
+properties:
+  id:
+    type: string
+    format: uuid
+    description: "Subscription type ID"
+  type:
+    type: string
+    enum: [ subscription_type ]
+  attributes:
+    $ref: './SubscriptionTypeAttributes.yaml'

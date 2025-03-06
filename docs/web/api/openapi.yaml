@@ -15,55 +15,51 @@ paths:
       summary: Test
 components:
   schemas:
-    SubType:
+    SubscriptionType:
       properties:
         data:
-          $ref: '#/components/schemas/SubType_data'
+          $ref: '#/components/schemas/SubscriptionType_data'
       required:
       - data
       type: object
-    SubTypesCollection:
+    SubscriptionTypesCollection:
       properties:
         data:
-          items:
-            $ref: '#/components/schemas/SubType/properties/data'
-          type: array
+          $ref: '#/components/schemas/SubscriptionTypesCollection_data'
         links:
           $ref: '#/components/schemas/LinksPagination'
       required:
       - data
       - links
       type: object
-    SubTypeUpdate:
+    SubscriptionTypeUpdate:
       properties:
         data:
-          $ref: '#/components/schemas/SubTypeUpdate_data'
+          $ref: '#/components/schemas/SubscriptionTypeUpdate_data'
       required:
       - data
       type: object
-    SubPlan:
+    SubscriptionPlan:
       properties:
         data:
-          $ref: '#/components/schemas/SubPlan_data'
+          $ref: '#/components/schemas/SubscriptionPlan_data'
       required:
       - data
       type: object
-    SubPlansCollection:
+    SubscriptionPlansCollection:
       properties:
         data:
-          items:
-            $ref: '#/components/schemas/SubPlan/properties/data'
-          type: array
+          $ref: '#/components/schemas/SubscriptionPlansCollection_data'
         links:
           $ref: '#/components/schemas/LinksPagination'
       required:
       - data
       - links
       type: object
-    SubPlanUpdate:
+    SubscriptionPlanUpdate:
       properties:
         data:
-          $ref: '#/components/schemas/SubPlanUpdate_data'
+          $ref: '#/components/schemas/SubscriptionPlanUpdate_data'
       required:
       - data
       type: object
@@ -77,9 +73,7 @@ components:
     SubscriptionsCollection:
       properties:
         data:
-          items:
-            $ref: '#/components/schemas/Subscription/properties/data'
-          type: array
+          $ref: '#/components/schemas/SubscriptionsCollection_data'
         links:
           $ref: '#/components/schemas/LinksPagination'
       required:
@@ -103,9 +97,7 @@ components:
     PaymentMethodsCollection:
       properties:
         data:
-          items:
-            $ref: '#/components/schemas/PaymentMethod/properties/data'
-          type: array
+          $ref: '#/components/schemas/PaymentMethodsCollection_data'
         links:
           $ref: '#/components/schemas/LinksPagination'
       required:
@@ -115,16 +107,14 @@ components:
     BillingSchedule:
       properties:
         data:
-          $ref: '#/components/schemas/BillingSchedule'
+          $ref: '#/components/schemas/BillingSchedule_data'
       required:
       - data
       type: object
     BillingSchedulesCollection:
       properties:
         data:
-          items:
-            $ref: '#/components/schemas/BillingSchedulesCollection_data_inner'
-          type: array
+          $ref: '#/components/schemas/BillingSchedulesCollection_data'
         links:
           $ref: '#/components/schemas/LinksPagination'
       required:
@@ -148,9 +138,7 @@ components:
     TransactionsCollection:
       properties:
         data:
-          items:
-            $ref: '#/components/schemas/Transaction/properties/data'
-          type: array
+          $ref: '#/components/schemas/TransactionsCollection_data'
         links:
           $ref: '#/components/schemas/LinksPagination'
       required:
@@ -191,12 +179,12 @@ components:
       required:
       - self
       type: object
-    SubType_data_attributes:
+    SubscriptionType_data_attributes:
       properties:
         name:
           description: Name
           type: string
-        description:
+        desc:
           description: Description
           type: string
         status:
@@ -212,12 +200,12 @@ components:
           type: string
       required:
       - created_at
-      - description
+      - desc
       - name
       - status
       - updated_at
       type: object
-    SubType_data:
+    SubscriptionType_data:
       properties:
         id:
           description: Subscription type ID
@@ -228,13 +216,34 @@ components:
           - subscription_type
           type: string
         attributes:
-          $ref: '#/components/schemas/SubType_data_attributes'
+          $ref: '#/components/schemas/SubscriptionType_data_attributes'
       required:
       - attributes
       - id
       - type
       type: object
-    SubTypeUpdate_data_attributes:
+    SubscriptionTypesCollection_data_attributes:
+      properties:
+        subscription_types:
+          items:
+            $ref: '#/components/schemas/SubscriptionType/properties/data'
+          type: array
+      required:
+      - subscription_types
+      type: object
+    SubscriptionTypesCollection_data:
+      properties:
+        type:
+          enum:
+          - subscription_types_collection
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SubscriptionTypesCollection_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
+    SubscriptionTypeUpdate_data_attributes:
       properties:
         name:
           description: Name
@@ -247,19 +256,19 @@ components:
           format: date-time
           type: string
       type: object
-    SubTypeUpdate_data:
+    SubscriptionTypeUpdate_data:
       properties:
         type:
           enum:
           - subscription_type_update
           type: string
         attributes:
-          $ref: '#/components/schemas/SubTypeUpdate_data_attributes'
+          $ref: '#/components/schemas/SubscriptionTypeUpdate_data_attributes'
       required:
       - attributes
       - type
       type: object
-    SubPlan_data_attributes:
+    SubscriptionPlan_data_attributes:
       properties:
         type_id:
           description: Subscription Plan ID
@@ -273,7 +282,7 @@ components:
           type: string
         price:
           description: Subscription Plan Price
-          format: float64
+          format: float32
           type: number
         currency:
           description: Subscription Plan Currency
@@ -310,7 +319,7 @@ components:
       - type_id
       - updated_at
       type: object
-    SubPlan_data:
+    SubscriptionPlan_data:
       properties:
         id:
           description: Subscription Plan ID
@@ -321,13 +330,34 @@ components:
           - subscription_plan
           type: string
         attributes:
-          $ref: '#/components/schemas/SubPlan_data_attributes'
+          $ref: '#/components/schemas/SubscriptionPlan_data_attributes'
       required:
       - attributes
       - id
       - type
       type: object
-    SubPlanUpdate_data_attributes:
+    SubscriptionPlansCollection_data_attributes:
+      properties:
+        subscription_plans:
+          items:
+            $ref: '#/components/schemas/SubscriptionPlan/properties/data'
+          type: array
+      required:
+      - subscription_plans
+      type: object
+    SubscriptionPlansCollection_data:
+      properties:
+        type:
+          enum:
+          - subscription_plans_collection
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SubscriptionPlansCollection_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
+    SubscriptionPlanUpdate_data_attributes:
       properties:
         name:
           description: Name
@@ -345,14 +375,14 @@ components:
           description: Status
           type: string
       type: object
-    SubPlanUpdate_data:
+    SubscriptionPlanUpdate_data:
       properties:
         type:
           enum:
           - subscription_plan_update
           type: string
         attributes:
-          $ref: '#/components/schemas/SubPlanUpdate_data_attributes'
+          $ref: '#/components/schemas/SubscriptionPlanUpdate_data_attributes'
       required:
       - attributes
       - type
@@ -382,8 +412,12 @@ components:
           - unavailable
           - removed
           type: string
-        start_at:
+        start_date:
           description: Start at
+          format: date-time
+          type: string
+        end_date:
+          description: End at
           format: date-time
           type: string
         updated_at:
@@ -418,6 +452,27 @@ components:
       required:
       - attributes
       - id
+      - type
+      type: object
+    SubscriptionsCollection_data_attributes:
+      properties:
+        subscriptions:
+          items:
+            $ref: '#/components/schemas/Subscription/properties/data'
+          type: array
+      required:
+      - subscriptions
+      type: object
+    SubscriptionsCollection_data:
+      properties:
+        type:
+          enum:
+          - subscriptions_collection
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SubscriptionsCollection_data_attributes'
+      required:
+      - attributes
       - type
       type: object
     SubscriptionUpdate_data_attributes:
@@ -495,28 +550,29 @@ components:
       - id
       - type
       type: object
-    BillingSchedulesCollection_data_inner:
+    PaymentMethodsCollection_data_attributes:
       properties:
-        id:
-          description: schedules ID
-          format: uuid
-          type: string
+        payment_methods:
+          items:
+            $ref: '#/components/schemas/PaymentMethod/properties/data'
+          type: array
+      required:
+      - payment_methods
+      type: object
+    PaymentMethodsCollection_data:
+      properties:
         type:
           enum:
-          - billing_schedule
+          - payment_methods
           type: string
         attributes:
-          $ref: '#/components/schemas/BillingScheduleUpdate/properties/data/properties/attributes'
+          $ref: '#/components/schemas/PaymentMethodsCollection_data_attributes'
       required:
       - attributes
-      - id
       - type
-    BillingScheduleUpdate_data_attributes:
+      type: object
+    BillingSchedule_data_attributes:
       properties:
-        user_id:
-          description: User ID
-          format: uuid
-          type: string
         schedules_date:
           description: Billing Schedule Date
           format: date-time
@@ -546,14 +602,49 @@ components:
       - updated_at
       - user_id
       type: object
+    BillingSchedule_data:
+      properties:
+        id:
+          description: user ID
+          format: uuid
+          type: string
+        type:
+          enum:
+          - billing_schedule
+          type: string
+        attributes:
+          $ref: '#/components/schemas/BillingSchedule_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    BillingSchedulesCollection_data_attributes:
+      properties:
+        billing_schedule:
+          items:
+            $ref: '#/components/schemas/BillingSchedule/properties/data'
+          type: array
+      required:
+      - billing_schedule
+      type: object
+    BillingSchedulesCollection_data:
+      properties:
+        type:
+          enum:
+          - billing_schedules
+          type: string
+        attributes:
+          $ref: '#/components/schemas/BillingSchedulesCollection_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
     BillingScheduleUpdate_data:
       properties:
         type:
           enum:
           - billing_schedule_update
           type: string
-        attributes:
-          $ref: '#/components/schemas/BillingScheduleUpdate_data_attributes'
       required:
       - attributes
       - type
@@ -564,13 +655,9 @@ components:
           description: User ID
           format: uuid
           type: string
-        plan_id:
-          description: Plan ID
-          format: ObjectId
-          type: string
         payment_id:
           description: Payment ID
-          format: ObjectId
+          format: uuid
           type: string
         amount:
           description: Transaction amount
@@ -578,6 +665,12 @@ components:
           type: number
         currency:
           description: Transaction currency
+          type: string
+        status:
+          description: Transaction status
+          type: string
+        payment_provider:
+          description: Payment provider
           type: string
         provider_transaction_id:
           description: Provider transaction ID
@@ -590,8 +683,9 @@ components:
       - amount
       - currency
       - payment_id
-      - plan_id
+      - payment_provider
       - provider_transaction_id
+      - status
       - transaction_date
       - user_id
       type: object
@@ -610,6 +704,27 @@ components:
       required:
       - attributes
       - id
+      - type
+      type: object
+    TransactionsCollection_data_attributes:
+      properties:
+        transaction_plans:
+          items:
+            $ref: '#/components/schemas/Transaction/properties/data'
+          type: array
+      required:
+      - transaction_plans
+      type: object
+    TransactionsCollection_data:
+      properties:
+        type:
+          enum:
+          - transaction_collection
+          type: string
+        attributes:
+          $ref: '#/components/schemas/TransactionsCollection_data_attributes'
+      required:
+      - attributes
       - type
       type: object
     LinksDirect_links:

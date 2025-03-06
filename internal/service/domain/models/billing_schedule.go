@@ -9,7 +9,7 @@ import (
 
 type BillingSchedule struct {
 	UserID        uuid.UUID     `json:"user_id"`
-	ScheduledDate time.Time     `json:"scheduled_date"`
+	SchedulesDate time.Time     `json:"schedules_date"`
 	AttemptedDate *time.Time    `json:"attempted_date,omitempty"`
 	Status        BillingStatus `json:"status"`
 	UpdatedAt     time.Time     `json:"updated_at"`

@@ -58,7 +58,7 @@ func (b *billingSchedules) New() BillingSchedules {
 func (b *billingSchedules) Insert(ctx context.Context, bs *models.BillingSchedule) error {
 	values := map[string]interface{}{
 		"user_id":        bs.UserID,
-		"scheduled_date": bs.ScheduledDate,
+		"scheduled_date": bs.SchedulesDate,
 		"status":         bs.Status,
 		"updated_at":     time.Now().UTC(),
 		"created_at":     time.Now().UTC(),
@@ -138,7 +138,7 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 
 		err := rows.Scan(
 			&bs.UserID,
-			&bs.ScheduledDate,
+			&bs.SchedulesDate,
 			&attemptedDate,
 			&bs.Status,
 			&bs.UpdatedAt,
@@ -183,7 +183,7 @@ func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, er
 
 	err = b.db.QueryRowContext(ctx, query, args...).Scan(
 		&bs.UserID,
-		&bs.ScheduledDate,
+		&bs.SchedulesDate,
 		&attemptedDate,
 		&bs.Status,
 		&bs.UpdatedAt,
@@ -244,7 +244,7 @@ func (b *billingSchedules) Filter(filters map[string]any) BillingSchedules {
 
 func (b *billingSchedules) FilterTime(field string, after bool, date time.Time) BillingSchedules {
 	var validFields = map[string]bool{
-		"scheduled_date": true,
+		"schedules_date": true,
 		"created_at":     true,
 		"attempted_date": true,
 	}

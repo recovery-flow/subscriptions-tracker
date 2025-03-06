@@ -4,8 +4,22 @@ required:
   - links
 properties:
   data:
-    type: array
-    items:
-      $ref: './TransactionData.yaml'
+    type: object
+    required:
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ transaction_collection ]
+      attributes:
+        type: object
+        required:
+          - transaction_plans
+        properties:
+          transaction_plans:
+            type: array
+            items:
+              $ref: './TransactionData.yaml'
   links:
     $ref: './LinksPagination.yaml'

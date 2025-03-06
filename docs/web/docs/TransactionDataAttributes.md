@@ -5,10 +5,11 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **UserId** | **string** | User ID | 
-**PlanId** | **string** | Plan ID | 
 **PaymentId** | **string** | Payment ID | 
 **Amount** | **float32** | Transaction amount | 
 **Currency** | **string** | Transaction currency | 
+**Status** | **string** | Transaction status | 
+**PaymentProvider** | **string** | Payment provider | 
 **ProviderTransactionId** | **string** | Provider transaction ID | 
 **TransactionDate** | **time.Time** | Transaction creation date | 
 
@@ -16,7 +17,7 @@ Name | Type | Description | Notes
 
 ### NewTransactionDataAttributes
 
-`func NewTransactionDataAttributes(userId string, planId string, paymentId string, amount float32, currency string, providerTransactionId string, transactionDate time.Time, ) *TransactionDataAttributes`
+`func NewTransactionDataAttributes(userId string, paymentId string, amount float32, currency string, status string, paymentProvider string, providerTransactionId string, transactionDate time.Time, ) *TransactionDataAttributes`
 
 NewTransactionDataAttributes instantiates a new TransactionDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -49,26 +50,6 @@ and a boolean to check if the value has been set.
 `func (o *TransactionDataAttributes) SetUserId(v string)`
 
 SetUserId sets UserId field to given value.
-
-
-### GetPlanId
-
-`func (o *TransactionDataAttributes) GetPlanId() string`
-
-GetPlanId returns the PlanId field if non-nil, zero value otherwise.
-
-### GetPlanIdOk
-
-`func (o *TransactionDataAttributes) GetPlanIdOk() (*string, bool)`
-
-GetPlanIdOk returns a tuple with the PlanId field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPlanId
-
-`func (o *TransactionDataAttributes) SetPlanId(v string)`
-
-SetPlanId sets PlanId field to given value.
 
 
 ### GetPaymentId
@@ -129,6 +110,46 @@ and a boolean to check if the value has been set.
 `func (o *TransactionDataAttributes) SetCurrency(v string)`
 
 SetCurrency sets Currency field to given value.
+
+
+### GetStatus
+
+`func (o *TransactionDataAttributes) GetStatus() string`
+
+GetStatus returns the Status field if non-nil, zero value otherwise.
+
+### GetStatusOk
+
+`func (o *TransactionDataAttributes) GetStatusOk() (*string, bool)`
+
+GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStatus
+
+`func (o *TransactionDataAttributes) SetStatus(v string)`
+
+SetStatus sets Status field to given value.
+
+
+### GetPaymentProvider
+
+`func (o *TransactionDataAttributes) GetPaymentProvider() string`
+
+GetPaymentProvider returns the PaymentProvider field if non-nil, zero value otherwise.
+
+### GetPaymentProviderOk
+
+`func (o *TransactionDataAttributes) GetPaymentProviderOk() (*string, bool)`
+
+GetPaymentProviderOk returns a tuple with the PaymentProvider field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPaymentProvider
+
+`func (o *TransactionDataAttributes) SetPaymentProvider(v string)`
+
+SetPaymentProvider sets PaymentProvider field to given value.
 
 
 ### GetProviderTransactionId

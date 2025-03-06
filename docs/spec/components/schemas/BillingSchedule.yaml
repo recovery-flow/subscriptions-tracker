@@ -3,4 +3,4 @@ required:
   - data
 properties:
     data:
-      $ref: './BillingSchedule.yaml'
+      $ref: './BillingScheduleData.yaml'

@@ -102,7 +102,7 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 
 		bc := &models.BillingSchedule{
 			UserID:        UserID,
-			ScheduledDate: time.Now().UTC().Add(frePeriod),
+			SchedulesDate: time.Now().UTC().Add(frePeriod),
 			Status:        models.BillingStatusPlanned,
 		}
 		err = d.Infra.Data.SQL.Schedules.New().Insert(ctx, bc)
@@ -127,7 +127,7 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 			//		Currency: sPlan.Currency,
 			//		Status: models.TrnStatusFailed,
 			//		PaymentProvider: "TODO",
-			//		PaymentID: "TODO",
+			//		PaymentProviderID: "TODO",
 			//		TransactionDate: time.Now().UTC(),
 			//	})
 			//	if err != nil {
@@ -143,7 +143,7 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 			//	Currency: sPlan.Currency,
 			//	Status: models.TrnStatusSuccess,
 			//	PaymentProvider: "TODO",
-			//	PaymentID: "TODO",
+			//	PaymentProviderID: "TODO",
 			//	TransactionDate: time.Now().UTC(),
 			//})
 			//if err != nil {

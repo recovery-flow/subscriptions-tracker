@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Data** | [**BillingSchedule**](BillingSchedule.md) |  | 
+**Data** | [**BillingScheduleData**](BillingScheduleData.md) |  | 
 
 ## Methods
 
 ### NewBillingSchedule
 
-`func NewBillingSchedule(data BillingSchedule, ) *BillingSchedule`
+`func NewBillingSchedule(data BillingScheduleData, ) *BillingSchedule`
 
 NewBillingSchedule instantiates a new BillingSchedule object
 This constructor will assign default values to properties that have it defined,
@@ -27,20 +27,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetData
 
-`func (o *BillingSchedule) GetData() BillingSchedule`
+`func (o *BillingSchedule) GetData() BillingScheduleData`
 
 GetData returns the Data field if non-nil, zero value otherwise.
 
 ### GetDataOk
 
-`func (o *BillingSchedule) GetDataOk() (*BillingSchedule, bool)`
+`func (o *BillingSchedule) GetDataOk() (*BillingScheduleData, bool)`
 
 GetDataOk returns a tuple with the Data field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetData
 
-`func (o *BillingSchedule) SetData(v BillingSchedule)`
+`func (o *BillingSchedule) SetData(v BillingScheduleData)`
 
 SetData sets Data field to given value.
 

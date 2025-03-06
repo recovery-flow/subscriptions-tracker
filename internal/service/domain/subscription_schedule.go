@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,8 +11,8 @@ import (
 
 type SubscriptionSchedule interface {
 	GetUserSchedule(ctx context.Context, userID uuid.UUID) (*models.BillingSchedule, error)
-
 	SelectSchedule(ctx context.Context, after bool, date time.Time) ([]models.BillingSchedule, error)
+
 	MadeTransaction(ctx context.Context, userID uuid.UUID) error
 }
 
@@ -22,7 +23,7 @@ func (d *domain) GetUserSchedule(ctx context.Context, userID uuid.UUID) (*models
 }
 
 func (d *domain) SelectSchedule(ctx context.Context, after bool, date time.Time) ([]models.BillingSchedule, error) {
-	return d.Infra.Data.SQL.Schedules.New().FilterTime("scheduled_date", after, date).Select(ctx)
+	return d.Infra.Data.SQL.Schedules.New().FilterTime("schedules_date", after, date).Select(ctx)
 }
 
 func (d *domain) MadeTransaction(ctx context.Context, userID uuid.UUID) error {
@@ -31,9 +32,17 @@ func (d *domain) MadeTransaction(ctx context.Context, userID uuid.UUID) error {
 		return err
 	}
 
+	if sub.Availability != models.SubPlanAvailable {
+		return fmt.Errorf("subscription is not available")
+	}
+
 	plan, err := d.GetSubPlan(ctx, sub.PlanID)
 	if err != nil {
 		return err
+	}
+
+	if plan.Status != models.StatusPlanActive {
+		return fmt.Errorf("plan is not active")
 	}
 
 	method, err := d.GetUserDefaultPaymentMethod(ctx, userID)

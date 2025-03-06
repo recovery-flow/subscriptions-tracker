@@ -4,10 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Title** | Pointer to **string** | Title | [optional] 
+**Name** | Pointer to **string** | Name | [optional] 
+**Desc** | Pointer to **string** | Description | [optional] 
 **Price** | Pointer to **float32** | Price | [optional] 
 **Currency** | Pointer to **string** | Currency | [optional] 
-**PayFrequency** | Pointer to **string** | Pay frequency | [optional] 
 **Status** | Pointer to **string** | Status | [optional] 
 
 ## Methods
@@ -29,30 +29,55 @@ NewSubscriptionPlanUpdateDataAttributesWithDefaults instantiates a new Subscript
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetTitle
+### GetName
 
-`func (o *SubscriptionPlanUpdateDataAttributes) GetTitle() string`
+`func (o *SubscriptionPlanUpdateDataAttributes) GetName() string`
 
-GetTitle returns the Title field if non-nil, zero value otherwise.
+GetName returns the Name field if non-nil, zero value otherwise.
 
-### GetTitleOk
+### GetNameOk
 
-`func (o *SubscriptionPlanUpdateDataAttributes) GetTitleOk() (*string, bool)`
+`func (o *SubscriptionPlanUpdateDataAttributes) GetNameOk() (*string, bool)`
 
-GetTitleOk returns a tuple with the Title field if it's non-nil, zero value otherwise
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTitle
+### SetName
 
-`func (o *SubscriptionPlanUpdateDataAttributes) SetTitle(v string)`
+`func (o *SubscriptionPlanUpdateDataAttributes) SetName(v string)`
 
-SetTitle sets Title field to given value.
+SetName sets Name field to given value.
 
-### HasTitle
+### HasName
 
-`func (o *SubscriptionPlanUpdateDataAttributes) HasTitle() bool`
+`func (o *SubscriptionPlanUpdateDataAttributes) HasName() bool`
 
-HasTitle returns a boolean if a field has been set.
+HasName returns a boolean if a field has been set.
+
+### GetDesc
+
+`func (o *SubscriptionPlanUpdateDataAttributes) GetDesc() string`
+
+GetDesc returns the Desc field if non-nil, zero value otherwise.
+
+### GetDescOk
+
+`func (o *SubscriptionPlanUpdateDataAttributes) GetDescOk() (*string, bool)`
+
+GetDescOk returns a tuple with the Desc field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDesc
+
+`func (o *SubscriptionPlanUpdateDataAttributes) SetDesc(v string)`
+
+SetDesc sets Desc field to given value.
+
+### HasDesc
+
+`func (o *SubscriptionPlanUpdateDataAttributes) HasDesc() bool`
+
+HasDesc returns a boolean if a field has been set.
 
 ### GetPrice
 
@@ -103,31 +128,6 @@ SetCurrency sets Currency field to given value.
 `func (o *SubscriptionPlanUpdateDataAttributes) HasCurrency() bool`
 
 HasCurrency returns a boolean if a field has been set.
-
-### GetPayFrequency
-
-`func (o *SubscriptionPlanUpdateDataAttributes) GetPayFrequency() string`
-
-GetPayFrequency returns the PayFrequency field if non-nil, zero value otherwise.
-
-### GetPayFrequencyOk
-
-`func (o *SubscriptionPlanUpdateDataAttributes) GetPayFrequencyOk() (*string, bool)`
-
-GetPayFrequencyOk returns a tuple with the PayFrequency field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPayFrequency
-
-`func (o *SubscriptionPlanUpdateDataAttributes) SetPayFrequency(v string)`
-
-SetPayFrequency sets PayFrequency field to given value.
-
-### HasPayFrequency
-
-`func (o *SubscriptionPlanUpdateDataAttributes) HasPayFrequency() bool`
-
-HasPayFrequency returns a boolean if a field has been set.
 
 ### GetStatus
 

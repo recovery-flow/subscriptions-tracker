@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Data** | [**[]BillingSchedulesCollectionDataInner**](BillingSchedulesCollectionDataInner.md) |  | 
+**Data** | [**BillingSchedulesCollectionData**](BillingSchedulesCollectionData.md) |  | 
 **Links** | [**LinksPagination**](LinksPagination.md) |  | 
 
 ## Methods
 
 ### NewBillingSchedulesCollection
 
-`func NewBillingSchedulesCollection(data []BillingSchedulesCollectionDataInner, links LinksPagination, ) *BillingSchedulesCollection`
+`func NewBillingSchedulesCollection(data BillingSchedulesCollectionData, links LinksPagination, ) *BillingSchedulesCollection`
 
 NewBillingSchedulesCollection instantiates a new BillingSchedulesCollection object
 This constructor will assign default values to properties that have it defined,
@@ -28,20 +28,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetData
 
-`func (o *BillingSchedulesCollection) GetData() []BillingSchedulesCollectionDataInner`
+`func (o *BillingSchedulesCollection) GetData() BillingSchedulesCollectionData`
 
 GetData returns the Data field if non-nil, zero value otherwise.
 
 ### GetDataOk
 
-`func (o *BillingSchedulesCollection) GetDataOk() (*[]BillingSchedulesCollectionDataInner, bool)`
+`func (o *BillingSchedulesCollection) GetDataOk() (*BillingSchedulesCollectionData, bool)`
 
 GetDataOk returns a tuple with the Data field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetData
 
-`func (o *BillingSchedulesCollection) SetData(v []BillingSchedulesCollectionDataInner)`
+`func (o *BillingSchedulesCollection) SetData(v BillingSchedulesCollectionData)`
 
 SetData sets Data field to given value.
 

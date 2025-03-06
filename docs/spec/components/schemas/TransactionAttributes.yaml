@@ -1,10 +1,11 @@
 type: object
 required:
   - user_id
-  - plan_id
   - payment_id
   - amount
   - currency
+  - status
+  - payment_provider
   - provider_transaction_id
   - transaction_date
 properties:
@@ -12,13 +13,9 @@ properties:
     type: string
     format: uuid
     description: "User ID"
-  plan_id:
-    type: string
-    format: ObjectId
-    description: "Plan ID"
   payment_id:
     type: string
-    format: ObjectId
+    format: uuid
     description: "Payment ID"
   amount:
     type: number
@@ -27,6 +24,12 @@ properties:
   currency:
     type: string
     description: "Transaction currency"
+  status:
+    type: string
+    description: "Transaction status"
+  payment_provider:
+    type: string
+    description: "Payment provider"
   provider_transaction_id:
     type: string
     description: "Provider transaction ID"

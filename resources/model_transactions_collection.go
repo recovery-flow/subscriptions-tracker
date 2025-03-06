@@ -21,7 +21,7 @@ var _ MappedNullable = &TransactionsCollection{}
 
 // TransactionsCollection struct for TransactionsCollection
 type TransactionsCollection struct {
-	Data []TransactionData `json:"data"`
+	Data TransactionsCollectionData `json:"data"`
 	Links LinksPagination `json:"links"`
 }
 
@@ -31,7 +31,7 @@ type _TransactionsCollection TransactionsCollection
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTransactionsCollection(data []TransactionData, links LinksPagination) *TransactionsCollection {
+func NewTransactionsCollection(data TransactionsCollectionData, links LinksPagination) *TransactionsCollection {
 	this := TransactionsCollection{}
 	this.Data = data
 	this.Links = links
@@ -47,9 +47,9 @@ func NewTransactionsCollectionWithDefaults() *TransactionsCollection {
 }
 
 // GetData returns the Data field value
-func (o *TransactionsCollection) GetData() []TransactionData {
+func (o *TransactionsCollection) GetData() TransactionsCollectionData {
 	if o == nil {
-		var ret []TransactionData
+		var ret TransactionsCollectionData
 		return ret
 	}
 
@@ -58,15 +58,15 @@ func (o *TransactionsCollection) GetData() []TransactionData {
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *TransactionsCollection) GetDataOk() ([]TransactionData, bool) {
+func (o *TransactionsCollection) GetDataOk() (*TransactionsCollectionData, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Data, true
+	return &o.Data, true
 }
 
 // SetData sets field value
-func (o *TransactionsCollection) SetData(v []TransactionData) {
+func (o *TransactionsCollection) SetData(v TransactionsCollectionData) {
 	o.Data = v
 }
 

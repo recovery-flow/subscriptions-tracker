@@ -6,10 +6,6 @@ required:
   - updated_at
   - created_at
 properties:
-  user_id:
-    type: string
-    format: uuid
-    description: "User ID"
   schedules_date:
     type: string
     format: date-time

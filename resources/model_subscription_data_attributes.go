@@ -31,7 +31,9 @@ type SubscriptionDataAttributes struct {
 	// Availability
 	Availability string `json:"availability"`
 	// Start at
-	StartAt *time.Time `json:"start_at,omitempty"`
+	StartDate time.Time `json:"start_date"`
+	// End at
+	EndDate *time.Time `json:"end_date,omitempty"`
 	// Updated at
 	UpdatedAt time.Time `json:"updated_at"`
 	// Created at
@@ -44,12 +46,13 @@ type _SubscriptionDataAttributes SubscriptionDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSubscriptionDataAttributes(planId string, paymentMethodId string, status string, availability string, updatedAt time.Time, createdAt time.Time) *SubscriptionDataAttributes {
+func NewSubscriptionDataAttributes(planId string, paymentMethodId string, status string, availability string, startDate time.Time, updatedAt time.Time, createdAt time.Time) *SubscriptionDataAttributes {
 	this := SubscriptionDataAttributes{}
 	this.PlanId = planId
 	this.PaymentMethodId = paymentMethodId
 	this.Status = status
 	this.Availability = availability
+	this.StartDate = startDate
 	this.UpdatedAt = updatedAt
 	this.CreatedAt = createdAt
 	return &this
@@ -159,36 +162,60 @@ func (o *SubscriptionDataAttributes) SetAvailability(v string) {
 	o.Availability = v
 }
 
-// GetStartAt returns the StartAt field value if set, zero value otherwise.
-func (o *SubscriptionDataAttributes) GetStartAt() time.Time {
-	if o == nil || IsNil(o.StartAt) {
+// GetStartDate returns the StartDate field value
+func (o *SubscriptionDataAttributes) GetStartDate() time.Time {
+	if o == nil {
 		var ret time.Time
 		return ret
 	}
-	return *o.StartAt
+
+	return o.StartDate
 }
 
-// GetStartAtOk returns a tuple with the StartAt field value if set, nil otherwise
+// GetStartDateOk returns a tuple with the StartDate field value
 // and a boolean to check if the value has been set.
-func (o *SubscriptionDataAttributes) GetStartAtOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.StartAt) {
+func (o *SubscriptionDataAttributes) GetStartDateOk() (*time.Time, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return o.StartAt, true
+	return &o.StartDate, true
 }
 
-// HasStartAt returns a boolean if a field has been set.
-func (o *SubscriptionDataAttributes) HasStartAt() bool {
-	if o != nil && !IsNil(o.StartAt) {
+// SetStartDate sets field value
+func (o *SubscriptionDataAttributes) SetStartDate(v time.Time) {
+	o.StartDate = v
+}
+
+// GetEndDate returns the EndDate field value if set, zero value otherwise.
+func (o *SubscriptionDataAttributes) GetEndDate() time.Time {
+	if o == nil || IsNil(o.EndDate) {
+		var ret time.Time
+		return ret
+	}
+	return *o.EndDate
+}
+
+// GetEndDateOk returns a tuple with the EndDate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SubscriptionDataAttributes) GetEndDateOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.EndDate) {
+		return nil, false
+	}
+	return o.EndDate, true
+}
+
+// HasEndDate returns a boolean if a field has been set.
+func (o *SubscriptionDataAttributes) HasEndDate() bool {
+	if o != nil && !IsNil(o.EndDate) {
 		return true
 	}
 
 	return false
 }
 
-// SetStartAt gets a reference to the given time.Time and assigns it to the StartAt field.
-func (o *SubscriptionDataAttributes) SetStartAt(v time.Time) {
-	o.StartAt = &v
+// SetEndDate gets a reference to the given time.Time and assigns it to the EndDate field.
+func (o *SubscriptionDataAttributes) SetEndDate(v time.Time) {
+	o.EndDate = &v
 }
 
 // GetUpdatedAt returns the UpdatedAt field value
@@ -253,8 +280,9 @@ func (o SubscriptionDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize["payment_method_id"] = o.PaymentMethodId
 	toSerialize["status"] = o.Status
 	toSerialize["availability"] = o.Availability
-	if !IsNil(o.StartAt) {
-		toSerialize["start_at"] = o.StartAt
+	toSerialize["start_date"] = o.StartDate
+	if !IsNil(o.EndDate) {
+		toSerialize["end_date"] = o.EndDate
 	}
 	toSerialize["updated_at"] = o.UpdatedAt
 	toSerialize["created_at"] = o.CreatedAt
@@ -270,6 +298,7 @@ func (o *SubscriptionDataAttributes) UnmarshalJSON(data []byte) (err error) {
 		"payment_method_id",
 		"status",
 		"availability",
+		"start_date",
 		"updated_at",
 		"created_at",
 	}

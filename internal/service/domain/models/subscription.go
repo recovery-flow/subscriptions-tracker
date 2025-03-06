@@ -22,10 +22,11 @@ type Subscription struct {
 type SubscriptionStatus string
 
 const (
-	SubscriptionStatusActive   SubscriptionStatus = "active"
-	SubscriptionStatusInactive SubscriptionStatus = "inactive"
-	SubscriptionStatusCanceled SubscriptionStatus = "canceled"
-	SubscriptionStatusExpired  SubscriptionStatus = "expired"
+	SubscriptionStatusActive    SubscriptionStatus = "active"
+	SubscriptionStatusInactive  SubscriptionStatus = "inactive"
+	SubscriptionStatusCanceled  SubscriptionStatus = "canceled"
+	SubscriptionStatusForbidden SubscriptionStatus = "forbidden "
+	SubscriptionStatusExpired   SubscriptionStatus = "expired"
 )
 
 func ParseSubscriptionStatus(status string) (SubscriptionStatus, error) {
@@ -38,6 +39,8 @@ func ParseSubscriptionStatus(status string) (SubscriptionStatus, error) {
 		return SubscriptionStatusExpired, nil
 	case "canceled":
 		return SubscriptionStatusCanceled, nil
+	case "forbidden":
+		return SubscriptionStatusForbidden, nil
 	default:
 		return "", fmt.Errorf("invalid subscription status: %s", status)
 	}

@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Data** | [**[]TransactionData**](TransactionData.md) |  | 
+**Data** | [**TransactionsCollectionData**](TransactionsCollectionData.md) |  | 
 **Links** | [**LinksPagination**](LinksPagination.md) |  | 
 
 ## Methods
 
 ### NewTransactionsCollection
 
-`func NewTransactionsCollection(data []TransactionData, links LinksPagination, ) *TransactionsCollection`
+`func NewTransactionsCollection(data TransactionsCollectionData, links LinksPagination, ) *TransactionsCollection`
 
 NewTransactionsCollection instantiates a new TransactionsCollection object
 This constructor will assign default values to properties that have it defined,
@@ -28,20 +28,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetData
 
-`func (o *TransactionsCollection) GetData() []TransactionData`
+`func (o *TransactionsCollection) GetData() TransactionsCollectionData`
 
 GetData returns the Data field if non-nil, zero value otherwise.
 
 ### GetDataOk
 
-`func (o *TransactionsCollection) GetDataOk() (*[]TransactionData, bool)`
+`func (o *TransactionsCollection) GetDataOk() (*TransactionsCollectionData, bool)`
 
 GetDataOk returns a tuple with the Data field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetData
 
-`func (o *TransactionsCollection) SetData(v []TransactionData)`
+`func (o *TransactionsCollection) SetData(v TransactionsCollectionData)`
 
 SetData sets Data field to given value.
 

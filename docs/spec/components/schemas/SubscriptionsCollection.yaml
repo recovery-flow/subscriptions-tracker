@@ -1,0 +1,25 @@
+type: object
+required:
+  - data
+  - links
+properties:
+  data:
+    type: object
+    required:
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ subscriptions_collection ]
+      attributes:
+        type: object
+        required:
+          - subscriptions
+        properties:
+          subscriptions:
+            type: array
+            items:
+              $ref: './SubscriptionData.yaml'
+  links:
+    $ref: './LinksPagination.yaml'

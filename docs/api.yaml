@@ -15,22 +15,22 @@ paths:
 
 components:
   schemas:
-    SubType:
-        $ref: './spec/components/schemas/SubType.yaml'
-    SubTypesCollection:
-      $ref: './spec/components/schemas/SubTypesCollection.yaml'
-    SubTypeUpdate:
-      $ref: './spec/components/schemas/SubTypeUpdate.yaml'
-    SubPlan:
-      $ref: './spec/components/schemas/SubPlan.yaml'
-    SubPlansCollection:
-      $ref: './spec/components/schemas/SubPlansCollection.yaml'
-    SubPlanUpdate:
-      $ref: './spec/components/schemas/SubPlanUpdate.yaml'
+    SubscriptionType:
+        $ref: './spec/components/schemas/SubscriptionType.yaml'
+    SubscriptionTypesCollection:
+      $ref: './spec/components/schemas/SubscriptionTypesCollection.yaml'
+    SubscriptionTypeUpdate:
+      $ref: './spec/components/schemas/SubscriptionTypeUpdate.yaml'
+    SubscriptionPlan:
+      $ref: './spec/components/schemas/SubscriptionPlan.yaml'
+    SubscriptionPlansCollection:
+      $ref: './spec/components/schemas/SubscriptionPlansCollection.yaml'
+    SubscriptionPlanUpdate:
+      $ref: './spec/components/schemas/SubscriptionPlanUpdate.yaml'
     Subscription:
       $ref: './spec/components/schemas/Subscription.yaml'
     SubscriptionsCollection:
-      $ref: './spec/components/schemas/SubscriptionCollection.yaml'
+      $ref: './spec/components/schemas/SubscriptionsCollection.yaml'
     SubscriptionUpdate:
       $ref: './spec/components/schemas/SubscriptionUpdate.yaml'
     PaymentMethod:

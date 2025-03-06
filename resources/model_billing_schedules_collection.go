@@ -21,7 +21,7 @@ var _ MappedNullable = &BillingSchedulesCollection{}
 
 // BillingSchedulesCollection struct for BillingSchedulesCollection
 type BillingSchedulesCollection struct {
-	Data []BillingSchedulesCollectionDataInner `json:"data"`
+	Data BillingSchedulesCollectionData `json:"data"`
 	Links LinksPagination `json:"links"`
 }
 
@@ -31,7 +31,7 @@ type _BillingSchedulesCollection BillingSchedulesCollection
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBillingSchedulesCollection(data []BillingSchedulesCollectionDataInner, links LinksPagination) *BillingSchedulesCollection {
+func NewBillingSchedulesCollection(data BillingSchedulesCollectionData, links LinksPagination) *BillingSchedulesCollection {
 	this := BillingSchedulesCollection{}
 	this.Data = data
 	this.Links = links
@@ -47,9 +47,9 @@ func NewBillingSchedulesCollectionWithDefaults() *BillingSchedulesCollection {
 }
 
 // GetData returns the Data field value
-func (o *BillingSchedulesCollection) GetData() []BillingSchedulesCollectionDataInner {
+func (o *BillingSchedulesCollection) GetData() BillingSchedulesCollectionData {
 	if o == nil {
-		var ret []BillingSchedulesCollectionDataInner
+		var ret BillingSchedulesCollectionData
 		return ret
 	}
 
@@ -58,15 +58,15 @@ func (o *BillingSchedulesCollection) GetData() []BillingSchedulesCollectionDataI
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *BillingSchedulesCollection) GetDataOk() ([]BillingSchedulesCollectionDataInner, bool) {
+func (o *BillingSchedulesCollection) GetDataOk() (*BillingSchedulesCollectionData, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Data, true
+	return &o.Data, true
 }
 
 // SetData sets field value
-func (o *BillingSchedulesCollection) SetData(v []BillingSchedulesCollectionDataInner) {
+func (o *BillingSchedulesCollection) SetData(v BillingSchedulesCollectionData) {
 	o.Data = v
 }
 

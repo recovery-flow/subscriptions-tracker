@@ -11,6 +11,6 @@ properties:
       type:
         type: string
         enum: [ billing_schedule_update ]
-      attributes:
-        $ref: './BillingScheduleAttributes.yaml'
+#      attributes:
+##        $ref: './BillingScheduleAttributes.yaml'
         #TODO - maybe this is not used in future

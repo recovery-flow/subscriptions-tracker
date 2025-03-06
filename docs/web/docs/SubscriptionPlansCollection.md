@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Data** | [**[]SubscriptionPlanData**](SubscriptionPlanData.md) |  | 
+**Data** | [**SubscriptionPlansCollectionData**](SubscriptionPlansCollectionData.md) |  | 
 **Links** | [**LinksPagination**](LinksPagination.md) |  | 
 
 ## Methods
 
 ### NewSubscriptionPlansCollection
 
-`func NewSubscriptionPlansCollection(data []SubscriptionPlanData, links LinksPagination, ) *SubscriptionPlansCollection`
+`func NewSubscriptionPlansCollection(data SubscriptionPlansCollectionData, links LinksPagination, ) *SubscriptionPlansCollection`
 
 NewSubscriptionPlansCollection instantiates a new SubscriptionPlansCollection object
 This constructor will assign default values to properties that have it defined,
@@ -28,20 +28,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetData
 
-`func (o *SubscriptionPlansCollection) GetData() []SubscriptionPlanData`
+`func (o *SubscriptionPlansCollection) GetData() SubscriptionPlansCollectionData`
 
 GetData returns the Data field if non-nil, zero value otherwise.
 
 ### GetDataOk
 
-`func (o *SubscriptionPlansCollection) GetDataOk() (*[]SubscriptionPlanData, bool)`
+`func (o *SubscriptionPlansCollection) GetDataOk() (*SubscriptionPlansCollectionData, bool)`
 
 GetDataOk returns a tuple with the Data field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetData
 
-`func (o *SubscriptionPlansCollection) SetData(v []SubscriptionPlanData)`
+`func (o *SubscriptionPlansCollection) SetData(v SubscriptionPlansCollectionData)`
 
 SetData sets Data field to given value.
 

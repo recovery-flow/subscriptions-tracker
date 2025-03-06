@@ -24,14 +24,16 @@ var _ MappedNullable = &TransactionDataAttributes{}
 type TransactionDataAttributes struct {
 	// User ID
 	UserId string `json:"user_id"`
-	// Plan ID
-	PlanId string `json:"plan_id"`
 	// Payment ID
 	PaymentId string `json:"payment_id"`
 	// Transaction amount
 	Amount float32 `json:"amount"`
 	// Transaction currency
 	Currency string `json:"currency"`
+	// Transaction status
+	Status string `json:"status"`
+	// Payment provider
+	PaymentProvider string `json:"payment_provider"`
 	// Provider transaction ID
 	ProviderTransactionId string `json:"provider_transaction_id"`
 	// Transaction creation date
@@ -44,13 +46,14 @@ type _TransactionDataAttributes TransactionDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTransactionDataAttributes(userId string, planId string, paymentId string, amount float32, currency string, providerTransactionId string, transactionDate time.Time) *TransactionDataAttributes {
+func NewTransactionDataAttributes(userId string, paymentId string, amount float32, currency string, status string, paymentProvider string, providerTransactionId string, transactionDate time.Time) *TransactionDataAttributes {
 	this := TransactionDataAttributes{}
 	this.UserId = userId
-	this.PlanId = planId
 	this.PaymentId = paymentId
 	this.Amount = amount
 	this.Currency = currency
+	this.Status = status
+	this.PaymentProvider = paymentProvider
 	this.ProviderTransactionId = providerTransactionId
 	this.TransactionDate = transactionDate
 	return &this
@@ -86,30 +89,6 @@ func (o *TransactionDataAttributes) GetUserIdOk() (*string, bool) {
 // SetUserId sets field value
 func (o *TransactionDataAttributes) SetUserId(v string) {
 	o.UserId = v
-}
-
-// GetPlanId returns the PlanId field value
-func (o *TransactionDataAttributes) GetPlanId() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.PlanId
-}
-
-// GetPlanIdOk returns a tuple with the PlanId field value
-// and a boolean to check if the value has been set.
-func (o *TransactionDataAttributes) GetPlanIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.PlanId, true
-}
-
-// SetPlanId sets field value
-func (o *TransactionDataAttributes) SetPlanId(v string) {
-	o.PlanId = v
 }
 
 // GetPaymentId returns the PaymentId field value
@@ -184,6 +163,54 @@ func (o *TransactionDataAttributes) SetCurrency(v string) {
 	o.Currency = v
 }
 
+// GetStatus returns the Status field value
+func (o *TransactionDataAttributes) GetStatus() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Status
+}
+
+// GetStatusOk returns a tuple with the Status field value
+// and a boolean to check if the value has been set.
+func (o *TransactionDataAttributes) GetStatusOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Status, true
+}
+
+// SetStatus sets field value
+func (o *TransactionDataAttributes) SetStatus(v string) {
+	o.Status = v
+}
+
+// GetPaymentProvider returns the PaymentProvider field value
+func (o *TransactionDataAttributes) GetPaymentProvider() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.PaymentProvider
+}
+
+// GetPaymentProviderOk returns a tuple with the PaymentProvider field value
+// and a boolean to check if the value has been set.
+func (o *TransactionDataAttributes) GetPaymentProviderOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.PaymentProvider, true
+}
+
+// SetPaymentProvider sets field value
+func (o *TransactionDataAttributes) SetPaymentProvider(v string) {
+	o.PaymentProvider = v
+}
+
 // GetProviderTransactionId returns the ProviderTransactionId field value
 func (o *TransactionDataAttributes) GetProviderTransactionId() string {
 	if o == nil {
@@ -243,10 +270,11 @@ func (o TransactionDataAttributes) MarshalJSON() ([]byte, error) {
 func (o TransactionDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["user_id"] = o.UserId
-	toSerialize["plan_id"] = o.PlanId
 	toSerialize["payment_id"] = o.PaymentId
 	toSerialize["amount"] = o.Amount
 	toSerialize["currency"] = o.Currency
+	toSerialize["status"] = o.Status
+	toSerialize["payment_provider"] = o.PaymentProvider
 	toSerialize["provider_transaction_id"] = o.ProviderTransactionId
 	toSerialize["transaction_date"] = o.TransactionDate
 	return toSerialize, nil
@@ -258,10 +286,11 @@ func (o *TransactionDataAttributes) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"user_id",
-		"plan_id",
 		"payment_id",
 		"amount",
 		"currency",
+		"status",
+		"payment_provider",
 		"provider_transaction_id",
 		"transaction_date",
 	}

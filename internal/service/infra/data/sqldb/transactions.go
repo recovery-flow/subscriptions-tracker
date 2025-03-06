@@ -62,7 +62,7 @@ func (t *transactions) Insert(ctx context.Context, trn *models.Transaction) erro
 		"currency":          trn.Currency,
 		"status":            trn.Status,
 		"payment_provider":  trn.PaymentProvider,
-		"payment_id":        trn.PaymentID,
+		"payment_id":        trn.PaymentProviderID,
 		"transaction_date":  trn.TransactionDate,
 	}
 
@@ -140,7 +140,7 @@ func (t *transactions) Select(ctx context.Context) ([]models.Transaction, error)
 			&trn.Currency,
 			&trn.Status,
 			&trn.PaymentProvider,
-			&trn.PaymentID,
+			&trn.PaymentProviderID,
 			&trn.TransactionDate,
 		)
 		if err != nil {
@@ -181,7 +181,7 @@ func (t *transactions) Get(ctx context.Context) (*models.Transaction, error) {
 		&trn.Currency,
 		&trn.Status,
 		&trn.PaymentProvider,
-		&trn.PaymentID,
+		&trn.PaymentProviderID,
 		&trn.TransactionDate,
 	)
 	if err != nil {

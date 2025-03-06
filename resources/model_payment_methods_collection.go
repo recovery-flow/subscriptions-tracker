@@ -21,7 +21,7 @@ var _ MappedNullable = &PaymentMethodsCollection{}
 
 // PaymentMethodsCollection struct for PaymentMethodsCollection
 type PaymentMethodsCollection struct {
-	Data []PaymentMethodData `json:"data"`
+	Data PaymentMethodsCollectionData `json:"data"`
 	Links LinksPagination `json:"links"`
 }
 
@@ -31,7 +31,7 @@ type _PaymentMethodsCollection PaymentMethodsCollection
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPaymentMethodsCollection(data []PaymentMethodData, links LinksPagination) *PaymentMethodsCollection {
+func NewPaymentMethodsCollection(data PaymentMethodsCollectionData, links LinksPagination) *PaymentMethodsCollection {
 	this := PaymentMethodsCollection{}
 	this.Data = data
 	this.Links = links
@@ -47,9 +47,9 @@ func NewPaymentMethodsCollectionWithDefaults() *PaymentMethodsCollection {
 }
 
 // GetData returns the Data field value
-func (o *PaymentMethodsCollection) GetData() []PaymentMethodData {
+func (o *PaymentMethodsCollection) GetData() PaymentMethodsCollectionData {
 	if o == nil {
-		var ret []PaymentMethodData
+		var ret PaymentMethodsCollectionData
 		return ret
 	}
 
@@ -58,15 +58,15 @@ func (o *PaymentMethodsCollection) GetData() []PaymentMethodData {
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *PaymentMethodsCollection) GetDataOk() ([]PaymentMethodData, bool) {
+func (o *PaymentMethodsCollection) GetDataOk() (*PaymentMethodsCollectionData, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Data, true
+	return &o.Data, true
 }
 
 // SetData sets field value
-func (o *PaymentMethodsCollection) SetData(v []PaymentMethodData) {
+func (o *PaymentMethodsCollection) SetData(v PaymentMethodsCollectionData) {
 	o.Data = v
 }
 

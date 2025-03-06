@@ -21,7 +21,7 @@ var _ MappedNullable = &BillingSchedule{}
 
 // BillingSchedule struct for BillingSchedule
 type BillingSchedule struct {
-	Data BillingSchedule `json:"data"`
+	Data BillingScheduleData `json:"data"`
 }
 
 type _BillingSchedule BillingSchedule
@@ -30,7 +30,7 @@ type _BillingSchedule BillingSchedule
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBillingSchedule(data BillingSchedule) *BillingSchedule {
+func NewBillingSchedule(data BillingScheduleData) *BillingSchedule {
 	this := BillingSchedule{}
 	this.Data = data
 	return &this
@@ -45,9 +45,9 @@ func NewBillingScheduleWithDefaults() *BillingSchedule {
 }
 
 // GetData returns the Data field value
-func (o *BillingSchedule) GetData() BillingSchedule {
+func (o *BillingSchedule) GetData() BillingScheduleData {
 	if o == nil {
-		var ret BillingSchedule
+		var ret BillingScheduleData
 		return ret
 	}
 
@@ -56,7 +56,7 @@ func (o *BillingSchedule) GetData() BillingSchedule {
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *BillingSchedule) GetDataOk() (*BillingSchedule, bool) {
+func (o *BillingSchedule) GetDataOk() (*BillingScheduleData, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (o *BillingSchedule) GetDataOk() (*BillingSchedule, bool) {
 }
 
 // SetData sets field value
-func (o *BillingSchedule) SetData(v BillingSchedule) {
+func (o *BillingSchedule) SetData(v BillingScheduleData) {
 	o.Data = v
 }
 

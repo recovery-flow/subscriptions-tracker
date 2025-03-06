@@ -5,13 +5,12 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Type** | **string** |  | 
-**Attributes** | [**BillingScheduleUpdateDataAttributes**](BillingScheduleUpdateDataAttributes.md) |  | 
 
 ## Methods
 
 ### NewBillingScheduleUpdateData
 
-`func NewBillingScheduleUpdateData(type_ string, attributes BillingScheduleUpdateDataAttributes, ) *BillingScheduleUpdateData`
+`func NewBillingScheduleUpdateData(type_ string, ) *BillingScheduleUpdateData`
 
 NewBillingScheduleUpdateData instantiates a new BillingScheduleUpdateData object
 This constructor will assign default values to properties that have it defined,
@@ -44,26 +43,6 @@ and a boolean to check if the value has been set.
 `func (o *BillingScheduleUpdateData) SetType(v string)`
 
 SetType sets Type field to given value.
-
-
-### GetAttributes
-
-`func (o *BillingScheduleUpdateData) GetAttributes() BillingScheduleUpdateDataAttributes`
-
-GetAttributes returns the Attributes field if non-nil, zero value otherwise.
-
-### GetAttributesOk
-
-`func (o *BillingScheduleUpdateData) GetAttributesOk() (*BillingScheduleUpdateDataAttributes, bool)`
-
-GetAttributesOk returns a tuple with the Attributes field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAttributes
-
-`func (o *BillingScheduleUpdateData) SetAttributes(v BillingScheduleUpdateDataAttributes)`
-
-SetAttributes sets Attributes field to given value.
 
 
 

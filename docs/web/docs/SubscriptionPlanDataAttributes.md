@@ -4,20 +4,22 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Title** | **string** | Title | 
-**Price** | **float32** | Price | 
-**Currency** | **string** | Currency | 
-**PayFrequency** | **string** | Pay frequency | 
-**Status** | **string** | Status | 
-**UpdatedAt** | Pointer to **time.Time** | Updated at | [optional] 
-**DeletedAt** | Pointer to **time.Time** |  | [optional] 
-**CreatedAt** | **time.Time** | Created at | 
+**TypeId** | **string** | Subscription Plan ID | 
+**Name** | **string** | Subscription Plan Name | 
+**Desc** | **string** | Subscription Plan Description | 
+**Price** | **float32** | Subscription Plan Price | 
+**Currency** | **string** | Subscription Plan Currency | 
+**BillingCycle** | **string** | Subscription Plan Billing Interval | 
+**BillingInterval** | **int32** | Subscription Plan Billing Interval | 
+**Status** | **string** | Subscription Plan Status | 
+**UpdatedAt** | **time.Time** | Subscription Plan Updated At | 
+**CreatedAt** | **time.Time** | Subscription Plan Created At | 
 
 ## Methods
 
 ### NewSubscriptionPlanDataAttributes
 
-`func NewSubscriptionPlanDataAttributes(title string, price float32, currency string, payFrequency string, status string, createdAt time.Time, ) *SubscriptionPlanDataAttributes`
+`func NewSubscriptionPlanDataAttributes(typeId string, name string, desc string, price float32, currency string, billingCycle string, billingInterval int32, status string, updatedAt time.Time, createdAt time.Time, ) *SubscriptionPlanDataAttributes`
 
 NewSubscriptionPlanDataAttributes instantiates a new SubscriptionPlanDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -32,24 +34,64 @@ NewSubscriptionPlanDataAttributesWithDefaults instantiates a new SubscriptionPla
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetTitle
+### GetTypeId
 
-`func (o *SubscriptionPlanDataAttributes) GetTitle() string`
+`func (o *SubscriptionPlanDataAttributes) GetTypeId() string`
 
-GetTitle returns the Title field if non-nil, zero value otherwise.
+GetTypeId returns the TypeId field if non-nil, zero value otherwise.
 
-### GetTitleOk
+### GetTypeIdOk
 
-`func (o *SubscriptionPlanDataAttributes) GetTitleOk() (*string, bool)`
+`func (o *SubscriptionPlanDataAttributes) GetTypeIdOk() (*string, bool)`
 
-GetTitleOk returns a tuple with the Title field if it's non-nil, zero value otherwise
+GetTypeIdOk returns a tuple with the TypeId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTitle
+### SetTypeId
 
-`func (o *SubscriptionPlanDataAttributes) SetTitle(v string)`
+`func (o *SubscriptionPlanDataAttributes) SetTypeId(v string)`
 
-SetTitle sets Title field to given value.
+SetTypeId sets TypeId field to given value.
+
+
+### GetName
+
+`func (o *SubscriptionPlanDataAttributes) GetName() string`
+
+GetName returns the Name field if non-nil, zero value otherwise.
+
+### GetNameOk
+
+`func (o *SubscriptionPlanDataAttributes) GetNameOk() (*string, bool)`
+
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetName
+
+`func (o *SubscriptionPlanDataAttributes) SetName(v string)`
+
+SetName sets Name field to given value.
+
+
+### GetDesc
+
+`func (o *SubscriptionPlanDataAttributes) GetDesc() string`
+
+GetDesc returns the Desc field if non-nil, zero value otherwise.
+
+### GetDescOk
+
+`func (o *SubscriptionPlanDataAttributes) GetDescOk() (*string, bool)`
+
+GetDescOk returns a tuple with the Desc field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDesc
+
+`func (o *SubscriptionPlanDataAttributes) SetDesc(v string)`
+
+SetDesc sets Desc field to given value.
 
 
 ### GetPrice
@@ -92,24 +134,44 @@ and a boolean to check if the value has been set.
 SetCurrency sets Currency field to given value.
 
 
-### GetPayFrequency
+### GetBillingCycle
 
-`func (o *SubscriptionPlanDataAttributes) GetPayFrequency() string`
+`func (o *SubscriptionPlanDataAttributes) GetBillingCycle() string`
 
-GetPayFrequency returns the PayFrequency field if non-nil, zero value otherwise.
+GetBillingCycle returns the BillingCycle field if non-nil, zero value otherwise.
 
-### GetPayFrequencyOk
+### GetBillingCycleOk
 
-`func (o *SubscriptionPlanDataAttributes) GetPayFrequencyOk() (*string, bool)`
+`func (o *SubscriptionPlanDataAttributes) GetBillingCycleOk() (*string, bool)`
 
-GetPayFrequencyOk returns a tuple with the PayFrequency field if it's non-nil, zero value otherwise
+GetBillingCycleOk returns a tuple with the BillingCycle field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetPayFrequency
+### SetBillingCycle
 
-`func (o *SubscriptionPlanDataAttributes) SetPayFrequency(v string)`
+`func (o *SubscriptionPlanDataAttributes) SetBillingCycle(v string)`
 
-SetPayFrequency sets PayFrequency field to given value.
+SetBillingCycle sets BillingCycle field to given value.
+
+
+### GetBillingInterval
+
+`func (o *SubscriptionPlanDataAttributes) GetBillingInterval() int32`
+
+GetBillingInterval returns the BillingInterval field if non-nil, zero value otherwise.
+
+### GetBillingIntervalOk
+
+`func (o *SubscriptionPlanDataAttributes) GetBillingIntervalOk() (*int32, bool)`
+
+GetBillingIntervalOk returns a tuple with the BillingInterval field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBillingInterval
+
+`func (o *SubscriptionPlanDataAttributes) SetBillingInterval(v int32)`
+
+SetBillingInterval sets BillingInterval field to given value.
 
 
 ### GetStatus
@@ -151,36 +213,6 @@ and a boolean to check if the value has been set.
 
 SetUpdatedAt sets UpdatedAt field to given value.
 
-### HasUpdatedAt
-
-`func (o *SubscriptionPlanDataAttributes) HasUpdatedAt() bool`
-
-HasUpdatedAt returns a boolean if a field has been set.
-
-### GetDeletedAt
-
-`func (o *SubscriptionPlanDataAttributes) GetDeletedAt() time.Time`
-
-GetDeletedAt returns the DeletedAt field if non-nil, zero value otherwise.
-
-### GetDeletedAtOk
-
-`func (o *SubscriptionPlanDataAttributes) GetDeletedAtOk() (*time.Time, bool)`
-
-GetDeletedAtOk returns a tuple with the DeletedAt field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetDeletedAt
-
-`func (o *SubscriptionPlanDataAttributes) SetDeletedAt(v time.Time)`
-
-SetDeletedAt sets DeletedAt field to given value.
-
-### HasDeletedAt
-
-`func (o *SubscriptionPlanDataAttributes) HasDeletedAt() bool`
-
-HasDeletedAt returns a boolean if a field has been set.
 
 ### GetCreatedAt
 

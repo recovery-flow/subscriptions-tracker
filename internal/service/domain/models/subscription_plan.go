@@ -12,7 +12,7 @@ type SubscriptionPlan struct {
 	TypeID          uuid.UUID    `json:"type_id"`
 	Name            string       `json:"name"`
 	Description     string       `json:"description"`
-	Price           float64      `json:"price"`
+	Price           float32      `json:"price"`
 	Currency        string       `json:"currency"`
 	BillingInterval int8         `json:"billing_interval"`
 	BillingCycle    BillingCycle `json:"billing_interval_unit"`

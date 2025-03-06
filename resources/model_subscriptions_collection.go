@@ -21,7 +21,7 @@ var _ MappedNullable = &SubscriptionsCollection{}
 
 // SubscriptionsCollection struct for SubscriptionsCollection
 type SubscriptionsCollection struct {
-	Data []SubscriptionData `json:"data"`
+	Data SubscriptionsCollectionData `json:"data"`
 	Links LinksPagination `json:"links"`
 }
 
@@ -31,7 +31,7 @@ type _SubscriptionsCollection SubscriptionsCollection
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSubscriptionsCollection(data []SubscriptionData, links LinksPagination) *SubscriptionsCollection {
+func NewSubscriptionsCollection(data SubscriptionsCollectionData, links LinksPagination) *SubscriptionsCollection {
 	this := SubscriptionsCollection{}
 	this.Data = data
 	this.Links = links
@@ -47,9 +47,9 @@ func NewSubscriptionsCollectionWithDefaults() *SubscriptionsCollection {
 }
 
 // GetData returns the Data field value
-func (o *SubscriptionsCollection) GetData() []SubscriptionData {
+func (o *SubscriptionsCollection) GetData() SubscriptionsCollectionData {
 	if o == nil {
-		var ret []SubscriptionData
+		var ret SubscriptionsCollectionData
 		return ret
 	}
 
@@ -58,15 +58,15 @@ func (o *SubscriptionsCollection) GetData() []SubscriptionData {
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *SubscriptionsCollection) GetDataOk() ([]SubscriptionData, bool) {
+func (o *SubscriptionsCollection) GetDataOk() (*SubscriptionsCollectionData, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Data, true
+	return &o.Data, true
 }
 
 // SetData sets field value
-func (o *SubscriptionsCollection) SetData(v []SubscriptionData) {
+func (o *SubscriptionsCollection) SetData(v SubscriptionsCollectionData) {
 	o.Data = v
 }
 
