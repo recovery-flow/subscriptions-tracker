@@ -47,7 +47,7 @@ func (p *plans) Set(ctx context.Context, plan models.SubscriptionPlan) error {
 		"name":                  plan.Name,
 		"description":           plan.Description,
 		"billing_interval":      plan.BillingInterval,
-		"billing_interval_unit": plan.BillingIntervalUnit,
+		"billing_interval_unit": plan.BillingCycle,
 		"currency":              plan.Currency,
 		"status":                plan.Status,
 		"created_at":            plan.CreatedAt.Format(time.RFC3339),
@@ -200,17 +200,17 @@ func parsePlan(ID string, vals map[string]string) (*models.SubscriptionPlan, err
 	}
 
 	plan := models.SubscriptionPlan{
-		ID:                  id,
-		TypeID:              typeID,
-		Price:               price,
-		Name:                vals["name"],
-		Description:         vals["description"],
-		BillingInterval:     int8(billingInterval),
-		BillingIntervalUnit: models.BillingIntervalUnit(vals["billing_interval_unit"]),
-		Currency:            vals["currency"],
-		Status:              status,
-		CreatedAt:           createdAt,
-		UpdatedAt:           updatedAt,
+		ID:              id,
+		TypeID:          typeID,
+		Price:           price,
+		Name:            vals["name"],
+		Description:     vals["description"],
+		BillingInterval: int8(billingInterval),
+		BillingCycle:    models.BillingCycle(vals["billing_interval_unit"]),
+		Currency:        vals["currency"],
+		Status:          status,
+		CreatedAt:       createdAt,
+		UpdatedAt:       updatedAt,
 	}
 
 	return &plan, nil

@@ -1,0 +1,28 @@
+type: object
+required:
+  - user_id
+  - type
+  - provider_token
+  - is_default
+  - created_at
+properties:
+  user_id:
+    type: string
+    format: uuid
+    description: "User ID"
+  type:
+    type: string
+    enum: [ payment_method ]
+  provider_token:
+    type: string
+    description: "Provider token"
+  is_default:
+    type: boolean
+    description: "Is default"
+  created_at:
+    type: string
+    format: date-time
+    description: "Created at"
+    example: "2020-01-01T00:00:00Z"
+    readOnly: true
+    writeOnly: true

@@ -1,0 +1,38 @@
+type: object
+required:
+  - plan_id
+  - payment_method_id
+  - status
+  - availability
+  - start_date
+  - updated_at
+  - created_at
+properties:
+  plan_id:
+    type: string
+    format: uuid
+    description: "Plan ID"
+  payment_method_id:
+    type: string
+    format: uuid
+    description: "Payment Method ID"
+  status:
+    type: string
+    enum: [ active, inactive, canceled, expired ]
+    description: "State"
+  availability:
+    type: string
+    enum: [ available, unavailable, removed ]
+    description: "Availability"
+  start_at:
+    type: string
+    format: date-time
+    description: "Start at"
+  updated_at:
+    type: string
+    format: date-time
+    description: "Updated at"
+  created_at:
+    type: string
+    format: date-time
+    description: "Created at"

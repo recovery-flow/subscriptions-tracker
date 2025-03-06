@@ -8,17 +8,17 @@ import (
 )
 
 type SubscriptionPlan struct {
-	ID                  uuid.UUID           `json:"id"`
-	TypeID              uuid.UUID           `json:"type_id"`
-	Price               float64             `json:"price"`
-	Name                string              `json:"name"`
-	Description         string              `json:"description"`
-	BillingInterval     int8                `json:"billing_interval"`
-	BillingIntervalUnit BillingIntervalUnit `json:"billing_interval_unit"`
-	Currency            string              `json:"currency"`
-	Status              StatusPlan          `json:"status"`
-	UpdatedAt           time.Time           `json:"updated_at"`
-	CreatedAt           time.Time           `json:"created_at"`
+	ID              uuid.UUID    `json:"id"`
+	TypeID          uuid.UUID    `json:"type_id"`
+	Name            string       `json:"name"`
+	Description     string       `json:"description"`
+	Price           float64      `json:"price"`
+	Currency        string       `json:"currency"`
+	BillingInterval int8         `json:"billing_interval"`
+	BillingCycle    BillingCycle `json:"billing_interval_unit"`
+	Status          StatusPlan   `json:"status"`
+	UpdatedAt       time.Time    `json:"updated_at"`
+	CreatedAt       time.Time    `json:"created_at"`
 }
 
 type StatusPlan string
@@ -39,28 +39,28 @@ func ParseStatusPlan(status string) (StatusPlan, error) {
 	}
 }
 
-type BillingIntervalUnit string
+type BillingCycle string
 
 const (
-	IntervalOnce  BillingIntervalUnit = "once"
-	IntervalDay   BillingIntervalUnit = "day"
-	IntervalWeek  BillingIntervalUnit = "week"
-	IntervalMonth BillingIntervalUnit = "month"
-	IntervalYear  BillingIntervalUnit = "year"
+	CycleOnce  BillingCycle = "once"
+	CycleDay   BillingCycle = "day"
+	CycleWeek  BillingCycle = "week"
+	CycleMonth BillingCycle = "month"
+	CycleYear  BillingCycle = "year"
 )
 
-func ParseBillingIntervalUnit(unit string) (BillingIntervalUnit, error) {
+func ParseBillingCycle(unit string) (BillingCycle, error) {
 	switch unit {
 	case "once":
-		return IntervalOnce, nil
+		return CycleOnce, nil
 	case "day":
-		return IntervalDay, nil
+		return CycleDay, nil
 	case "week":
-		return IntervalWeek, nil
+		return CycleWeek, nil
 	case "month":
-		return IntervalMonth, nil
+		return CycleMonth, nil
 	case "year":
-		return IntervalYear, nil
+		return CycleYear, nil
 	default:
 		return "", fmt.Errorf("invalid billing interval unit: %s", unit)
 	}

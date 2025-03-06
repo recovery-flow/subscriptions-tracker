@@ -68,19 +68,19 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 		//Create a new subscription
 
 		var endDate time.Time
-		uInterval := sPlan.BillingIntervalUnit
+		uInterval := sPlan.BillingCycle
 		interval := sPlan.BillingInterval
 
 		switch uInterval {
-		case models.IntervalOnce:
+		case models.CycleOnce:
 			endDate = time.Now().AddDate(100, 0, 0)
-		case models.IntervalDay:
+		case models.CycleDay:
 			endDate = time.Now().AddDate(0, 0, 1*int(interval))
-		case models.IntervalWeek:
+		case models.CycleWeek:
 			endDate = time.Now().AddDate(0, 0, 7*int(interval))
-		case models.IntervalMonth:
+		case models.CycleMonth:
 			endDate = time.Now().AddDate(0, int(interval), 0)
-		case models.IntervalYear:
+		case models.CycleYear:
 			endDate = time.Now().AddDate(int(interval), 0, 0)
 		default:
 			return fmt.Errorf("invalid billing interval unit %s || %d", uInterval, interval)

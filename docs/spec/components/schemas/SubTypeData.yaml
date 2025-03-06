@@ -7,9 +7,9 @@ properties:
   id:
     type: string
     format: uuid
-    description: "Subscriber ID"
+    description: "Subscription type ID"
   type:
     type: string
-    enum: [ subscriber ]
+    enum: [ subscription_type ]
   attributes:
-    $ref: './SubscriberAttributes.yaml'
+    $ref: './SubTypeAttributes.yaml'

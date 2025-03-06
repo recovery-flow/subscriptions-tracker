@@ -18,9 +18,6 @@ properties:
             type: string
             format: ObjectId
             description: "Plan ID object ID"
-          streak_months:
-            type: integer
-            description: "Streak months"
           status:
             type: string
             enum:
@@ -28,11 +25,7 @@ properties:
               - "inactive"
               - "cancelled"
             description: "Status"
-          start_at:
+          payment_method_id:
             type: string
-            format: date-time
-            description: "Start at"
-          end_at:
-            type: string
-            format: date-time
-            description: "End at"
+            format: uuid
+            description: "Payment Method ID"

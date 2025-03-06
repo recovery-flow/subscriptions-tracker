@@ -18,7 +18,7 @@ type SubscriptionsCatalog interface {
 		price float64,
 		currency string,
 		BillingInterval int8,
-		BillingIntervalUnit models.BillingIntervalUnit,
+		BillingIntervalUnit models.BillingCycle,
 	) (*models.SubscriptionPlan, error)
 
 	UpdateSubType(ctx context.Context, ID uuid.UUID, update map[string]any) error
@@ -59,21 +59,21 @@ func (d *domain) CreateSubPlan(
 	price float64,
 	currency string,
 	BillingInterval int8,
-	BillingIntervalUnit models.BillingIntervalUnit,
+	BillingIntervalUnit models.BillingCycle,
 ) (*models.SubscriptionPlan, error) {
 
 	plan := &models.SubscriptionPlan{
-		ID:                  uuid.New(),
-		TypeID:              TypeID,
-		Price:               price,
-		Name:                name,
-		Description:         desc,
-		BillingInterval:     BillingInterval,
-		BillingIntervalUnit: BillingIntervalUnit,
-		Currency:            currency,
-		Status:              models.StatusPlanInactive,
-		UpdatedAt:           time.Now().UTC(),
-		CreatedAt:           time.Now().UTC(),
+		ID:              uuid.New(),
+		TypeID:          TypeID,
+		Price:           price,
+		Name:            name,
+		Description:     desc,
+		BillingInterval: BillingInterval,
+		BillingCycle:    BillingIntervalUnit,
+		Currency:        currency,
+		Status:          models.StatusPlanInactive,
+		UpdatedAt:       time.Now().UTC(),
+		CreatedAt:       time.Now().UTC(),
 	}
 
 	_, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{

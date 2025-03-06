@@ -1,0 +1,48 @@
+type: object
+required:
+  - type_id
+  - name
+  - desc
+  - price
+  - currency
+  - billing_cycle
+  - billing_interval
+  - status
+  - updated_at
+  - created_at
+properties:
+  type_id:
+    type: string
+    format: uuid
+    description: "Subscription Plan ID"
+  name:
+    type: string
+    description: "Subscription Plan Name"
+  desc:
+    type: string
+    description: "Subscription Plan Description"
+  price:
+    type: number
+    format: float64
+    description: "Subscription Plan Price"
+  currency:
+    type: string
+    description: "Subscription Plan Currency"
+  billing_cycle:
+    type: string
+    description: "Subscription Plan Billing Interval"
+  billing_interval:
+    type: integer
+    description: "Subscription Plan Billing Interval"
+  status:
+    type: string
+    enum: [ active, inactive ]
+    description: "Subscription Plan Status"
+  updated_at:
+    type: string
+    format: date-time
+    description: "Subscription Plan Updated At"
+  created_at:
+    type: string
+    format: date-time
+    description: "Subscription Plan Created At"

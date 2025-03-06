@@ -6,6 +6,6 @@ properties:
   data:
     type: array
     items:
-      $ref: './SubscriberData.yaml'
+      $ref: './BillingScheduleData.yaml'
   links:
     $ref: './LinksPagination.yaml'

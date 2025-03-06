@@ -15,18 +15,34 @@ paths:
 
 components:
   schemas:
-    Subscriber:
-      $ref: './spec/components/schemas/Subscriber.yaml'
-    SubscribersCollection:
-      $ref: './spec/components/schemas/SubscribersCollection.yaml'
-    SubscriberUpdate:
-      $ref: './spec/components/schemas/SubscriberUpdate.yaml'
-    SubscriptionPlan:
-      $ref: './spec/components/schemas/SubscriptionPlan.yaml'
-    SubscriptionPlansCollection:
-      $ref: './spec/components/schemas/SubscriptionPlansCollection.yaml'
-    SubscriptionPlanUpdate:
-      $ref: './spec/components/schemas/SubscriptionPlanUpdate.yaml'
+    SubType:
+        $ref: './spec/components/schemas/SubType.yaml'
+    SubTypesCollection:
+      $ref: './spec/components/schemas/SubTypesCollection.yaml'
+    SubTypeUpdate:
+      $ref: './spec/components/schemas/SubTypeUpdate.yaml'
+    SubPlan:
+      $ref: './spec/components/schemas/SubPlan.yaml'
+    SubPlansCollection:
+      $ref: './spec/components/schemas/SubPlansCollection.yaml'
+    SubPlanUpdate:
+      $ref: './spec/components/schemas/SubPlanUpdate.yaml'
+    Subscription:
+      $ref: './spec/components/schemas/Subscription.yaml'
+    SubscriptionsCollection:
+      $ref: './spec/components/schemas/SubscriptionCollection.yaml'
+    SubscriptionUpdate:
+      $ref: './spec/components/schemas/SubscriptionUpdate.yaml'
+    PaymentMethod:
+      $ref: './spec/components/schemas/PaymentMethod.yaml'
+    PaymentMethodsCollection:
+      $ref: './spec/components/schemas/PaymentMethodsCollection.yaml'
+    BillingSchedule:
+      $ref: './spec/components/schemas/BillingSchedule.yaml'
+    BillingSchedulesCollection:
+      $ref: './spec/components/schemas/BillingSchedulesCollection.yaml'
+    BillingScheduleUpdate:
+      $ref: './spec/components/schemas/BillingScheduleUpdate.yaml'
     Transaction:
       $ref: './spec/components/schemas/Transaction.yaml'
     TransactionsCollection:

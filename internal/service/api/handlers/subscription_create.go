@@ -54,7 +54,7 @@ func SubscriptionCreate(w http.ResponseWriter, r *http.Request) {
 	//	Name:                "test",
 	//	Description:         "test",
 	//	BillingInterval:     1,
-	//	BillingIntervalUnit: "month",
+	//	BillingCycle: "month",
 	//	Currency:            "USD",
 	//	Status:              "active",
 	//	CreatedAt:           time.Now(),

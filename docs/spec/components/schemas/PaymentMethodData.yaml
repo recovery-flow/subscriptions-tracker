@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - type
+  - attributes
+properties:
+  id:
+    type: string
+    format: uuid
+    description: "payment method ID"
+  type:
+    type: string
+    enum: [ payment_method ]
+  attributes:
+    $ref: './PaymentMethodAttributes.yaml'

@@ -5,7 +5,6 @@ properties:
   data:
     type: object
     required:
-      - id
       - type
       - attributes
     properties:
@@ -15,22 +14,18 @@ properties:
       attributes:
         type: object
         properties:
-          title:
+          name:
             type: string
-            description: "Title"
+            description: "Name"
+          desc:
+            type: string
+            description: "Description"
           price:
             type: number
             description: "Price"
           currency:
             type: string
             description: "Currency"
-          pay_frequency:
-            type: string
-            description: "Pay frequency"
           status:
             type: string
-            enum:
-              - "active"
-              - "inactive"
-              - "cancelled"
             description: "Status"

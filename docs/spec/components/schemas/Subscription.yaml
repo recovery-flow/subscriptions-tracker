@@ -3,4 +3,4 @@ required:
   - data
 properties:
   data:
-    $ref: './SubscriptionPlanData.yaml'
+    $ref: './SubscriptionData.yaml'
