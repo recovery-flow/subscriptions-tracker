@@ -5,8 +5,8 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/resources"
 )
 
-func SubscriptionType(types models.SubscriptionType) resources.SubscriptionType {
-	return resources.SubscriptionType{
+func SubscriptionType(types models.SubscriptionType, plans []models.SubscriptionPlan) resources.SubscriptionType {
+	res := resources.SubscriptionType{
 		Data: resources.SubscriptionTypeData{
 			Id:   types.ID.String(),
 			Type: resources.TypeSubscriptionType,
@@ -19,4 +19,14 @@ func SubscriptionType(types models.SubscriptionType) resources.SubscriptionType 
 			},
 		},
 	}
+
+	if len(plans) > 0 {
+		var data []resources.SubscriptionPlanData
+		for _, plan := range plans {
+			data = append(data, SubscriptionPlan(plan, &types).Data)
+		}
+		res.Included = data
+	}
+
+	return res
 }

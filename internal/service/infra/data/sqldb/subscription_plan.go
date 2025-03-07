@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -65,8 +64,8 @@ func (p *subPlan) Insert(ctx context.Context, plan *models.SubscriptionPlan) err
 		"billing_interval": plan.BillingInterval,
 		"billing_cycle":    plan.BillingCycle,
 		"status":           plan.Status,
-		"created_at":       time.Now().UTC(),
-		"updated_at":       time.Now().UTC(),
+		"updated_at":       plan.UpdatedAt,
+		"created_at":       plan.CreatedAt,
 	}
 
 	query, args, err := p.inserter.SetMap(values).ToSql()
@@ -86,7 +85,6 @@ func (p *subPlan) Insert(ctx context.Context, plan *models.SubscriptionPlan) err
 }
 
 func (p *subPlan) Update(ctx context.Context, updates map[string]any) error {
-	updates["updated_at"] = time.Now().UTC()
 	query, args, err := p.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for %s: %w", subscriptionPlansTable, err)

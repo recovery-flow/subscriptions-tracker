@@ -49,11 +49,11 @@ func Run(ctx context.Context, svc *service.Service) {
 			r.Route("/private", func(r chi.Router) {
 				r.Use(roleGrant)
 				r.Route("/types", func(r chi.Router) {
-					r.Post("/", nil)
-					r.Put("/{id}", nil)
+					r.Post("/", handlers.SubscriptionTypeCreate)
+					r.Put("/{id}", handlers.SubscriptionTypeCreate)
 				})
 				r.Route("/plans", func(r chi.Router) {
-					r.Post("/", nil)
+					r.Post("/", handlers.SubscriptionPlanCreate)
 					r.Put("/{id}", nil)
 				})
 

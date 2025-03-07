@@ -15,10 +15,10 @@ type SubscriptionsCatalog interface {
 		ctx context.Context,
 		name, desc string,
 		TypeID uuid.UUID,
-		price float64,
+		price float32,
 		currency string,
 		BillingInterval int8,
-		BillingIntervalUnit models.BillingCycle,
+		BillingCycle string,
 	) (*models.SubscriptionPlan, error)
 
 	UpdateSubType(ctx context.Context, ID uuid.UUID, update map[string]any) error
@@ -42,6 +42,8 @@ func (d *domain) CreateSubType(ctx context.Context, name, desc string) (*models.
 		Name:        name,
 		Description: desc,
 		Status:      models.StatusTypeInactive,
+		UpdatedAt:   time.Now().UTC(),
+		CreatedAt:   time.Now().UTC(),
 	}
 
 	err := d.Infra.Data.SQL.Types.New().Insert(ctx, sType)
@@ -56,11 +58,15 @@ func (d *domain) CreateSubPlan(
 	ctx context.Context,
 	name, desc string,
 	TypeID uuid.UUID,
-	price float64,
+	price float32,
 	currency string,
 	BillingInterval int8,
-	BillingIntervalUnit models.BillingCycle,
+	BillingCycle string,
 ) (*models.SubscriptionPlan, error) {
+	cycle, err := models.ParseBillingCycle(BillingCycle)
+	if err != nil {
+		return nil, err
+	}
 
 	plan := &models.SubscriptionPlan{
 		ID:              uuid.New(),
@@ -69,14 +75,14 @@ func (d *domain) CreateSubPlan(
 		Name:            name,
 		Description:     desc,
 		BillingInterval: BillingInterval,
-		BillingCycle:    BillingIntervalUnit,
+		BillingCycle:    cycle,
 		Currency:        currency,
 		Status:          models.StatusPlanInactive,
 		UpdatedAt:       time.Now().UTC(),
 		CreatedAt:       time.Now().UTC(),
 	}
 
-	_, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{
+	_, err = d.Infra.Data.SQL.Types.New().Filter(map[string]any{
 		"id": TypeID.String(),
 	}).Get(ctx)
 	if err != nil {

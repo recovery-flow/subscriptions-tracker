@@ -17,6 +17,7 @@ components:
       type: object
       required:
         - data
+        - included
       properties:
         data:
           type: object
@@ -59,6 +60,10 @@ components:
                   type: string
                   format: date-time
                   description: Created At
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionPlan/properties/data'
     SubscriptionTypesCollection:
       type: object
       required:
@@ -114,10 +119,38 @@ components:
                   type: string
                   format: date-time
                   description: Updated At
+    SubscriptionTypeCreate:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscription_type_create
+            attributes:
+              type: object
+              required:
+                - name
+                - description
+              properties:
+                name:
+                  type: string
+                  description: Name
+                description:
+                  type: string
+                  description: Description
     SubscriptionPlan:
       type: object
       required:
         - data
+        - included
       properties:
         data:
           type: object
@@ -185,6 +218,10 @@ components:
                   type: string
                   format: date-time
                   description: Subscription Plan Created At
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionType/properties/data'
     SubscriptionPlansCollection:
       type: object
       required:
@@ -242,6 +279,58 @@ components:
                 currency:
                   type: string
                   description: Currency
+                status:
+                  type: string
+                  description: Status
+    SubscriptionPlanCreate:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscription_plan_create
+            attributes:
+              type: object
+              required:
+                - type_id
+                - name
+                - desc
+                - price
+                - currency
+                - billing_cycle
+                - billing_interval
+                - status
+              properties:
+                type_id:
+                  type: string
+                  format: uuid
+                  description: Subscription Plan ID
+                name:
+                  type: string
+                  description: Name
+                desc:
+                  type: string
+                  description: Description
+                price:
+                  type: number
+                  description: Price
+                currency:
+                  type: string
+                  description: Currency
+                billing_cycle:
+                  type: string
+                  description: Subscription Plan Billing Interval
+                billing_interval:
+                  type: integer
+                  description: Subscription Plan Billing Interval
                 status:
                   type: string
                   description: Status
@@ -375,6 +464,35 @@ components:
                   type: string
                   format: uuid
                   description: Payment Method ID
+    SubscriptionCreate:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - subscription_plan
+            attributes:
+              type: object
+              required:
+                - plan_id
+                - payment_method_id
+              properties:
+                plan_id:
+                  type: string
+                  format: uuid
+                  description: Plan ID
+                payment_method_id:
+                  type: string
+                  format: uuid
+                  description: Payment Method ID
     PaymentMethod:
       type: object
       required:
@@ -450,6 +568,42 @@ components:
                     $ref: '#/components/schemas/PaymentMethod/properties/data'
         links:
           $ref: '#/components/schemas/LinksPagination'
+    PaymentMethodCreate:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - payment_method_create
+            attributes:
+              type: object
+              required:
+                - user_id
+                - type
+                - provider_token
+                - is_default
+              properties:
+                user_id:
+                  type: string
+                  description: User ID
+                type:
+                  type: string
+                  enum:
+                    - payment_method
+                provider_token:
+                  type: string
+                  description: Provider token
+                is_default:
+                  type: boolean
+                  description: Is default
     BillingSchedule:
       type: object
       required:

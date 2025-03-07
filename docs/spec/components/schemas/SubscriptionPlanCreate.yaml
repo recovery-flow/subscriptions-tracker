@@ -1,0 +1,50 @@
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ subscription_plan_create ]
+      attributes:
+        type: object
+        required:
+          - type_id
+          - name
+          - desc
+          - price
+          - currency
+          - billing_cycle
+          - billing_interval
+          - status
+        properties:
+          type_id:
+            type: string
+            format: uuid
+            description: "Subscription Plan ID"
+          name:
+            type: string
+            description: "Name"
+          desc:
+            type: string
+            description: "Description"
+          price:
+            type: number
+            description: "Price"
+          currency:
+            type: string
+            description: "Currency"
+          billing_cycle:
+            type: string
+            description: "Subscription Plan Billing Interval"
+          billing_interval:
+            type: integer
+            description: "Subscription Plan Billing Interval"
+          status:
+            type: string
+            description: "Status"

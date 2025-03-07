@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -70,8 +69,8 @@ func (s *subscriptions) Insert(ctx context.Context, sub *models.Subscription) er
 		"availability":      sub.Availability,
 		"start_date":        sub.StartDate,
 		"end_date":          sub.EndDate,
-		"created_at":        time.Now().UTC(),
-		"updated_at":        time.Now().UTC(),
+		"updated_at":        sub.UpdatedAt,
+		"created_at":        sub.CreatedAt,
 	}).ToSql()
 
 	if err != nil {
@@ -92,7 +91,6 @@ func (s *subscriptions) Insert(ctx context.Context, sub *models.Subscription) er
 }
 
 func (s *subscriptions) Update(ctx context.Context, updates map[string]any) error {
-	updates["updated_at"] = time.Now().UTC()
 	query, args, err := s.updater.
 		SetMap(updates).
 		ToSql()
@@ -153,8 +151,8 @@ func (s *subscriptions) Select(ctx context.Context) ([]models.Subscription, erro
 			&sub.Availability,
 			&sub.StartDate,
 			&sub.EndDate,
-			&sub.CreatedAt,
 			&sub.UpdatedAt,
+			&sub.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning %s row: %w", subscriptionTable, err)
@@ -195,8 +193,8 @@ func (s *subscriptions) Get(ctx context.Context) (*models.Subscription, error) {
 		&sub.Availability,
 		&sub.StartDate,
 		&sub.EndDate,
-		&sub.CreatedAt,
 		&sub.UpdatedAt,
+		&sub.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

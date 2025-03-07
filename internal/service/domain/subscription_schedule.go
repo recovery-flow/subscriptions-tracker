@@ -74,15 +74,28 @@ func (d *domain) MadeTransaction(ctx context.Context, userID uuid.UUID) error {
 	res := d.Infra.Data.SQL.Schedules.New().Transaction(func(ctx context.Context) error {
 		//TODO make transaction
 		resTrn := true
-		statusTrn := models.TrnStatusFailed
-		scheduleStatus := models.BillingStatusFailed
 
-		if resTrn == true {
-			statusTrn = models.TrnStatusSuccess
-			scheduleStatus = models.BillingStatusPlanned
+		if resTrn != true {
+			trn.Status = models.TrnStatusFailed
+			err = d.Infra.Data.SQL.Transactions.New().Insert(ctx, trn)
+			if err != nil {
+				return err
+			}
+
+			err = d.Infra.Data.SQL.Schedules.New().Filter(map[string]any{
+				"user_id": userID.String(),
+			}).Update(ctx, map[string]any{
+				"status":         models.BillingStatusFailed,
+				"attempted_date": time.Now().UTC(),
+			})
+			if err != nil {
+				return err
+			}
+
+			return err
 		}
 
-		trn.Status = statusTrn
+		trn.Status = models.TrnStatusSuccess
 		err = d.Infra.Data.SQL.Transactions.New().Insert(ctx, trn)
 		if err != nil {
 			return err
@@ -91,7 +104,8 @@ func (d *domain) MadeTransaction(ctx context.Context, userID uuid.UUID) error {
 		err = d.Infra.Data.SQL.Schedules.New().Filter(map[string]any{
 			"user_id": userID.String(),
 		}).Update(ctx, map[string]any{
-			"status": scheduleStatus,
+			"status":         models.StatusTypeActive,
+			"schedules_date": time.Now().UTC().AddDate(0, 1, 0),
 		})
 		if err != nil {
 			return err

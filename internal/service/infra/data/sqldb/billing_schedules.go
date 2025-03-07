@@ -60,8 +60,8 @@ func (b *billingSchedules) Insert(ctx context.Context, bs *models.BillingSchedul
 		"user_id":        bs.UserID,
 		"scheduled_date": bs.SchedulesDate,
 		"status":         bs.Status,
-		"updated_at":     time.Now().UTC(),
-		"created_at":     time.Now().UTC(),
+		"updated_at":     bs.UpdatedAt,
+		"created_at":     bs.CreatedAt,
 	}
 
 	if bs.AttemptedDate != nil {
@@ -85,7 +85,6 @@ func (b *billingSchedules) Insert(ctx context.Context, bs *models.BillingSchedul
 }
 
 func (b *billingSchedules) Update(ctx context.Context, updates map[string]any) error {
-	updates["updated_at"] = time.Now().UTC()
 	query, args, err := b.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for %s: %w", billingSchedulesTable, err)
@@ -245,7 +244,6 @@ func (b *billingSchedules) Filter(filters map[string]any) BillingSchedules {
 func (b *billingSchedules) FilterTime(field string, after bool, date time.Time) BillingSchedules {
 	var validFields = map[string]bool{
 		"schedules_date": true,
-		"created_at":     true,
 		"attempted_date": true,
 	}
 	if _, exists := validFields[field]; !exists {

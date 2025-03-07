@@ -202,7 +202,7 @@ func parsePlan(ID string, vals map[string]string) (*models.SubscriptionPlan, err
 	plan := models.SubscriptionPlan{
 		ID:              id,
 		TypeID:          typeID,
-		Price:           price,
+		Price:           float32(price),
 		Name:            vals["name"],
 		Description:     vals["description"],
 		BillingInterval: int8(billingInterval),

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -62,7 +61,7 @@ func (m *paymentMethods) Insert(ctx context.Context, pm *models.PaymentMethod) e
 		"type":           pm.Type,
 		"provider_token": pm.ProviderToken,
 		"is_default":     pm.IsDefault,
-		"created_at":     time.Now().UTC(),
+		"created_at":     pm.CreatedAt,
 	}
 
 	query, args, err := m.inserter.SetMap(values).ToSql()
@@ -82,7 +81,6 @@ func (m *paymentMethods) Insert(ctx context.Context, pm *models.PaymentMethod) e
 }
 
 func (m *paymentMethods) Update(ctx context.Context, updates map[string]any) error {
-	updates["updated_at"] = time.Now().UTC()
 	query, args, err := m.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("building update query for %s: %w", paymentMethodsTable, err)

@@ -1,6 +1,11 @@
 type: object
 required:
   - data
+  - included
 properties:
   data:
     $ref: './SubscriptionTypeData.yaml'
+  included:
+    type: array
+    items:
+      $ref: './SubscriptionPlanData.yaml'

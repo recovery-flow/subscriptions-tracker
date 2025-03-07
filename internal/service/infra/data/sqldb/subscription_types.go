@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
@@ -61,8 +60,8 @@ func (t *subTypes) Insert(ctx context.Context, sub *models.SubscriptionType) err
 		"name":        sub.Name,
 		"description": sub.Description,
 		"status":      sub.Status,
-		"updated_at":  time.Now().UTC(),
-		"created_at":  time.Now().UTC(),
+		"updated_at":  sub.UpdatedAt,
+		"created_at":  sub.CreatedAt,
 	}).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building insert query for %s: %w", subscriptionTypesTable, err)
@@ -80,7 +79,6 @@ func (t *subTypes) Insert(ctx context.Context, sub *models.SubscriptionType) err
 }
 
 func (t *subTypes) Update(ctx context.Context, updates map[string]any) error {
-	updates["updated_at"] = time.Now().UTC()
 	query, args, err := t.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building update query for %s: %w", subscriptionTypesTable, err)

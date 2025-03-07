@@ -30,8 +30,6 @@ func ParseBillingStatus(status string) (BillingStatus, error) {
 		return BillingStatusPlanned, nil
 	case "failed":
 		return BillingStatusFailed, nil
-	//case "success":
-	//	return BillingStatusSuccess, nil
 	case "processing":
 		return BillingStatusProcessing, nil
 	default:

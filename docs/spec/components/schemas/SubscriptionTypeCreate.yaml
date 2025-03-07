@@ -1,0 +1,25 @@
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ subscription_type_create ]
+      attributes:
+        type: object
+        required:
+          - name
+          - description
+        properties:
+          name:
+            type: string
+            description: "Name"
+          description:
+            type: string
+            description: "Description"

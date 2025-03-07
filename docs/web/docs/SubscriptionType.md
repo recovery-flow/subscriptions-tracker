@@ -5,12 +5,13 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Data** | [**SubscriptionTypeData**](SubscriptionTypeData.md) |  | 
+**Included** | [**[]SubscriptionPlanData**](SubscriptionPlanData.md) |  | 
 
 ## Methods
 
 ### NewSubscriptionType
 
-`func NewSubscriptionType(data SubscriptionTypeData, ) *SubscriptionType`
+`func NewSubscriptionType(data SubscriptionTypeData, included []SubscriptionPlanData, ) *SubscriptionType`
 
 NewSubscriptionType instantiates a new SubscriptionType object
 This constructor will assign default values to properties that have it defined,
@@ -43,6 +44,26 @@ and a boolean to check if the value has been set.
 `func (o *SubscriptionType) SetData(v SubscriptionTypeData)`
 
 SetData sets Data field to given value.
+
+
+### GetIncluded
+
+`func (o *SubscriptionType) GetIncluded() []SubscriptionPlanData`
+
+GetIncluded returns the Included field if non-nil, zero value otherwise.
+
+### GetIncludedOk
+
+`func (o *SubscriptionType) GetIncludedOk() (*[]SubscriptionPlanData, bool)`
+
+GetIncludedOk returns a tuple with the Included field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIncluded
+
+`func (o *SubscriptionType) SetIncluded(v []SubscriptionPlanData)`
+
+SetIncluded sets Included field to given value.
 
 
 

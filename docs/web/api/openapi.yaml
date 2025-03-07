@@ -19,8 +19,13 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/SubscriptionType_data'
+        included:
+          items:
+            $ref: '#/components/schemas/SubscriptionPlan/properties/data'
+          type: array
       required:
       - data
+      - included
       type: object
     SubscriptionTypesCollection:
       properties:
@@ -39,12 +44,24 @@ components:
       required:
       - data
       type: object
+    SubscriptionTypeCreate:
+      properties:
+        data:
+          $ref: '#/components/schemas/SubscriptionTypeCreate_data'
+      required:
+      - data
+      type: object
     SubscriptionPlan:
       properties:
         data:
           $ref: '#/components/schemas/SubscriptionPlan_data'
+        included:
+          items:
+            $ref: '#/components/schemas/SubscriptionType/properties/data'
+          type: array
       required:
       - data
+      - included
       type: object
     SubscriptionPlansCollection:
       properties:
@@ -60,6 +77,13 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/SubscriptionPlanUpdate_data'
+      required:
+      - data
+      type: object
+    SubscriptionPlanCreate:
+      properties:
+        data:
+          $ref: '#/components/schemas/SubscriptionPlanCreate_data'
       required:
       - data
       type: object
@@ -87,6 +111,13 @@ components:
       required:
       - data
       type: object
+    SubscriptionCreate:
+      properties:
+        data:
+          $ref: '#/components/schemas/SubscriptionCreate_data'
+      required:
+      - data
+      type: object
     PaymentMethod:
       properties:
         data:
@@ -103,6 +134,13 @@ components:
       required:
       - data
       - links
+      type: object
+    PaymentMethodCreate:
+      properties:
+        data:
+          $ref: '#/components/schemas/PaymentMethodCreate_data'
+      required:
+      - data
       type: object
     BillingSchedule:
       properties:
@@ -268,6 +306,30 @@ components:
       - attributes
       - type
       type: object
+    SubscriptionTypeCreate_data_attributes:
+      properties:
+        name:
+          description: Name
+          type: string
+        description:
+          description: Description
+          type: string
+      required:
+      - description
+      - name
+      type: object
+    SubscriptionTypeCreate_data:
+      properties:
+        type:
+          enum:
+          - subscription_type_create
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SubscriptionTypeCreate_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
     SubscriptionPlan_data_attributes:
       properties:
         type_id:
@@ -383,6 +445,55 @@ components:
           type: string
         attributes:
           $ref: '#/components/schemas/SubscriptionPlanUpdate_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
+    SubscriptionPlanCreate_data_attributes:
+      properties:
+        type_id:
+          description: Subscription Plan ID
+          format: uuid
+          type: string
+        name:
+          description: Name
+          type: string
+        desc:
+          description: Description
+          type: string
+        price:
+          description: Price
+          type: number
+        currency:
+          description: Currency
+          type: string
+        billing_cycle:
+          description: Subscription Plan Billing Interval
+          type: string
+        billing_interval:
+          description: Subscription Plan Billing Interval
+          type: integer
+        status:
+          description: Status
+          type: string
+      required:
+      - billing_cycle
+      - billing_interval
+      - currency
+      - desc
+      - name
+      - price
+      - status
+      - type_id
+      type: object
+    SubscriptionPlanCreate_data:
+      properties:
+        type:
+          enum:
+          - subscription_plan_create
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SubscriptionPlanCreate_data_attributes'
       required:
       - attributes
       - type
@@ -505,6 +616,32 @@ components:
       - attributes
       - type
       type: object
+    SubscriptionCreate_data_attributes:
+      properties:
+        plan_id:
+          description: Plan ID
+          format: uuid
+          type: string
+        payment_method_id:
+          description: Payment Method ID
+          format: uuid
+          type: string
+      required:
+      - payment_method_id
+      - plan_id
+      type: object
+    SubscriptionCreate_data:
+      properties:
+        type:
+          enum:
+          - subscription_plan
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SubscriptionCreate_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
     PaymentMethod_data_attributes:
       properties:
         user_id:
@@ -567,6 +704,39 @@ components:
           type: string
         attributes:
           $ref: '#/components/schemas/PaymentMethodsCollection_data_attributes'
+      required:
+      - attributes
+      - type
+      type: object
+    PaymentMethodCreate_data_attributes:
+      properties:
+        user_id:
+          description: User ID
+          type: string
+        type:
+          enum:
+          - payment_method
+          type: string
+        provider_token:
+          description: Provider token
+          type: string
+        is_default:
+          description: Is default
+          type: boolean
+      required:
+      - is_default
+      - provider_token
+      - type
+      - user_id
+      type: object
+    PaymentMethodCreate_data:
+      properties:
+        type:
+          enum:
+          - payment_method_create
+          type: string
+        attributes:
+          $ref: '#/components/schemas/PaymentMethodCreate_data_attributes'
       required:
       - attributes
       - type

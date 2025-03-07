@@ -21,22 +21,30 @@ components:
       $ref: './spec/components/schemas/SubscriptionTypesCollection.yaml'
     SubscriptionTypeUpdate:
       $ref: './spec/components/schemas/SubscriptionTypeUpdate.yaml'
+    SubscriptionTypeCreate:
+      $ref: './spec/components/schemas/SubscriptionTypeCreate.yaml'
     SubscriptionPlan:
       $ref: './spec/components/schemas/SubscriptionPlan.yaml'
     SubscriptionPlansCollection:
       $ref: './spec/components/schemas/SubscriptionPlansCollection.yaml'
     SubscriptionPlanUpdate:
       $ref: './spec/components/schemas/SubscriptionPlanUpdate.yaml'
+    SubscriptionPlanCreate:
+      $ref: './spec/components/schemas/SubscriptionPlanCreate.yaml'
     Subscription:
       $ref: './spec/components/schemas/Subscription.yaml'
     SubscriptionsCollection:
       $ref: './spec/components/schemas/SubscriptionsCollection.yaml'
     SubscriptionUpdate:
       $ref: './spec/components/schemas/SubscriptionUpdate.yaml'
+    SubscriptionCreate:
+      $ref: './spec/components/schemas/SubscriptionCreate.yaml'
     PaymentMethod:
       $ref: './spec/components/schemas/PaymentMethod.yaml'
     PaymentMethodsCollection:
       $ref: './spec/components/schemas/PaymentMethodsCollection.yaml'
+    PaymentMethodCreate:
+      $ref: './spec/components/schemas/PaymentMethodCreate.yaml'
     BillingSchedule:
       $ref: './spec/components/schemas/BillingSchedule.yaml'
     BillingSchedulesCollection:
