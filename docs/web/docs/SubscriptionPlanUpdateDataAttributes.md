@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 **Desc** | Pointer to **string** | Description | [optional] 
 **Price** | Pointer to **float32** | Price | [optional] 
 **Currency** | Pointer to **string** | Currency | [optional] 
-**Status** | Pointer to **string** | Status | [optional] 
 
 ## Methods
 
@@ -128,31 +127,6 @@ SetCurrency sets Currency field to given value.
 `func (o *SubscriptionPlanUpdateDataAttributes) HasCurrency() bool`
 
 HasCurrency returns a boolean if a field has been set.
-
-### GetStatus
-
-`func (o *SubscriptionPlanUpdateDataAttributes) GetStatus() string`
-
-GetStatus returns the Status field if non-nil, zero value otherwise.
-
-### GetStatusOk
-
-`func (o *SubscriptionPlanUpdateDataAttributes) GetStatusOk() (*string, bool)`
-
-GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetStatus
-
-`func (o *SubscriptionPlanUpdateDataAttributes) SetStatus(v string)`
-
-SetStatus sets Status field to given value.
-
-### HasStatus
-
-`func (o *SubscriptionPlanUpdateDataAttributes) HasStatus() bool`
-
-HasStatus returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

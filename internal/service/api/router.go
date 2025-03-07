@@ -50,11 +50,19 @@ func Run(ctx context.Context, svc *service.Service) {
 				r.Use(roleGrant)
 				r.Route("/types", func(r chi.Router) {
 					r.Post("/", handlers.SubscriptionTypeCreate)
-					r.Put("/{id}", handlers.SubscriptionTypeCreate)
+					r.Route("/{id}", func(r chi.Router) {
+						r.Put("/", handlers.SubscriptionTypeUpdate)
+						r.Post("/activate", handlers.SubscriptionTypeActivate)
+						r.Post("/deactivate", handlers.SubscriptionTypeDeactivate)
+					})
 				})
 				r.Route("/plans", func(r chi.Router) {
 					r.Post("/", handlers.SubscriptionPlanCreate)
-					r.Put("/{id}", nil)
+					r.Route("/{id}", func(r chi.Router) {
+						r.Put("/", handlers.SubscriptionPlanUpdate)
+						r.Post("/activate", handlers.SubscriptionPlanActivate)
+						r.Post("/deactivate", handlers.SubscriptionPlanDeactivate)
+					})
 				})
 
 				r.Route("/subscriptions", func(r chi.Router) {

@@ -112,13 +112,6 @@ components:
                 name:
                   type: string
                   description: Name
-                status:
-                  type: string
-                  description: Status
-                updated_at:
-                  type: string
-                  format: date-time
-                  description: Updated At
     SubscriptionTypeCreate:
       type: object
       required:
@@ -279,9 +272,6 @@ components:
                 currency:
                   type: string
                   description: Currency
-                status:
-                  type: string
-                  description: Status
     SubscriptionPlanCreate:
       type: object
       required:

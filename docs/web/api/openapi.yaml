@@ -286,13 +286,6 @@ components:
         name:
           description: Name
           type: string
-        status:
-          description: Status
-          type: string
-        updated_at:
-          description: Updated At
-          format: date-time
-          type: string
       type: object
     SubscriptionTypeUpdate_data:
       properties:
@@ -432,9 +425,6 @@ components:
           type: number
         currency:
           description: Currency
-          type: string
-        status:
-          description: Status
           type: string
       type: object
     SubscriptionPlanUpdate_data:

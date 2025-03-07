@@ -27,8 +27,6 @@ type SubscriptionPlanUpdateDataAttributes struct {
 	Price *float32 `json:"price,omitempty"`
 	// Currency
 	Currency *string `json:"currency,omitempty"`
-	// Status
-	Status *string `json:"status,omitempty"`
 }
 
 // NewSubscriptionPlanUpdateDataAttributes instantiates a new SubscriptionPlanUpdateDataAttributes object
@@ -176,38 +174,6 @@ func (o *SubscriptionPlanUpdateDataAttributes) SetCurrency(v string) {
 	o.Currency = &v
 }
 
-// GetStatus returns the Status field value if set, zero value otherwise.
-func (o *SubscriptionPlanUpdateDataAttributes) GetStatus() string {
-	if o == nil || IsNil(o.Status) {
-		var ret string
-		return ret
-	}
-	return *o.Status
-}
-
-// GetStatusOk returns a tuple with the Status field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *SubscriptionPlanUpdateDataAttributes) GetStatusOk() (*string, bool) {
-	if o == nil || IsNil(o.Status) {
-		return nil, false
-	}
-	return o.Status, true
-}
-
-// HasStatus returns a boolean if a field has been set.
-func (o *SubscriptionPlanUpdateDataAttributes) HasStatus() bool {
-	if o != nil && !IsNil(o.Status) {
-		return true
-	}
-
-	return false
-}
-
-// SetStatus gets a reference to the given string and assigns it to the Status field.
-func (o *SubscriptionPlanUpdateDataAttributes) SetStatus(v string) {
-	o.Status = &v
-}
-
 func (o SubscriptionPlanUpdateDataAttributes) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -229,9 +195,6 @@ func (o SubscriptionPlanUpdateDataAttributes) ToMap() (map[string]interface{}, e
 	}
 	if !IsNil(o.Currency) {
 		toSerialize["currency"] = o.Currency
-	}
-	if !IsNil(o.Status) {
-		toSerialize["status"] = o.Status
 	}
 	return toSerialize, nil
 }

@@ -12,7 +12,6 @@ package resources
 
 import (
 	"encoding/json"
-	"time"
 )
 
 // checks if the SubscriptionTypeUpdateDataAttributes type satisfies the MappedNullable interface at compile time
@@ -22,10 +21,6 @@ var _ MappedNullable = &SubscriptionTypeUpdateDataAttributes{}
 type SubscriptionTypeUpdateDataAttributes struct {
 	// Name
 	Name *string `json:"name,omitempty"`
-	// Status
-	Status *string `json:"status,omitempty"`
-	// Updated At
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
 // NewSubscriptionTypeUpdateDataAttributes instantiates a new SubscriptionTypeUpdateDataAttributes object
@@ -77,70 +72,6 @@ func (o *SubscriptionTypeUpdateDataAttributes) SetName(v string) {
 	o.Name = &v
 }
 
-// GetStatus returns the Status field value if set, zero value otherwise.
-func (o *SubscriptionTypeUpdateDataAttributes) GetStatus() string {
-	if o == nil || IsNil(o.Status) {
-		var ret string
-		return ret
-	}
-	return *o.Status
-}
-
-// GetStatusOk returns a tuple with the Status field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *SubscriptionTypeUpdateDataAttributes) GetStatusOk() (*string, bool) {
-	if o == nil || IsNil(o.Status) {
-		return nil, false
-	}
-	return o.Status, true
-}
-
-// HasStatus returns a boolean if a field has been set.
-func (o *SubscriptionTypeUpdateDataAttributes) HasStatus() bool {
-	if o != nil && !IsNil(o.Status) {
-		return true
-	}
-
-	return false
-}
-
-// SetStatus gets a reference to the given string and assigns it to the Status field.
-func (o *SubscriptionTypeUpdateDataAttributes) SetStatus(v string) {
-	o.Status = &v
-}
-
-// GetUpdatedAt returns the UpdatedAt field value if set, zero value otherwise.
-func (o *SubscriptionTypeUpdateDataAttributes) GetUpdatedAt() time.Time {
-	if o == nil || IsNil(o.UpdatedAt) {
-		var ret time.Time
-		return ret
-	}
-	return *o.UpdatedAt
-}
-
-// GetUpdatedAtOk returns a tuple with the UpdatedAt field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *SubscriptionTypeUpdateDataAttributes) GetUpdatedAtOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.UpdatedAt) {
-		return nil, false
-	}
-	return o.UpdatedAt, true
-}
-
-// HasUpdatedAt returns a boolean if a field has been set.
-func (o *SubscriptionTypeUpdateDataAttributes) HasUpdatedAt() bool {
-	if o != nil && !IsNil(o.UpdatedAt) {
-		return true
-	}
-
-	return false
-}
-
-// SetUpdatedAt gets a reference to the given time.Time and assigns it to the UpdatedAt field.
-func (o *SubscriptionTypeUpdateDataAttributes) SetUpdatedAt(v time.Time) {
-	o.UpdatedAt = &v
-}
-
 func (o SubscriptionTypeUpdateDataAttributes) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -153,12 +84,6 @@ func (o SubscriptionTypeUpdateDataAttributes) ToMap() (map[string]interface{}, e
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Status) {
-		toSerialize["status"] = o.Status
-	}
-	if !IsNil(o.UpdatedAt) {
-		toSerialize["updated_at"] = o.UpdatedAt
 	}
 	return toSerialize, nil
 }

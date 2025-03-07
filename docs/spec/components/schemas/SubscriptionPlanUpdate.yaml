@@ -26,6 +26,3 @@ properties:
           currency:
             type: string
             description: "Currency"
-          status:
-            type: string
-            description: "Status"
