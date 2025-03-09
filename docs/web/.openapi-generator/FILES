@@ -28,6 +28,8 @@ docs/PaymentMethodDataAttributes.md
 docs/PaymentMethodsCollection.md
 docs/PaymentMethodsCollectionData.md
 docs/PaymentMethodsCollectionDataAttributes.md
+docs/Relationships.md
+docs/RelationshipsDataInner.md
 docs/Subscription.md
 docs/SubscriptionCreate.md
 docs/SubscriptionCreateData.md
@@ -40,6 +42,7 @@ docs/SubscriptionPlanCreateData.md
 docs/SubscriptionPlanCreateDataAttributes.md
 docs/SubscriptionPlanData.md
 docs/SubscriptionPlanDataAttributes.md
+docs/SubscriptionPlanDataRelationships.md
 docs/SubscriptionPlanUpdate.md
 docs/SubscriptionPlanUpdateData.md
 docs/SubscriptionPlanUpdateDataAttributes.md
@@ -52,6 +55,8 @@ docs/SubscriptionTypeCreateData.md
 docs/SubscriptionTypeCreateDataAttributes.md
 docs/SubscriptionTypeData.md
 docs/SubscriptionTypeDataAttributes.md
+docs/SubscriptionTypeDataRelationships.md
+docs/SubscriptionTypeDepends.md
 docs/SubscriptionTypeUpdate.md
 docs/SubscriptionTypeUpdateData.md
 docs/SubscriptionTypeUpdateDataAttributes.md
@@ -95,6 +100,8 @@ model_payment_method_data_attributes.go
 model_payment_methods_collection.go
 model_payment_methods_collection_data.go
 model_payment_methods_collection_data_attributes.go
+model_relationships.go
+model_relationships_data_inner.go
 model_subscription.go
 model_subscription_create.go
 model_subscription_create_data.go
@@ -107,6 +114,7 @@ model_subscription_plan_create_data.go
 model_subscription_plan_create_data_attributes.go
 model_subscription_plan_data.go
 model_subscription_plan_data_attributes.go
+model_subscription_plan_data_relationships.go
 model_subscription_plan_update.go
 model_subscription_plan_update_data.go
 model_subscription_plan_update_data_attributes.go
@@ -119,6 +127,8 @@ model_subscription_type_create_data.go
 model_subscription_type_create_data_attributes.go
 model_subscription_type_data.go
 model_subscription_type_data_attributes.go
+model_subscription_type_data_relationships.go
+model_subscription_type_depends.go
 model_subscription_type_update.go
 model_subscription_type_update_data.go
 model_subscription_type_update_data_attributes.go

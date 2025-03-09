@@ -17,7 +17,6 @@ components:
       type: object
       required:
         - data
-        - included
       properties:
         data:
           type: object
@@ -25,6 +24,7 @@ components:
             - id
             - type
             - attributes
+            - relationships
           properties:
             id:
               type: string
@@ -60,10 +60,13 @@ components:
                   type: string
                   format: date-time
                   description: Created At
-        included:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubscriptionPlan/properties/data'
+            relationships:
+              type: object
+              required:
+                - subscription_plan_relation
+              properties:
+                subscription_plan_relation:
+                  $ref: '#/components/schemas/Relationships'
     SubscriptionTypesCollection:
       type: object
       required:
@@ -139,11 +142,24 @@ components:
                 description:
                   type: string
                   description: Description
-    SubscriptionPlan:
+    SubscriptionTypeDepends:
       type: object
       required:
         - data
         - included
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionType/properties/data'
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionPlan/properties/data'
+    SubscriptionPlan:
+      type: object
+      required:
+        - data
       properties:
         data:
           type: object
@@ -151,6 +167,7 @@ components:
             - id
             - type
             - attributes
+            - relationships
           properties:
             id:
               type: string
@@ -211,10 +228,13 @@ components:
                   type: string
                   format: date-time
                   description: Subscription Plan Created At
-        included:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubscriptionType/properties/data'
+            relationships:
+              type: object
+              required:
+                - subscription_type_relation
+              properties:
+                subscription_type_relation:
+                  $ref: '#/components/schemas/Relationships'
     SubscriptionPlansCollection:
       type: object
       required:
@@ -773,6 +793,23 @@ components:
                     $ref: '#/components/schemas/Transaction/properties/data'
         links:
           $ref: '#/components/schemas/LinksPagination'
+    Relationships:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - type
+            properties:
+              id:
+                type: string
+              type:
+                type: string
     LinksSelf:
       type: object
       required:

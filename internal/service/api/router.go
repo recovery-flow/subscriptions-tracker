@@ -29,20 +29,31 @@ func Run(ctx context.Context, svc *service.Service) {
 		r.Route("/v1", func(r chi.Router) {
 			r.Route("/public", func(r chi.Router) {
 				r.Route("/types", func(r chi.Router) {
-					r.Post("/", nil)
-					r.Put("/{id}", nil)
+					r.Route("/{type_id}", func(r chi.Router) {
+						r.Get("/", handlers.GetSubscriptionType)
+					})
+					r.Get("/", handlers.GetSubscriptionTypeActive)
 				})
-				r.Route("/plans", func(r chi.Router) {
-					r.Post("/", nil)
-					r.Put("/{id}", nil)
+
+				r.Route("/plan", func(r chi.Router) {
+					r.Route("/{plan_id}", func(r chi.Router) {
+						r.Get("/", handlers.GetSubscriptionPlan)
+					})
+				})
+
+				r.Route("/payments", func(r chi.Router) {
+					r.Post("/", handlers.CreatePayment)
+					r.Route("/{payment_id}", func(r chi.Router) {
+						r.Get("/", handlers.GetPaymentMethod)
+						r.Delete("/", handlers.DeletePaymentMethod)
+					})
 				})
 
 				r.Route("/subscriptions", func(r chi.Router) {
 					r.Use(authMW)
-					r.Route("/{id}", func(r chi.Router) {
-						r.Get("/", nil)
-						r.Put("/", nil)
-					})
+					r.Get("/", handlers.UserSubscriptionGet)
+					r.Post("/", handlers.UserSubscriptionCreate)
+					r.Patch("/deactivate", handlers.UserSubscriptionDeactivate)
 				})
 			})
 
@@ -63,28 +74,6 @@ func Run(ctx context.Context, svc *service.Service) {
 						r.Post("/activate", handlers.SubscriptionPlanActivate)
 						r.Post("/deactivate", handlers.SubscriptionPlanDeactivate)
 					})
-				})
-
-				r.Route("/subscriptions", func(r chi.Router) {
-					r.Route("/{id}", func(r chi.Router) {
-						r.Get("/", nil)
-						r.Put("/", nil)
-					})
-				})
-
-				r.Route("/payment_method", func(r chi.Router) {
-					r.Get("/", nil)
-					r.Put("/", nil)
-				})
-
-				r.Route("/transactions", func(r chi.Router) {
-					r.Get("/", nil)
-					r.Post("/", nil)
-				})
-
-				r.Route("/billing_schedules", func(r chi.Router) {
-					r.Get("/", nil)
-					r.Post("/", nil)
 				})
 			})
 		})

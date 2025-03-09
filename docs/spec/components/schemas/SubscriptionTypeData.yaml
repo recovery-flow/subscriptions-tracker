@@ -3,6 +3,7 @@ required:
   - id
   - type
   - attributes
+  - relationships
 properties:
   id:
     type: string
@@ -13,3 +14,10 @@ properties:
     enum: [ subscription_type ]
   attributes:
     $ref: './SubscriptionTypeAttributes.yaml'
+  relationships:
+    type: object
+    required:
+      - subscription_plan_relation
+    properties:
+      subscription_plan_relation:
+        $ref: './Relationships.yaml'

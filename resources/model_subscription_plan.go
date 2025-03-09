@@ -22,7 +22,6 @@ var _ MappedNullable = &SubscriptionPlan{}
 // SubscriptionPlan struct for SubscriptionPlan
 type SubscriptionPlan struct {
 	Data SubscriptionPlanData `json:"data"`
-	Included []SubscriptionTypeData `json:"included"`
 }
 
 type _SubscriptionPlan SubscriptionPlan
@@ -31,10 +30,9 @@ type _SubscriptionPlan SubscriptionPlan
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSubscriptionPlan(data SubscriptionPlanData, included []SubscriptionTypeData) *SubscriptionPlan {
+func NewSubscriptionPlan(data SubscriptionPlanData) *SubscriptionPlan {
 	this := SubscriptionPlan{}
 	this.Data = data
-	this.Included = included
 	return &this
 }
 
@@ -70,30 +68,6 @@ func (o *SubscriptionPlan) SetData(v SubscriptionPlanData) {
 	o.Data = v
 }
 
-// GetIncluded returns the Included field value
-func (o *SubscriptionPlan) GetIncluded() []SubscriptionTypeData {
-	if o == nil {
-		var ret []SubscriptionTypeData
-		return ret
-	}
-
-	return o.Included
-}
-
-// GetIncludedOk returns a tuple with the Included field value
-// and a boolean to check if the value has been set.
-func (o *SubscriptionPlan) GetIncludedOk() ([]SubscriptionTypeData, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Included, true
-}
-
-// SetIncluded sets field value
-func (o *SubscriptionPlan) SetIncluded(v []SubscriptionTypeData) {
-	o.Included = v
-}
-
 func (o SubscriptionPlan) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -105,7 +79,6 @@ func (o SubscriptionPlan) MarshalJSON() ([]byte, error) {
 func (o SubscriptionPlan) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["data"] = o.Data
-	toSerialize["included"] = o.Included
 	return toSerialize, nil
 }
 
@@ -115,7 +88,6 @@ func (o *SubscriptionPlan) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"data",
-		"included",
 	}
 
 	allProperties := make(map[string]interface{})

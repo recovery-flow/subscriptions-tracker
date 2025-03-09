@@ -29,19 +29,13 @@ func SubscriptionTypeCreate(w http.ResponseWriter, r *http.Request) {
 	name := req.Data.Attributes.Name
 	desc := req.Data.Attributes.Description
 
-	sType, err := Domain(r).CreateSubType(r.Context(), name, desc)
+	sType, err := Domain(r).CreateType(r.Context(), name, desc)
 	if err != nil {
 		Log(r).WithError(err).Debug("Failed to create subscription type")
 		httpkit.RenderErr(w, problems.InternalError(err.Error()))
 		return
 	}
 
-	plans, err := Domain(r).GetSubPlanByType(r.Context(), sType.ID)
-	if err != nil {
-		Log(r).WithError(err).Debug("Failed to get subscription plans")
-		httpkit.RenderErr(w, problems.InternalError(err.Error()))
-	}
-
 	Log(r).Infof("Subscription type %s created, by user %s", sType.ID, accountID)
-	httpkit.Render(w, responses.SubscriptionType(*sType, plans))
+	httpkit.Render(w, responses.SubscriptionType(sType, nil))
 }

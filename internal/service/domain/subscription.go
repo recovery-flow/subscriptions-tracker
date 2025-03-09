@@ -11,19 +11,20 @@ import (
 
 type SubscriptionsTracker interface {
 	GetUserSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error)
-	ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error)
+	CreateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error)
 	DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error
 	CanceledSubscription(ctx context.Context, UserID uuid.UUID) error
 
-	AddPaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) (*models.PaymentMethod, error)
+	CreatePaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) (*models.PaymentMethod, error)
 	DeletePaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) error
-	GetPaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) (*models.PaymentMethod, error)
+	GetPaymentMethod(ctx context.Context, paymentMethodID uuid.UUID) (*models.PaymentMethod, error)
+	GetUserPaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) (*models.PaymentMethod, error)
 	GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([]models.PaymentMethod, error)
 	GetUserDefaultPaymentMethod(ctx context.Context, userID uuid.UUID) (*models.PaymentMethod, error)
 	SetPaymentMethodAsDefault(ctx context.Context, userID, paymentMethodID uuid.UUID) error
 }
 
-func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error) {
+func (d *domain) CreateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error) {
 	var subscription *models.Subscription
 	err := d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
 		sType, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{
@@ -103,7 +104,7 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 		bc := &models.BillingSchedule{
 			UserID:        UserID,
 			SchedulesDate: time.Now().UTC().Add(frePeriod),
-			Status:        models.BillingStatusPlanned,
+			Status:        models.ScheduleBillingStatusPlanned,
 		}
 		err = d.Infra.Data.SQL.Schedules.New().Insert(ctx, bc)
 		if err != nil {
@@ -151,8 +152,8 @@ func (d *domain) ActivateSubscription(ctx context.Context, UserID, PlanID, Payme
 			//}
 		}
 
-		//TODO to supplement the work with Kafka
-		//if err := d.Infra.Kafka.SubscriptionCreated(evebody.CreateSubscription{
+		//TODO to supplement the work with Producer
+		//if err := d.Infra.Producer.SubscriptionCreated(evebody.CreateSubscription{
 		//	UserID:    subscription.UserID.String(),
 		//	PlanID:    subscription.PlanID.String(),
 		//	TypeID:    typeID.String(),
@@ -180,7 +181,7 @@ func (d *domain) DeactivateSubscription(ctx context.Context, UserID uuid.UUID) e
 			return err
 		}
 
-		//TODO to supplement the work with Kafka
+		//TODO to supplement the work with Producer
 
 		return nil
 	})
@@ -198,7 +199,7 @@ func (d *domain) CanceledSubscription(ctx context.Context, UserID uuid.UUID) err
 			return err
 		}
 
-		//TODO to supplement the work with Kafka
+		//TODO to supplement the work with Producer
 
 		return nil
 	})
@@ -215,7 +216,7 @@ func (d *domain) GetUserSubscription(ctx context.Context, userID uuid.UUID) (*mo
 	return res, nil
 }
 
-func (d *domain) AddPaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) (*models.PaymentMethod, error) {
+func (d *domain) CreatePaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) (*models.PaymentMethod, error) {
 	var method *models.PaymentMethod
 	pType, err := models.ParsePayType(payType)
 	if err != nil {
@@ -261,16 +262,28 @@ func (d *domain) DeletePaymentMethod(ctx context.Context, userID, paymentMethodI
 	return nil
 }
 
-func (d *domain) GetPaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) (*models.PaymentMethod, error) {
+func (d *domain) GetPaymentMethod(ctx context.Context, paymentMethodID uuid.UUID) (*models.PaymentMethod, error) {
 	res, err := d.Infra.Data.SQL.PaymentMethods.Filter(map[string]any{
-		"id":      paymentMethodID.String(),
-		"user_id": userID.String(),
+		"id": paymentMethodID.String(),
 	}).Get(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return res, nil
+}
+
+func (d *domain) GetUserPaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) (*models.PaymentMethod, error) {
+	method, err := d.GetPaymentMethod(ctx, paymentMethodID)
+	if err != nil {
+		return nil, err
+	}
+
+	if method.UserID != userID {
+		return nil, fmt.Errorf("payment method does not belong to user %s", paymentMethodID)
+	}
+
+	return method, nil
 }
 
 func (d *domain) GetUserPaymentMethods(ctx context.Context, userID uuid.UUID) ([]models.PaymentMethod, error) {

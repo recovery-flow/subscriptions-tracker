@@ -41,14 +41,14 @@ func SubscriptionPlanCreate(w http.ResponseWriter, r *http.Request) {
 	billingCycle := req.Data.Attributes.BillingCycle
 	billingInterval := req.Data.Attributes.BillingInterval
 
-	plans, err := Domain(r).CreateSubPlan(r.Context(), name, desc, typeID, price, currency, int8(billingInterval), billingCycle)
+	plans, err := Domain(r).CreatePlan(r.Context(), name, desc, typeID, price, currency, int8(billingInterval), billingCycle)
 	if err != nil {
 		Log(r).WithError(err).Debug("Failed to create subscription plan")
 		httpkit.RenderErr(w, problems.InternalError(err.Error()))
 		return
 	}
 
-	sType, err := Domain(r).GetSubType(r.Context(), typeID)
+	sType, _, err := Domain(r).GetType(r.Context(), typeID)
 	if err != nil {
 		Log(r).WithError(err).Debug("Failed to get subscription type")
 		httpkit.RenderErr(w, problems.InternalError(err.Error()))
@@ -56,5 +56,5 @@ func SubscriptionPlanCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Log(r).Infof("Subscription plan %s created, by user %s", plans.ID, accountID)
-	httpkit.Render(w, responses.SubscriptionPlan(*plans, sType))
+	httpkit.Render(w, responses.SubscriptionPlan(plans, sType))
 }

@@ -26,7 +26,7 @@ func SubscriptionTypeDeactivate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = Domain(r).DeactivateSubType(r.Context(), ID)
+	err = Domain(r).DeactivateType(r.Context(), ID)
 	if err != nil {
 		Log(r).WithError(err).Debug("Failed to update subscription type")
 		httpkit.RenderErr(w, problems.InternalError(err.Error()))

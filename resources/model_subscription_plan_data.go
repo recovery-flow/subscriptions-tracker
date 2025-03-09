@@ -25,6 +25,7 @@ type SubscriptionPlanData struct {
 	Id string `json:"id"`
 	Type string `json:"type"`
 	Attributes SubscriptionPlanDataAttributes `json:"attributes"`
+	Relationships SubscriptionPlanDataRelationships `json:"relationships"`
 }
 
 type _SubscriptionPlanData SubscriptionPlanData
@@ -33,11 +34,12 @@ type _SubscriptionPlanData SubscriptionPlanData
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSubscriptionPlanData(id string, type_ string, attributes SubscriptionPlanDataAttributes) *SubscriptionPlanData {
+func NewSubscriptionPlanData(id string, type_ string, attributes SubscriptionPlanDataAttributes, relationships SubscriptionPlanDataRelationships) *SubscriptionPlanData {
 	this := SubscriptionPlanData{}
 	this.Id = id
 	this.Type = type_
 	this.Attributes = attributes
+	this.Relationships = relationships
 	return &this
 }
 
@@ -121,6 +123,30 @@ func (o *SubscriptionPlanData) SetAttributes(v SubscriptionPlanDataAttributes) {
 	o.Attributes = v
 }
 
+// GetRelationships returns the Relationships field value
+func (o *SubscriptionPlanData) GetRelationships() SubscriptionPlanDataRelationships {
+	if o == nil {
+		var ret SubscriptionPlanDataRelationships
+		return ret
+	}
+
+	return o.Relationships
+}
+
+// GetRelationshipsOk returns a tuple with the Relationships field value
+// and a boolean to check if the value has been set.
+func (o *SubscriptionPlanData) GetRelationshipsOk() (*SubscriptionPlanDataRelationships, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Relationships, true
+}
+
+// SetRelationships sets field value
+func (o *SubscriptionPlanData) SetRelationships(v SubscriptionPlanDataRelationships) {
+	o.Relationships = v
+}
+
 func (o SubscriptionPlanData) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -134,6 +160,7 @@ func (o SubscriptionPlanData) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["type"] = o.Type
 	toSerialize["attributes"] = o.Attributes
+	toSerialize["relationships"] = o.Relationships
 	return toSerialize, nil
 }
 
@@ -145,6 +172,7 @@ func (o *SubscriptionPlanData) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"type",
 		"attributes",
+		"relationships",
 	}
 
 	allProperties := make(map[string]interface{})

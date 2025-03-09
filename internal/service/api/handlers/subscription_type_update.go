@@ -33,7 +33,7 @@ func SubscriptionTypeUpdate(w http.ResponseWriter, r *http.Request) {
 		httpkit.RenderErr(w, problems.BadRequest(fmt.Errorf("failed to parse type id"))...)
 	}
 
-	err = Domain(r).UpdateSubType(r.Context(), ID, map[string]any{
+	err = Domain(r).UpdateType(r.Context(), ID, map[string]any{
 		"name": req.Data.Attributes.Name,
 	})
 	if err != nil {

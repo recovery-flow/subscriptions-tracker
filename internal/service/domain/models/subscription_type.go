@@ -33,3 +33,8 @@ func ParseStatusType(status string) (StatusType, error) {
 		return "", fmt.Errorf("invalid type status: %s", status)
 	}
 }
+
+type SubscriptionTypeDepends struct {
+	SType *SubscriptionType
+	Plans []SubscriptionPlan
+}

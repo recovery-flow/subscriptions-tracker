@@ -26,7 +26,7 @@ func SubscriptionPlanActivate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = Domain(r).ActivateSubPlan(r.Context(), ID)
+	err = Domain(r).ActivatePlan(r.Context(), ID)
 	if err != nil {
 		Log(r).WithError(err).Debug("Failed to update subscription plan")
 		httpkit.RenderErr(w, problems.InternalError(err.Error()))

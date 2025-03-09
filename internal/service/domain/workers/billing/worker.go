@@ -19,7 +19,7 @@ func Run(ctx context.Context, svc *service.Service, sig chan struct{}) {
 	_, err := cron.NewJob(
 		gocron.DailyJob(1, gocron.NewAtTimes(gocron.NewAtTime(0, 15, 0))),
 		gocron.NewTask(func() {
-			schedules, err := svc.Domain.SelectSchedule(ctx, false, time.Now().UTC())
+			schedules, err := svc.Domain.SelectSchedules(ctx, false, time.Now().UTC(), string(models.ScheduleBillingStatusPlanned))
 			if err != nil {
 				log.WithError(err).Error("failed to get schedules")
 				return
@@ -39,7 +39,7 @@ func Run(ctx context.Context, svc *service.Service, sig chan struct{}) {
 				sem <- struct{}{}
 				go func(sched models.BillingSchedule) {
 					defer wg.Done()
-					err := svc.Domain.MadeTransaction(ctx, sched.UserID)
+					_, err = svc.Domain.MadeTransaction(ctx, sched.UserID)
 					if err != nil {
 						log.WithError(err).Errorf("failed to make transaction for user %s", sched.UserID)
 					} else {

@@ -5,7 +5,7 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/resources"
 )
 
-func SubscriptionPlan(subscriptionPlan models.SubscriptionPlan, subscriptionType *models.SubscriptionType) resources.SubscriptionPlan {
+func SubscriptionPlan(subscriptionPlan *models.SubscriptionPlan, subscriptionType *models.SubscriptionType) resources.SubscriptionPlan {
 	res := resources.SubscriptionPlan{
 		Data: resources.SubscriptionPlanData{
 			Id:   subscriptionPlan.ID.String(),
@@ -23,9 +23,16 @@ func SubscriptionPlan(subscriptionPlan models.SubscriptionPlan, subscriptionType
 		},
 	}
 	if subscriptionType != nil {
-		var included []resources.SubscriptionTypeData
-		included = append(included, SubscriptionType(*subscriptionType, nil).Data)
-		res.Included = included
+		relationships := make([]resources.RelationshipsDataInner, 0)
+		relationships = append(relationships, resources.RelationshipsDataInner{
+			Id:   subscriptionType.ID.String(),
+			Type: resources.TypeSubscriptionType,
+		})
+		res.Data.Relationships = resources.SubscriptionPlanDataRelationships{
+			SubscriptionTypeRelation: resources.Relationships{
+				Data: relationships,
+			},
+		}
 	}
 	return res
 }

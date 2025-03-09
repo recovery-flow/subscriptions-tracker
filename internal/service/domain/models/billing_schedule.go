@@ -8,30 +8,30 @@ import (
 )
 
 type BillingSchedule struct {
-	UserID        uuid.UUID     `json:"user_id"`
-	SchedulesDate time.Time     `json:"schedules_date"`
-	AttemptedDate *time.Time    `json:"attempted_date,omitempty"`
-	Status        BillingStatus `json:"status"`
-	UpdatedAt     time.Time     `json:"updated_at"`
-	CreatedAt     time.Time     `json:"created_at"`
+	UserID        uuid.UUID             `json:"user_id"`
+	SchedulesDate time.Time             `json:"schedules_date"`
+	AttemptedDate *time.Time            `json:"attempted_date,omitempty"`
+	Status        ScheduleBillingStatus `json:"status"`
+	UpdatedAt     time.Time             `json:"updated_at"`
+	CreatedAt     time.Time             `json:"created_at"`
 }
 
-type BillingStatus string
+type ScheduleBillingStatus string
 
 const (
-	BillingStatusPlanned    BillingStatus = "planned"
-	BillingStatusFailed     BillingStatus = "failed"
-	BillingStatusProcessing BillingStatus = "processing"
+	ScheduleBillingStatusPlanned    ScheduleBillingStatus = "planned"
+	ScheduleBillingStatusFailed     ScheduleBillingStatus = "failed"
+	ScheduleBillingStatusProcessing ScheduleBillingStatus = "processing"
 )
 
-func ParseBillingStatus(status string) (BillingStatus, error) {
+func ParseBillingStatus(status string) (ScheduleBillingStatus, error) {
 	switch status {
 	case "planned":
-		return BillingStatusPlanned, nil
+		return ScheduleBillingStatusPlanned, nil
 	case "failed":
-		return BillingStatusFailed, nil
+		return ScheduleBillingStatusFailed, nil
 	case "processing":
-		return BillingStatusProcessing, nil
+		return ScheduleBillingStatusProcessing, nil
 	default:
 		return "", fmt.Errorf("invalid billing status: %s", status)
 	}

@@ -92,3 +92,22 @@ ALTER TABLE subscription_transactions
 
 ALTER TABLE billing_schedule
     ADD CONSTRAINT fk_billing_plan_subscription FOREIGN KEY (user_id) REFERENCES subscriptions(user_id) ON DELETE CASCADE;
+
+CREATE OR REPLACE FUNCTION check_payment_methods_limit()
+RETURNS trigger AS $$
+BEGIN
+    IF (SELECT COUNT(*) FROM payment_methods WHERE user_id = NEW.user_id) >= 5 THEN
+        RAISE EXCEPTION 'User % already has 5 payment methods', NEW.user_id;
+END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER payment_methods_limit_trigger
+    BEFORE INSERT ON payment_methods
+    FOR EACH ROW
+    EXECUTE FUNCTION check_payment_methods_limit();
+
+CREATE UNIQUE INDEX uniq_user_default_payment_method
+    ON payment_methods (user_id)
+    WHERE is_default = true;

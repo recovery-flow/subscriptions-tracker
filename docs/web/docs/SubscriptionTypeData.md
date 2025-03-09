@@ -7,12 +7,13 @@ Name | Type | Description | Notes
 **Id** | **string** | Subscription type ID | 
 **Type** | **string** |  | 
 **Attributes** | [**SubscriptionTypeDataAttributes**](SubscriptionTypeDataAttributes.md) |  | 
+**Relationships** | [**SubscriptionTypeDataRelationships**](SubscriptionTypeDataRelationships.md) |  | 
 
 ## Methods
 
 ### NewSubscriptionTypeData
 
-`func NewSubscriptionTypeData(id string, type_ string, attributes SubscriptionTypeDataAttributes, ) *SubscriptionTypeData`
+`func NewSubscriptionTypeData(id string, type_ string, attributes SubscriptionTypeDataAttributes, relationships SubscriptionTypeDataRelationships, ) *SubscriptionTypeData`
 
 NewSubscriptionTypeData instantiates a new SubscriptionTypeData object
 This constructor will assign default values to properties that have it defined,
@@ -85,6 +86,26 @@ and a boolean to check if the value has been set.
 `func (o *SubscriptionTypeData) SetAttributes(v SubscriptionTypeDataAttributes)`
 
 SetAttributes sets Attributes field to given value.
+
+
+### GetRelationships
+
+`func (o *SubscriptionTypeData) GetRelationships() SubscriptionTypeDataRelationships`
+
+GetRelationships returns the Relationships field if non-nil, zero value otherwise.
+
+### GetRelationshipsOk
+
+`func (o *SubscriptionTypeData) GetRelationshipsOk() (*SubscriptionTypeDataRelationships, bool)`
+
+GetRelationshipsOk returns a tuple with the Relationships field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRelationships
+
+`func (o *SubscriptionTypeData) SetRelationships(v SubscriptionTypeDataRelationships)`
+
+SetRelationships sets Relationships field to given value.
 
 
 

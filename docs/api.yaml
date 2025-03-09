@@ -23,6 +23,8 @@ components:
       $ref: './spec/components/schemas/SubscriptionTypeUpdate.yaml'
     SubscriptionTypeCreate:
       $ref: './spec/components/schemas/SubscriptionTypeCreate.yaml'
+    SubscriptionTypeDepends:
+      $ref: './spec/components/schemas/SubscriptionTypeDepends.yaml'
     SubscriptionPlan:
       $ref: './spec/components/schemas/SubscriptionPlan.yaml'
     SubscriptionPlansCollection:
@@ -55,6 +57,8 @@ components:
       $ref: './spec/components/schemas/Transaction.yaml'
     TransactionsCollection:
       $ref: './spec/components/schemas/TransactionsCollection.yaml'
+    Relationships:
+      $ref: './spec/components/schemas/Relationships.yaml'
     LinksSelf:
       $ref: './spec/components/schemas/LinksSelf.yaml'
     LinksDirect:

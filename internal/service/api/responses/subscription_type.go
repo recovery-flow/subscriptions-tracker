@@ -5,27 +5,34 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/resources"
 )
 
-func SubscriptionType(types models.SubscriptionType, plans []models.SubscriptionPlan) resources.SubscriptionType {
+func SubscriptionType(sType *models.SubscriptionType, plans []models.SubscriptionPlan) resources.SubscriptionType {
 	res := resources.SubscriptionType{
 		Data: resources.SubscriptionTypeData{
-			Id:   types.ID.String(),
+			Id:   sType.ID.String(),
 			Type: resources.TypeSubscriptionType,
 			Attributes: resources.SubscriptionTypeDataAttributes{
-				Name:      types.Name,
-				Desc:      types.Description,
-				Status:    string(types.Status),
-				UpdatedAt: types.UpdatedAt,
-				CreatedAt: types.CreatedAt,
+				Name:      sType.Name,
+				Desc:      sType.Description,
+				Status:    string(sType.Status),
+				UpdatedAt: sType.UpdatedAt,
+				CreatedAt: sType.CreatedAt,
 			},
 		},
 	}
 
 	if len(plans) > 0 {
-		var data []resources.SubscriptionPlanData
+		relationships := make([]resources.RelationshipsDataInner, 0)
 		for _, plan := range plans {
-			data = append(data, SubscriptionPlan(plan, &types).Data)
+			relationships = append(relationships, resources.RelationshipsDataInner{
+				Id:   plan.ID.String(),
+				Type: resources.TypeSubscriptionPlan,
+			})
 		}
-		res.Included = data
+		res.Data.Relationships = resources.SubscriptionTypeDataRelationships{
+			SubscriptionPlanRelation: resources.Relationships{
+				Data: relationships,
+			},
+		}
 	}
 
 	return res

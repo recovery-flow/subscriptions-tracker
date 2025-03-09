@@ -34,7 +34,7 @@ func SubscriptionPlanUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = Domain(r).UpdateSubPlan(r.Context(), ID, map[string]any{
+	err = Domain(r).UpdatePlan(r.Context(), ID, map[string]any{
 		"name":     req.Data.Attributes.Name,
 		"desc":     req.Data.Attributes.Desc,
 		"price":    req.Data.Attributes.Price,
