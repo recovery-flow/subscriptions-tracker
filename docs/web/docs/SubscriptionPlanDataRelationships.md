@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**SubscriptionTypeRelation** | [**Relationships**](Relationships.md) |  | 
+**SubscriptionType** | [**Relationships**](Relationships.md) |  | 
 
 ## Methods
 
 ### NewSubscriptionPlanDataRelationships
 
-`func NewSubscriptionPlanDataRelationships(subscriptionTypeRelation Relationships, ) *SubscriptionPlanDataRelationships`
+`func NewSubscriptionPlanDataRelationships(subscriptionType Relationships, ) *SubscriptionPlanDataRelationships`
 
 NewSubscriptionPlanDataRelationships instantiates a new SubscriptionPlanDataRelationships object
 This constructor will assign default values to properties that have it defined,
@@ -25,24 +25,24 @@ NewSubscriptionPlanDataRelationshipsWithDefaults instantiates a new Subscription
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetSubscriptionTypeRelation
+### GetSubscriptionType
 
-`func (o *SubscriptionPlanDataRelationships) GetSubscriptionTypeRelation() Relationships`
+`func (o *SubscriptionPlanDataRelationships) GetSubscriptionType() Relationships`
 
-GetSubscriptionTypeRelation returns the SubscriptionTypeRelation field if non-nil, zero value otherwise.
+GetSubscriptionType returns the SubscriptionType field if non-nil, zero value otherwise.
 
-### GetSubscriptionTypeRelationOk
+### GetSubscriptionTypeOk
 
-`func (o *SubscriptionPlanDataRelationships) GetSubscriptionTypeRelationOk() (*Relationships, bool)`
+`func (o *SubscriptionPlanDataRelationships) GetSubscriptionTypeOk() (*Relationships, bool)`
 
-GetSubscriptionTypeRelationOk returns a tuple with the SubscriptionTypeRelation field if it's non-nil, zero value otherwise
+GetSubscriptionTypeOk returns a tuple with the SubscriptionType field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetSubscriptionTypeRelation
+### SetSubscriptionType
 
-`func (o *SubscriptionPlanDataRelationships) SetSubscriptionTypeRelation(v Relationships)`
+`func (o *SubscriptionPlanDataRelationships) SetSubscriptionType(v Relationships)`
 
-SetSubscriptionTypeRelation sets SubscriptionTypeRelation field to given value.
+SetSubscriptionType sets SubscriptionType field to given value.
 
 
 

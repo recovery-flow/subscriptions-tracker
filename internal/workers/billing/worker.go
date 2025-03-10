@@ -9,7 +9,7 @@ import (
 	"github.com/go-co-op/gocron/v2"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/workers/cron"
+	"github.com/recovery-flow/subscriptions-tracker/internal/workers/cron"
 )
 
 func Run(ctx context.Context, svc *service.Service, sig chan struct{}) {

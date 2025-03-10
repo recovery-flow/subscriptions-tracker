@@ -16,7 +16,7 @@ func SubscriptionTypeCreate(r *http.Request) (req resources.SubscriptionTypeCrea
 	}
 
 	errs := validation.Errors{
-		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.TypeSubscriptionType)),
+		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.TypeSubscriptionTypeCreate)),
 		"data/attributes": validation.Validate(req.Data.Attributes, validation.Required),
 	}
 	return req, errs.Filter()

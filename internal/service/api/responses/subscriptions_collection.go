@@ -10,7 +10,7 @@ import (
 func SubscriptionCollection(subscriptions []models.Subscription, baseURL string, queryParams url.Values, totalItems, pageSize, pageNumber int64) resources.SubscriptionsCollection {
 	var data []resources.SubscriptionData
 	for _, subscription := range subscriptions {
-		data = append(data, Subscription(subscription).Data)
+		data = append(data, Subscription(subscription, nil).Data)
 	}
 
 	links := resources.LinksPagination{

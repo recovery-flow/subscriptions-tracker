@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**UserId** | **string** | User ID | 
 **Type** | **string** |  | 
 **ProviderToken** | **string** | Provider token | 
 **IsDefault** | **bool** | Is default | 
@@ -13,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewPaymentMethodCreateDataAttributes
 
-`func NewPaymentMethodCreateDataAttributes(userId string, type_ string, providerToken string, isDefault bool, ) *PaymentMethodCreateDataAttributes`
+`func NewPaymentMethodCreateDataAttributes(type_ string, providerToken string, isDefault bool, ) *PaymentMethodCreateDataAttributes`
 
 NewPaymentMethodCreateDataAttributes instantiates a new PaymentMethodCreateDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -27,26 +26,6 @@ will change when the set of required properties is changed
 NewPaymentMethodCreateDataAttributesWithDefaults instantiates a new PaymentMethodCreateDataAttributes object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetUserId
-
-`func (o *PaymentMethodCreateDataAttributes) GetUserId() string`
-
-GetUserId returns the UserId field if non-nil, zero value otherwise.
-
-### GetUserIdOk
-
-`func (o *PaymentMethodCreateDataAttributes) GetUserIdOk() (*string, bool)`
-
-GetUserIdOk returns a tuple with the UserId field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetUserId
-
-`func (o *PaymentMethodCreateDataAttributes) SetUserId(v string)`
-
-SetUserId sets UserId field to given value.
-
 
 ### GetType
 

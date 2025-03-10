@@ -9,14 +9,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/recovery-flow/subscriptions-tracker/internal/config"
-	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/infra/events"
 	"github.com/segmentio/kafka-go"
 )
 
 type Producer interface {
-	SubscriptionActivate(subscription models.Subscription, userID uuid.UUID) error
-	SubscriptionDeactivate(subscription models.Subscription, userID uuid.UUID) error
+	SubscriptionActivate(userID, planID, typeID uuid.UUID) error
+	SubscriptionDeactivate(userID, planID, typeID uuid.UUID) error
 
 	sendMessage(topic string, event string, key string, data []byte) error
 }
@@ -40,22 +39,22 @@ func NewProducer(cfg *config.Config) Producer {
 	}
 }
 
-func (p *producer) SubscriptionActivate(subscription models.Subscription, typeID uuid.UUID) error {
-	body, err := json.Marshal(events.SubscriptionActivate{
-		PlanID:    subscription.PlanID.String(),
+func (p *producer) SubscriptionActivate(userID, planID, typeID uuid.UUID) error {
+	body, err := json.Marshal(events.SubscriptionStatus{
+		PlanID:    planID.String(),
 		TypeID:    typeID.String(),
 		CreatedAt: time.Now(),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to marshal SubscriptionActivate event: %w", err)
+		return fmt.Errorf("failed to marshal SubscriptionStatus event: %w", err)
 	}
 
-	return p.sendMessage(events.SubscriptionsStatusTopic, events.SubscriptionActivatedType, subscription.UserID.String(), body)
+	return p.sendMessage(events.SubscriptionsStatusTopic, events.SubscriptionActivatedType, userID.String(), body)
 }
 
-func (p *producer) SubscriptionDeactivate(subscription models.Subscription, typeID uuid.UUID) error {
-	body, err := json.Marshal(events.SubscriptionDeactivate{
-		PlanID:    subscription.PlanID.String(),
+func (p *producer) SubscriptionDeactivate(userID, planID, typeID uuid.UUID) error {
+	body, err := json.Marshal(events.SubscriptionStatus{
+		PlanID:    planID.String(),
 		TypeID:    typeID.String(),
 		CreatedAt: time.Now(),
 	})
@@ -63,7 +62,7 @@ func (p *producer) SubscriptionDeactivate(subscription models.Subscription, type
 		return fmt.Errorf("failed to marshal subscription deactivate event: %w", err)
 	}
 
-	return p.sendMessage(events.SubscriptionsStatusTopic, events.SubscriptionDeactivatedType, subscription.UserID.String(), body)
+	return p.sendMessage(events.SubscriptionsStatusTopic, events.SubscriptionDeactivatedType, userID.String(), body)
 }
 
 func (p *producer) sendMessage(topic string, event string, key string, body []byte) error {

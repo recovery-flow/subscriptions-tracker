@@ -11,7 +11,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/recovery-flow/comtools v0.1.1
-	github.com/recovery-flow/tokens v0.5.0
+	github.com/recovery-flow/tokens v0.5.1
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/sirupsen/logrus v1.9.3

@@ -21,8 +21,6 @@ var _ MappedNullable = &PaymentMethodCreateDataAttributes{}
 
 // PaymentMethodCreateDataAttributes struct for PaymentMethodCreateDataAttributes
 type PaymentMethodCreateDataAttributes struct {
-	// User ID
-	UserId string `json:"user_id"`
 	Type string `json:"type"`
 	// Provider token
 	ProviderToken string `json:"provider_token"`
@@ -36,9 +34,8 @@ type _PaymentMethodCreateDataAttributes PaymentMethodCreateDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPaymentMethodCreateDataAttributes(userId string, type_ string, providerToken string, isDefault bool) *PaymentMethodCreateDataAttributes {
+func NewPaymentMethodCreateDataAttributes(type_ string, providerToken string, isDefault bool) *PaymentMethodCreateDataAttributes {
 	this := PaymentMethodCreateDataAttributes{}
-	this.UserId = userId
 	this.Type = type_
 	this.ProviderToken = providerToken
 	this.IsDefault = isDefault
@@ -51,30 +48,6 @@ func NewPaymentMethodCreateDataAttributes(userId string, type_ string, providerT
 func NewPaymentMethodCreateDataAttributesWithDefaults() *PaymentMethodCreateDataAttributes {
 	this := PaymentMethodCreateDataAttributes{}
 	return &this
-}
-
-// GetUserId returns the UserId field value
-func (o *PaymentMethodCreateDataAttributes) GetUserId() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.UserId
-}
-
-// GetUserIdOk returns a tuple with the UserId field value
-// and a boolean to check if the value has been set.
-func (o *PaymentMethodCreateDataAttributes) GetUserIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.UserId, true
-}
-
-// SetUserId sets field value
-func (o *PaymentMethodCreateDataAttributes) SetUserId(v string) {
-	o.UserId = v
 }
 
 // GetType returns the Type field value
@@ -159,7 +132,6 @@ func (o PaymentMethodCreateDataAttributes) MarshalJSON() ([]byte, error) {
 
 func (o PaymentMethodCreateDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["user_id"] = o.UserId
 	toSerialize["type"] = o.Type
 	toSerialize["provider_token"] = o.ProviderToken
 	toSerialize["is_default"] = o.IsDefault
@@ -171,7 +143,6 @@ func (o *PaymentMethodCreateDataAttributes) UnmarshalJSON(data []byte) (err erro
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"user_id",
 		"type",
 		"provider_token",
 		"is_default",

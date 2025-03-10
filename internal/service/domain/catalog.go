@@ -31,6 +31,7 @@ type SubscriptionsCatalog interface {
 	DeactivatePlan(ctx context.Context, ID uuid.UUID) error
 
 	GetType(ctx context.Context, ID uuid.UUID) (*models.SubscriptionType, []models.SubscriptionPlan, error)
+	GetTypeByPlan(ctx context.Context, planID uuid.UUID) (*models.SubscriptionType, error)
 	GetPlan(ctx context.Context, ID uuid.UUID) (*models.SubscriptionPlan, error)
 	GetAllType(ctx context.Context, statusType *models.StatusType) ([]models.SubscriptionTypeDepends, error)
 }
@@ -216,6 +217,20 @@ func (d *domain) GetType(ctx context.Context, ID uuid.UUID) (*models.Subscriptio
 	}
 
 	return sType, plans, nil
+}
+
+func (d *domain) GetTypeByPlan(ctx context.Context, planID uuid.UUID) (*models.SubscriptionType, error) {
+	plan, err := d.Infra.Data.SQL.Plans.New().Filter(map[string]any{"id": planID.String()}).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	sType, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{"id": plan.TypeID.String()}).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return sType, nil
 }
 
 func (d *domain) GetPlan(ctx context.Context, ID uuid.UUID) (*models.SubscriptionPlan, error) {

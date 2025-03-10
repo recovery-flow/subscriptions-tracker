@@ -14,14 +14,10 @@ properties:
       attributes:
         type: object
         required:
-          - user_id
           - type
           - provider_token
           - is_default
         properties:
-          user_id:
-            type: string
-            description: "User ID"
           type:
             type: string
             enum: [ payment_method ]

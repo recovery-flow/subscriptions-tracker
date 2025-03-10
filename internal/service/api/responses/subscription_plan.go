@@ -23,14 +23,12 @@ func SubscriptionPlan(subscriptionPlan *models.SubscriptionPlan, subscriptionTyp
 		},
 	}
 	if subscriptionType != nil {
-		relationships := make([]resources.RelationshipsDataInner, 0)
-		relationships = append(relationships, resources.RelationshipsDataInner{
-			Id:   subscriptionType.ID.String(),
-			Type: resources.TypeSubscriptionType,
-		})
 		res.Data.Relationships = resources.SubscriptionPlanDataRelationships{
-			SubscriptionTypeRelation: resources.Relationships{
-				Data: relationships,
+			SubscriptionType: resources.Relationships{
+				Data: resources.RelationshipsData{
+					Id:   subscriptionType.ID.String(),
+					Type: resources.TypeSubscriptionType,
+				},
 			},
 		}
 	}

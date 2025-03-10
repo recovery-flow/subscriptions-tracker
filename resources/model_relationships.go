@@ -21,7 +21,7 @@ var _ MappedNullable = &Relationships{}
 
 // Relationships struct for Relationships
 type Relationships struct {
-	Data []RelationshipsDataInner `json:"data"`
+	Data RelationshipsData `json:"data"`
 }
 
 type _Relationships Relationships
@@ -30,7 +30,7 @@ type _Relationships Relationships
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRelationships(data []RelationshipsDataInner) *Relationships {
+func NewRelationships(data RelationshipsData) *Relationships {
 	this := Relationships{}
 	this.Data = data
 	return &this
@@ -45,9 +45,9 @@ func NewRelationshipsWithDefaults() *Relationships {
 }
 
 // GetData returns the Data field value
-func (o *Relationships) GetData() []RelationshipsDataInner {
+func (o *Relationships) GetData() RelationshipsData {
 	if o == nil {
-		var ret []RelationshipsDataInner
+		var ret RelationshipsData
 		return ret
 	}
 
@@ -56,15 +56,15 @@ func (o *Relationships) GetData() []RelationshipsDataInner {
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *Relationships) GetDataOk() ([]RelationshipsDataInner, bool) {
+func (o *Relationships) GetDataOk() (*RelationshipsData, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Data, true
+	return &o.Data, true
 }
 
 // SetData sets field value
-func (o *Relationships) SetData(v []RelationshipsDataInner) {
+func (o *Relationships) SetData(v RelationshipsData) {
 	o.Data = v
 }
 

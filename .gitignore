@@ -3,4 +3,6 @@ vendor
 node_modules
 
 main
+Makefile
 config_local.yaml
+config_docker.yaml

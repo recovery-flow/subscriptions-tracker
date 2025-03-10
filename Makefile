@@ -1,4 +1,4 @@
-DB_URL=postgresql://postgres:postgres@localhost:5556/postgres?sslmode=disable
+DB_URL=postgresql://postgres:postgres@localhost:7003/postgres?sslmode=disable
 OPENAPI_GENERATOR := java -jar ~/openapi-generator-cli.jar
 CONFIG_FILE := ./config_local.yaml
 API_SRC := ./docs/api.yaml
@@ -23,13 +23,13 @@ generate-sqlc:
 	sqlc generate
 
 migrate-up:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscription-tracker/main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscriptions-tracker/main.go
 	migrate -path internal/service/infra/data/sqldb/migrations -database $(DB_URL) -verbose up
 
 migrate-down:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscription-tracker/main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscriptions-tracker/main.go
 	migrate -path internal/service/infra/data/sqldb/migrations -database $(DB_URL) -verbose down
 
 run-server:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscription-tracker/main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o main ./cmd/subscriptions-tracker/main.go
 	KV_VIPER_FILE=$(CONFIG_FILE) ./main run service

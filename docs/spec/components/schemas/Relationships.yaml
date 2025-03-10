@@ -3,14 +3,12 @@ required:
   - data
 properties:
   data:
-    type: array
-    items:
-      type: object
-      required:
-        - id
-        - type
-      properties:
-        id:
-          type: string
-        type:
-          type: string
+    type: object
+    required:
+      - id
+      - type
+    properties:
+      id:
+        type: string
+      type:
+        type: string

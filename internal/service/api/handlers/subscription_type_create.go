@@ -32,7 +32,7 @@ func SubscriptionTypeCreate(w http.ResponseWriter, r *http.Request) {
 	sType, err := Domain(r).CreateType(r.Context(), name, desc)
 	if err != nil {
 		Log(r).WithError(err).Debug("Failed to create subscription type")
-		httpkit.RenderErr(w, problems.InternalError(err.Error()))
+		httpkit.RenderErr(w, problems.InternalError())
 		return
 	}
 

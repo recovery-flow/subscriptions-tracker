@@ -61,6 +61,7 @@ func (m *paymentMethods) Insert(ctx context.Context, pm *models.PaymentMethod) e
 		"type":           pm.Type,
 		"provider_token": pm.ProviderToken,
 		"is_default":     pm.IsDefault,
+		"updated_at":     pm.UpdatedAt,
 		"created_at":     pm.CreatedAt,
 	}
 
@@ -135,6 +136,7 @@ func (m *paymentMethods) Select(ctx context.Context) ([]models.PaymentMethod, er
 			&pm.Type,
 			&pm.ProviderToken,
 			&pm.IsDefault,
+			&pm.UpdatedAt,
 			&pm.CreatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scanning %s row: %w", paymentMethodsTable, err)
@@ -170,6 +172,7 @@ func (m *paymentMethods) Get(ctx context.Context) (*models.PaymentMethod, error)
 		&pm.Type,
 		&pm.ProviderToken,
 		&pm.IsDefault,
+		&pm.UpdatedAt,
 		&pm.CreatedAt,
 	)
 	if err != nil {

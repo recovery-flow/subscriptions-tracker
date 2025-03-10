@@ -21,15 +21,17 @@ func SubscriptionType(sType *models.SubscriptionType, plans []models.Subscriptio
 	}
 
 	if len(plans) > 0 {
-		relationships := make([]resources.RelationshipsDataInner, 0)
+		relationships := make([]resources.Relationships, 0)
 		for _, plan := range plans {
-			relationships = append(relationships, resources.RelationshipsDataInner{
-				Id:   plan.ID.String(),
-				Type: resources.TypeSubscriptionPlan,
+			relationships = append(relationships, resources.Relationships{
+				Data: resources.RelationshipsData{
+					Id:   plan.ID.String(),
+					Type: resources.TypeSubscriptionPlan,
+				},
 			})
 		}
 		res.Data.Relationships = resources.SubscriptionTypeDataRelationships{
-			SubscriptionPlanRelation: resources.Relationships{
+			SubscriptionPlanRelation: resources.SubscriptionTypeDataRelationshipsSubscriptionPlanRelation{
 				Data: relationships,
 			},
 		}

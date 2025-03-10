@@ -20,13 +20,7 @@ type InternalEvent struct {
 	Data      json.RawMessage `json:"data"`
 }
 
-type SubscriptionActivate struct {
-	PlanID    string    `json:"plan_id"`
-	TypeID    string    `json:"type_id"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-type SubscriptionDeactivate struct {
+type SubscriptionStatus struct {
 	PlanID    string    `json:"plan_id"`
 	TypeID    string    `json:"type_id"`
 	CreatedAt time.Time `json:"created_at"`

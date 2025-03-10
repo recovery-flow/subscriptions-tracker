@@ -1,24 +1,22 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"github.com/recovery-flow/comtools/httpkit"
 	"github.com/recovery-flow/comtools/httpkit/problems"
+	"github.com/recovery-flow/tokens"
 )
 
 func UserSubscriptionDeactivate(w http.ResponseWriter, r *http.Request) {
-	subID, err := uuid.Parse(chi.URLParam(r, "user_id"))
+	accountID, _, subTypeID, _, _, err := tokens.GetAccountData(r.Context())
 	if err != nil {
-		Log(r).WithError(err).Debug("Failed to parse user id")
-		httpkit.RenderErr(w, problems.BadRequest(fmt.Errorf("failed to parse user id"))...)
+		Log(r).WithError(err).Debug("Failed to get account data")
+		httpkit.RenderErr(w, problems.Unauthorized())
 		return
 	}
 
-	err = Domain(r).DeactivateSubscription(r.Context(), subID)
+	err = Domain(r).DeactivateSubscription(r.Context(), *accountID, *subTypeID)
 	if err != nil {
 		Log(r).WithError(err).Debug("Failed to deactivate user subscription")
 		httpkit.RenderErr(w, problems.InternalError(err.Error()))

@@ -66,7 +66,14 @@ components:
                 - subscription_plan_relation
               properties:
                 subscription_plan_relation:
-                  $ref: '#/components/schemas/Relationships'
+                  type: object
+                  required:
+                    - data
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Relationships'
     SubscriptionTypesCollection:
       type: object
       required:
@@ -231,9 +238,9 @@ components:
             relationships:
               type: object
               required:
-                - subscription_type_relation
+                - subscription_type
               properties:
-                subscription_type_relation:
+                subscription_type:
                   $ref: '#/components/schemas/Relationships'
     SubscriptionPlansCollection:
       type: object
@@ -355,6 +362,7 @@ components:
             - id
             - type
             - attributes
+            - relationships
           properties:
             id:
               type: string
@@ -414,6 +422,19 @@ components:
                   type: string
                   format: date-time
                   description: Created at
+            relationships:
+              type: object
+              required:
+                - plan
+                - type
+                - payment_method
+              properties:
+                plan:
+                  $ref: '#/components/schemas/Relationships'
+                type:
+                  $ref: '#/components/schemas/Relationships'
+                payment_method:
+                  $ref: '#/components/schemas/Relationships'
     SubscriptionsCollection:
       type: object
       required:
@@ -596,14 +617,10 @@ components:
             attributes:
               type: object
               required:
-                - user_id
                 - type
                 - provider_token
                 - is_default
               properties:
-                user_id:
-                  type: string
-                  description: User ID
                 type:
                   type: string
                   enum:
@@ -799,17 +816,15 @@ components:
         - data
       properties:
         data:
-          type: array
-          items:
-            type: object
-            required:
-              - id
-              - type
-            properties:
-              id:
-                type: string
-              type:
-                type: string
+          type: object
+          required:
+            - id
+            - type
+          properties:
+            id:
+              type: string
+            type:
+              type: string
     LinksSelf:
       type: object
       required:

@@ -16,38 +16,38 @@ import (
 	"fmt"
 )
 
-// checks if the RelationshipsDataInner type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &RelationshipsDataInner{}
+// checks if the RelationshipsData type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &RelationshipsData{}
 
-// RelationshipsDataInner struct for RelationshipsDataInner
-type RelationshipsDataInner struct {
+// RelationshipsData struct for RelationshipsData
+type RelationshipsData struct {
 	Id string `json:"id"`
 	Type string `json:"type"`
 }
 
-type _RelationshipsDataInner RelationshipsDataInner
+type _RelationshipsData RelationshipsData
 
-// NewRelationshipsDataInner instantiates a new RelationshipsDataInner object
+// NewRelationshipsData instantiates a new RelationshipsData object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRelationshipsDataInner(id string, type_ string) *RelationshipsDataInner {
-	this := RelationshipsDataInner{}
+func NewRelationshipsData(id string, type_ string) *RelationshipsData {
+	this := RelationshipsData{}
 	this.Id = id
 	this.Type = type_
 	return &this
 }
 
-// NewRelationshipsDataInnerWithDefaults instantiates a new RelationshipsDataInner object
+// NewRelationshipsDataWithDefaults instantiates a new RelationshipsData object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRelationshipsDataInnerWithDefaults() *RelationshipsDataInner {
-	this := RelationshipsDataInner{}
+func NewRelationshipsDataWithDefaults() *RelationshipsData {
+	this := RelationshipsData{}
 	return &this
 }
 
 // GetId returns the Id field value
-func (o *RelationshipsDataInner) GetId() string {
+func (o *RelationshipsData) GetId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -58,7 +58,7 @@ func (o *RelationshipsDataInner) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *RelationshipsDataInner) GetIdOk() (*string, bool) {
+func (o *RelationshipsData) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -66,12 +66,12 @@ func (o *RelationshipsDataInner) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *RelationshipsDataInner) SetId(v string) {
+func (o *RelationshipsData) SetId(v string) {
 	o.Id = v
 }
 
 // GetType returns the Type field value
-func (o *RelationshipsDataInner) GetType() string {
+func (o *RelationshipsData) GetType() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -82,7 +82,7 @@ func (o *RelationshipsDataInner) GetType() string {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *RelationshipsDataInner) GetTypeOk() (*string, bool) {
+func (o *RelationshipsData) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -90,11 +90,11 @@ func (o *RelationshipsDataInner) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *RelationshipsDataInner) SetType(v string) {
+func (o *RelationshipsData) SetType(v string) {
 	o.Type = v
 }
 
-func (o RelationshipsDataInner) MarshalJSON() ([]byte, error) {
+func (o RelationshipsData) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -102,14 +102,14 @@ func (o RelationshipsDataInner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o RelationshipsDataInner) ToMap() (map[string]interface{}, error) {
+func (o RelationshipsData) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["type"] = o.Type
 	return toSerialize, nil
 }
 
-func (o *RelationshipsDataInner) UnmarshalJSON(data []byte) (err error) {
+func (o *RelationshipsData) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -132,53 +132,53 @@ func (o *RelationshipsDataInner) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varRelationshipsDataInner := _RelationshipsDataInner{}
+	varRelationshipsData := _RelationshipsData{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varRelationshipsDataInner)
+	err = decoder.Decode(&varRelationshipsData)
 
 	if err != nil {
 		return err
 	}
 
-	*o = RelationshipsDataInner(varRelationshipsDataInner)
+	*o = RelationshipsData(varRelationshipsData)
 
 	return err
 }
 
-type NullableRelationshipsDataInner struct {
-	value *RelationshipsDataInner
+type NullableRelationshipsData struct {
+	value *RelationshipsData
 	isSet bool
 }
 
-func (v NullableRelationshipsDataInner) Get() *RelationshipsDataInner {
+func (v NullableRelationshipsData) Get() *RelationshipsData {
 	return v.value
 }
 
-func (v *NullableRelationshipsDataInner) Set(val *RelationshipsDataInner) {
+func (v *NullableRelationshipsData) Set(val *RelationshipsData) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRelationshipsDataInner) IsSet() bool {
+func (v NullableRelationshipsData) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRelationshipsDataInner) Unset() {
+func (v *NullableRelationshipsData) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRelationshipsDataInner(val *RelationshipsDataInner) *NullableRelationshipsDataInner {
-	return &NullableRelationshipsDataInner{value: val, isSet: true}
+func NewNullableRelationshipsData(val *RelationshipsData) *NullableRelationshipsData {
+	return &NullableRelationshipsData{value: val, isSet: true}
 }
 
-func (v NullableRelationshipsDataInner) MarshalJSON() ([]byte, error) {
+func (v NullableRelationshipsData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRelationshipsDataInner) UnmarshalJSON(src []byte) error {
+func (v *NullableRelationshipsData) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

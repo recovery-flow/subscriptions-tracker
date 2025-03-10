@@ -17,7 +17,7 @@ properties:
   relationships:
     type: object
     required:
-      - subscription_type_relation
+      - subscription_type
     properties:
-      subscription_type_relation:
+      subscription_type:
         $ref: './Relationships.yaml'

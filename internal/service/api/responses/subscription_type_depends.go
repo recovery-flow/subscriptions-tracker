@@ -10,7 +10,7 @@ func SubscriptionTypeDepends(subscriptions []models.SubscriptionTypeDepends) res
 	plans := make([]resources.SubscriptionPlanData, 0)
 
 	for _, subscription := range subscriptions {
-		typeRelations := make([]resources.RelationshipsDataInner, 0)
+		typeRelations := make([]resources.Relationships, 0)
 
 		for _, plan := range subscription.Plans {
 			plans = append(plans, resources.SubscriptionPlanData{
@@ -28,20 +28,20 @@ func SubscriptionTypeDepends(subscriptions []models.SubscriptionTypeDepends) res
 					CreatedAt:       plan.CreatedAt,
 				},
 				Relationships: resources.SubscriptionPlanDataRelationships{
-					SubscriptionTypeRelation: resources.Relationships{
-						Data: []resources.RelationshipsDataInner{
-							{
-								Id:   subscription.SType.ID.String(),
-								Type: resources.TypeSubscriptionType,
-							},
+					SubscriptionType: resources.Relationships{
+						Data: resources.RelationshipsData{
+							Id:   subscription.SType.ID.String(),
+							Type: resources.TypeSubscriptionType,
 						},
 					},
 				},
 			})
 			if plan.TypeID == subscription.SType.ID {
-				typeRelations = append(typeRelations, resources.RelationshipsDataInner{
-					Id:   plan.ID.String(),
-					Type: resources.TypeSubscriptionPlan,
+				typeRelations = append(typeRelations, resources.Relationships{
+					Data: resources.RelationshipsData{
+						Id:   plan.ID.String(),
+						Type: resources.TypeSubscriptionPlan,
+					},
 				})
 			}
 		}
@@ -57,7 +57,7 @@ func SubscriptionTypeDepends(subscriptions []models.SubscriptionTypeDepends) res
 				CreatedAt: subscription.SType.CreatedAt,
 			},
 			Relationships: resources.SubscriptionTypeDataRelationships{
-				SubscriptionPlanRelation: resources.Relationships{
+				SubscriptionPlanRelation: resources.SubscriptionTypeDataRelationshipsSubscriptionPlanRelation{
 					Data: typeRelations,
 				},
 			},

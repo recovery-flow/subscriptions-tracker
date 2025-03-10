@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Data** | [**[]SubscriptionTypeDataRelationshipsSubscriptionPlanRelationDataInner**](SubscriptionTypeDataRelationshipsSubscriptionPlanRelationDataInner.md) |  | 
+**Data** | [**[]Relationships**](Relationships.md) |  | 
 
 ## Methods
 
 ### NewSubscriptionTypeDataRelationshipsSubscriptionPlanRelation
 
-`func NewSubscriptionTypeDataRelationshipsSubscriptionPlanRelation(data []SubscriptionTypeDataRelationshipsSubscriptionPlanRelationDataInner, ) *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation`
+`func NewSubscriptionTypeDataRelationshipsSubscriptionPlanRelation(data []Relationships, ) *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation`
 
 NewSubscriptionTypeDataRelationshipsSubscriptionPlanRelation instantiates a new SubscriptionTypeDataRelationshipsSubscriptionPlanRelation object
 This constructor will assign default values to properties that have it defined,
@@ -27,20 +27,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetData
 
-`func (o *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) GetData() []SubscriptionTypeDataRelationshipsSubscriptionPlanRelationDataInner`
+`func (o *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) GetData() []Relationships`
 
 GetData returns the Data field if non-nil, zero value otherwise.
 
 ### GetDataOk
 
-`func (o *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) GetDataOk() (*[]SubscriptionTypeDataRelationshipsSubscriptionPlanRelationDataInner, bool)`
+`func (o *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) GetDataOk() (*[]Relationships, bool)`
 
 GetDataOk returns a tuple with the Data field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetData
 
-`func (o *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) SetData(v []SubscriptionTypeDataRelationshipsSubscriptionPlanRelationDataInner)`
+`func (o *SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) SetData(v []Relationships)`
 
 SetData sets Data field to given value.
 

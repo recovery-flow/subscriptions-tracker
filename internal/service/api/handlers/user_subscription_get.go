@@ -26,5 +26,14 @@ func UserSubscriptionGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpkit.Render(w, responses.Subscription(*res))
+	sType, err := Domain(r).GetTypeByPlan(r.Context(), res.PlanID)
+	if err != nil {
+		Log(r).WithError(err).Debug("Failed to get subscription type")
+		httpkit.RenderErr(w, problems.InternalError(err.Error()))
+		return
+	}
+
+	typeID := sType.ID
+
+	httpkit.Render(w, responses.Subscription(*res, &typeID))
 }

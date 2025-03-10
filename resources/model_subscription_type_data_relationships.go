@@ -21,7 +21,7 @@ var _ MappedNullable = &SubscriptionTypeDataRelationships{}
 
 // SubscriptionTypeDataRelationships struct for SubscriptionTypeDataRelationships
 type SubscriptionTypeDataRelationships struct {
-	SubscriptionPlanRelation Relationships `json:"subscription_plan_relation"`
+	SubscriptionPlanRelation SubscriptionTypeDataRelationshipsSubscriptionPlanRelation `json:"subscription_plan_relation"`
 }
 
 type _SubscriptionTypeDataRelationships SubscriptionTypeDataRelationships
@@ -30,7 +30,7 @@ type _SubscriptionTypeDataRelationships SubscriptionTypeDataRelationships
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSubscriptionTypeDataRelationships(subscriptionPlanRelation Relationships) *SubscriptionTypeDataRelationships {
+func NewSubscriptionTypeDataRelationships(subscriptionPlanRelation SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) *SubscriptionTypeDataRelationships {
 	this := SubscriptionTypeDataRelationships{}
 	this.SubscriptionPlanRelation = subscriptionPlanRelation
 	return &this
@@ -45,9 +45,9 @@ func NewSubscriptionTypeDataRelationshipsWithDefaults() *SubscriptionTypeDataRel
 }
 
 // GetSubscriptionPlanRelation returns the SubscriptionPlanRelation field value
-func (o *SubscriptionTypeDataRelationships) GetSubscriptionPlanRelation() Relationships {
+func (o *SubscriptionTypeDataRelationships) GetSubscriptionPlanRelation() SubscriptionTypeDataRelationshipsSubscriptionPlanRelation {
 	if o == nil {
-		var ret Relationships
+		var ret SubscriptionTypeDataRelationshipsSubscriptionPlanRelation
 		return ret
 	}
 
@@ -56,7 +56,7 @@ func (o *SubscriptionTypeDataRelationships) GetSubscriptionPlanRelation() Relati
 
 // GetSubscriptionPlanRelationOk returns a tuple with the SubscriptionPlanRelation field value
 // and a boolean to check if the value has been set.
-func (o *SubscriptionTypeDataRelationships) GetSubscriptionPlanRelationOk() (*Relationships, bool) {
+func (o *SubscriptionTypeDataRelationships) GetSubscriptionPlanRelationOk() (*SubscriptionTypeDataRelationshipsSubscriptionPlanRelation, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (o *SubscriptionTypeDataRelationships) GetSubscriptionPlanRelationOk() (*Re
 }
 
 // SetSubscriptionPlanRelation sets field value
-func (o *SubscriptionTypeDataRelationships) SetSubscriptionPlanRelation(v Relationships) {
+func (o *SubscriptionTypeDataRelationships) SetSubscriptionPlanRelation(v SubscriptionTypeDataRelationshipsSubscriptionPlanRelation) {
 	o.SubscriptionPlanRelation = v
 }
 

@@ -1,6 +1,8 @@
 package responses
 
 import (
+	"time"
+
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 	"github.com/recovery-flow/subscriptions-tracker/resources"
 )
@@ -13,7 +15,7 @@ func BillingSchedule(schedule models.BillingSchedule) resources.BillingSchedule 
 			Attributes: resources.BillingScheduleDataAttributes{
 				SchedulesDate: schedule.SchedulesDate,
 				Status:        string(schedule.Status),
-				UpdatedAt:     schedule.UpdatedAt,
+				UpdatedAt:     time.Now(),
 				CreatedAt:     schedule.CreatedAt,
 			},
 		},

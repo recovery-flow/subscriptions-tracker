@@ -21,7 +21,7 @@ var _ MappedNullable = &SubscriptionPlanDataRelationships{}
 
 // SubscriptionPlanDataRelationships struct for SubscriptionPlanDataRelationships
 type SubscriptionPlanDataRelationships struct {
-	SubscriptionTypeRelation Relationships `json:"subscription_type_relation"`
+	SubscriptionType Relationships `json:"subscription_type"`
 }
 
 type _SubscriptionPlanDataRelationships SubscriptionPlanDataRelationships
@@ -30,9 +30,9 @@ type _SubscriptionPlanDataRelationships SubscriptionPlanDataRelationships
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSubscriptionPlanDataRelationships(subscriptionTypeRelation Relationships) *SubscriptionPlanDataRelationships {
+func NewSubscriptionPlanDataRelationships(subscriptionType Relationships) *SubscriptionPlanDataRelationships {
 	this := SubscriptionPlanDataRelationships{}
-	this.SubscriptionTypeRelation = subscriptionTypeRelation
+	this.SubscriptionType = subscriptionType
 	return &this
 }
 
@@ -44,28 +44,28 @@ func NewSubscriptionPlanDataRelationshipsWithDefaults() *SubscriptionPlanDataRel
 	return &this
 }
 
-// GetSubscriptionTypeRelation returns the SubscriptionTypeRelation field value
-func (o *SubscriptionPlanDataRelationships) GetSubscriptionTypeRelation() Relationships {
+// GetSubscriptionType returns the SubscriptionType field value
+func (o *SubscriptionPlanDataRelationships) GetSubscriptionType() Relationships {
 	if o == nil {
 		var ret Relationships
 		return ret
 	}
 
-	return o.SubscriptionTypeRelation
+	return o.SubscriptionType
 }
 
-// GetSubscriptionTypeRelationOk returns a tuple with the SubscriptionTypeRelation field value
+// GetSubscriptionTypeOk returns a tuple with the SubscriptionType field value
 // and a boolean to check if the value has been set.
-func (o *SubscriptionPlanDataRelationships) GetSubscriptionTypeRelationOk() (*Relationships, bool) {
+func (o *SubscriptionPlanDataRelationships) GetSubscriptionTypeOk() (*Relationships, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.SubscriptionTypeRelation, true
+	return &o.SubscriptionType, true
 }
 
-// SetSubscriptionTypeRelation sets field value
-func (o *SubscriptionPlanDataRelationships) SetSubscriptionTypeRelation(v Relationships) {
-	o.SubscriptionTypeRelation = v
+// SetSubscriptionType sets field value
+func (o *SubscriptionPlanDataRelationships) SetSubscriptionType(v Relationships) {
+	o.SubscriptionType = v
 }
 
 func (o SubscriptionPlanDataRelationships) MarshalJSON() ([]byte, error) {
@@ -78,7 +78,7 @@ func (o SubscriptionPlanDataRelationships) MarshalJSON() ([]byte, error) {
 
 func (o SubscriptionPlanDataRelationships) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["subscription_type_relation"] = o.SubscriptionTypeRelation
+	toSerialize["subscription_type"] = o.SubscriptionType
 	return toSerialize, nil
 }
 
@@ -87,7 +87,7 @@ func (o *SubscriptionPlanDataRelationships) UnmarshalJSON(data []byte) (err erro
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"subscription_type_relation",
+		"subscription_type",
 	}
 
 	allProperties := make(map[string]interface{})

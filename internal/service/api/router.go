@@ -42,7 +42,9 @@ func Run(ctx context.Context, svc *service.Service) {
 				})
 
 				r.Route("/payments", func(r chi.Router) {
+					r.Use(authMW)
 					r.Post("/", handlers.CreatePayment)
+					//r.Get("/", handlers.GetPayments)
 					r.Route("/{payment_id}", func(r chi.Router) {
 						r.Get("/", handlers.GetPaymentMethod)
 						r.Delete("/", handlers.DeletePaymentMethod)
@@ -50,10 +52,12 @@ func Run(ctx context.Context, svc *service.Service) {
 				})
 
 				r.Route("/subscriptions", func(r chi.Router) {
-					r.Use(authMW)
-					r.Get("/", handlers.UserSubscriptionGet)
-					r.Post("/", handlers.UserSubscriptionCreate)
-					r.Patch("/deactivate", handlers.UserSubscriptionDeactivate)
+					r.Route("/status", func(r chi.Router) {
+						r.Use(authMW)
+						r.Post("/activate", handlers.UserSubscriptionActivate)
+						r.Patch("/deactivate", handlers.UserSubscriptionDeactivate)
+					})
+					r.Get("/{user_id}", handlers.UserSubscriptionGet)
 				})
 			})
 

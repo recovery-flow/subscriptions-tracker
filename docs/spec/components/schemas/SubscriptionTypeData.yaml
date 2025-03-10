@@ -20,4 +20,11 @@ properties:
       - subscription_plan_relation
     properties:
       subscription_plan_relation:
-        $ref: './Relationships.yaml'
+        type: object
+        required:
+          - data
+        properties:
+          data:
+            type: array
+            items:
+              $ref: './Relationships.yaml'

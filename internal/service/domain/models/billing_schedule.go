@@ -12,8 +12,8 @@ type BillingSchedule struct {
 	SchedulesDate time.Time             `json:"schedules_date"`
 	AttemptedDate *time.Time            `json:"attempted_date,omitempty"`
 	Status        ScheduleBillingStatus `json:"status"`
-	UpdatedAt     time.Time             `json:"updated_at"`
-	CreatedAt     time.Time             `json:"created_at"`
+	//UpdatedAt     time.Time             `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ScheduleBillingStatus string

@@ -11,9 +11,9 @@ import (
 
 type SubscriptionsTracker interface {
 	GetUserSubscription(ctx context.Context, userID uuid.UUID) (*models.Subscription, error)
-	CreateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error)
-	DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error
-	CanceledSubscription(ctx context.Context, UserID uuid.UUID) error
+	CreateSubscription(ctx context.Context, userID, planID, paymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error)
+	DeactivateSubscription(ctx context.Context, userID, typeID uuid.UUID) error
+	CanceledSubscription(ctx context.Context, userID uuid.UUID) error
 
 	CreatePaymentMethod(ctx context.Context, userID uuid.UUID, token string, payType string) (*models.PaymentMethod, error)
 	DeletePaymentMethod(ctx context.Context, userID, paymentMethodID uuid.UUID) error
@@ -27,20 +27,6 @@ type SubscriptionsTracker interface {
 func (d *domain) CreateSubscription(ctx context.Context, UserID, PlanID, PaymentMethodID uuid.UUID, frePeriod time.Duration) (*models.Subscription, error) {
 	var subscription *models.Subscription
 	err := d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
-		sType, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{
-			"id": PlanID.String(),
-		}).Get(ctx)
-		if err != nil {
-			return err
-		}
-		if sType == nil {
-			return fmt.Errorf("subscription type not found %s", PlanID)
-		}
-
-		if sType.Status != models.StatusTypeActive {
-			return fmt.Errorf("subscription type is not active %s", PlanID)
-		}
-
 		//Get the Subscription Plan
 
 		sPlan, err := d.Infra.Data.SQL.Plans.New().Filter(map[string]any{
@@ -51,6 +37,22 @@ func (d *domain) CreateSubscription(ctx context.Context, UserID, PlanID, Payment
 		}
 		if sPlan == nil {
 			return fmt.Errorf("subscription plan not found %s", PlanID)
+		}
+
+		//Get the Subscription Type
+
+		sType, err := d.Infra.Data.SQL.Types.New().Filter(map[string]any{
+			"id": sPlan.TypeID.String(),
+		}).Get(ctx)
+		if err != nil {
+			return err
+		}
+		if sType == nil {
+			return fmt.Errorf("subscription type not found %s", PlanID)
+		}
+
+		if sType.Status != models.StatusTypeActive {
+			return fmt.Errorf("subscription type is not active %s", PlanID)
 		}
 
 		//Get the Payment Method
@@ -112,55 +114,50 @@ func (d *domain) CreateSubscription(ctx context.Context, UserID, PlanID, Payment
 		}
 
 		//Create Billing Schedules for the Subscription
-		if frePeriod == 0 {
-			err = d.Infra.Data.SQL.Schedules.New().Insert(ctx, bc)
-			if err != nil {
-				return err
-			}
-			//TODO there should have been a payment :)
-			//pay, payErr := code.SomePaymentMethod(pMethod)
-			//if payErr != nil {
-			//	err = d.Infra.Data.SQL.Transactions.New().Insert(ctx , &models.Transaction{
-			//		ID: uuid.New(),
-			//		UserID: UserID,
-			//		PaymentMethodID: PaymentMethodID,
-			//		Amount: sPlan.Price,
-			//		Currency: sPlan.Currency,
-			//		Status: models.TrnStatusFailed,
-			//		PaymentProvider: "TODO",
-			//		PaymentProviderID: "TODO",
-			//		TransactionDate: time.Now().UTC(),
-			//	})
-			//	if err != nil {
-			//		d.log.WithError(err).Error("failed to insert transaction")
-			//	}
-			//	return payErr
-			//}
-			//err = d.Infra.Data.SQL.Transactions.New().Insert(ctx , &models.Transaction{
-			//	ID: uuid.New(),
-			//	UserID: UserID,
-			//	PaymentMethodID: PaymentMethodID,
-			//	Amount: sPlan.Price,
-			//	Currency: sPlan.Currency,
-			//	Status: models.TrnStatusSuccess,
-			//	PaymentProvider: "TODO",
-			//	PaymentProviderID: "TODO",
-			//	TransactionDate: time.Now().UTC(),
-			//})
-			//if err != nil {
-			//	d.log.WithError(err).Error("failed to insert transaction")
-			//}
-		}
-
-		//TODO to supplement the work with Producer
-		//if err := d.Infra.Producer.SubscriptionCreated(evebody.CreateSubscription{
-		//	UserID:    subscription.UserID.String(),
-		//	PlanID:    subscription.PlanID.String(),
-		//	TypeID:    typeID.String(),
-		//	CreatedAt: subscription.CreatedAt,
-		//}); err != nil {
-		//	return err
+		//if frePeriod == 0 {
+		//	err = d.Infra.Data.SQL.Schedules.New().Insert(ctx, bc)
+		//	if err != nil {
+		//		return err
+		//	}
+		//	//TODO there should have been a payment :)
+		//	//pay, payErr := code.SomePaymentMethod(pMethod)
+		//	//if payErr != nil {
+		//	//	err = d.Infra.Data.SQL.Transactions.New().Insert(ctx , &models.Transaction{
+		//	//		ID: uuid.New(),
+		//	//		UserID: UserID,
+		//	//		PaymentMethodID: PaymentMethodID,
+		//	//		Amount: sPlan.Price,
+		//	//		Currency: sPlan.Currency,
+		//	//		Status: models.TrnStatusFailed,
+		//	//		PaymentProvider: "TODO",
+		//	//		PaymentProviderID: "TODO",
+		//	//		TransactionDate: time.Now().UTC(),
+		//	//	})
+		//	//	if err != nil {
+		//	//		d.log.WithError(err).Error("failed to insert transaction")
+		//	//	}
+		//	//	return payErr
+		//	//}
+		//	//err = d.Infra.Data.SQL.Transactions.New().Insert(ctx , &models.Transaction{
+		//	//	ID: uuid.New(),
+		//	//	UserID: UserID,
+		//	//	PaymentMethodID: PaymentMethodID,
+		//	//	Amount: sPlan.Price,
+		//	//	Currency: sPlan.Currency,
+		//	//	Status: models.TrnStatusSuccess,
+		//	//	PaymentProvider: "TODO",
+		//	//	PaymentProviderID: "TODO",
+		//	//	TransactionDate: time.Now().UTC(),
+		//	//})
+		//	//if err != nil {
+		//	//	d.log.WithError(err).Error("failed to insert transaction")
+		//	//}
 		//}
+
+		err = d.Infra.Kafka.SubscriptionActivate(UserID, PlanID, sPlan.TypeID)
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
@@ -171,13 +168,25 @@ func (d *domain) CreateSubscription(ctx context.Context, UserID, PlanID, Payment
 	return subscription, nil
 }
 
-func (d *domain) DeactivateSubscription(ctx context.Context, UserID uuid.UUID) error {
-	err := d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
-		if err := d.Infra.Data.SQL.Subscriptions.New().Filter(map[string]any{
-			"user_id": UserID,
+func (d *domain) DeactivateSubscription(ctx context.Context, userID, typeID uuid.UUID) error {
+	plan, err := d.Infra.Data.SQL.Plans.New().Filter(map[string]any{
+		"type_id": typeID.String(),
+	}).Get(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = d.Infra.Data.SQL.Subscriptions.Transaction(func(ctx context.Context) error {
+		if err = d.Infra.Data.SQL.Subscriptions.New().Filter(map[string]any{
+			"user_id": userID,
 		}).Update(ctx, map[string]any{
 			"status": models.SubscriptionStatusInactive,
 		}); err != nil {
+			return err
+		}
+
+		err := d.Infra.Kafka.SubscriptionDeactivate(userID, plan.ID, typeID)
+		if err != nil {
 			return err
 		}
 

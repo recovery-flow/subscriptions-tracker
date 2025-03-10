@@ -29,13 +29,14 @@ docs/PaymentMethodsCollection.md
 docs/PaymentMethodsCollectionData.md
 docs/PaymentMethodsCollectionDataAttributes.md
 docs/Relationships.md
-docs/RelationshipsDataInner.md
+docs/RelationshipsData.md
 docs/Subscription.md
 docs/SubscriptionCreate.md
 docs/SubscriptionCreateData.md
 docs/SubscriptionCreateDataAttributes.md
 docs/SubscriptionData.md
 docs/SubscriptionDataAttributes.md
+docs/SubscriptionDataRelationships.md
 docs/SubscriptionPlan.md
 docs/SubscriptionPlanCreate.md
 docs/SubscriptionPlanCreateData.md
@@ -56,6 +57,7 @@ docs/SubscriptionTypeCreateDataAttributes.md
 docs/SubscriptionTypeData.md
 docs/SubscriptionTypeDataAttributes.md
 docs/SubscriptionTypeDataRelationships.md
+docs/SubscriptionTypeDataRelationshipsSubscriptionPlanRelation.md
 docs/SubscriptionTypeDepends.md
 docs/SubscriptionTypeUpdate.md
 docs/SubscriptionTypeUpdateData.md
@@ -101,13 +103,14 @@ model_payment_methods_collection.go
 model_payment_methods_collection_data.go
 model_payment_methods_collection_data_attributes.go
 model_relationships.go
-model_relationships_data_inner.go
+model_relationships_data.go
 model_subscription.go
 model_subscription_create.go
 model_subscription_create_data.go
 model_subscription_create_data_attributes.go
 model_subscription_data.go
 model_subscription_data_attributes.go
+model_subscription_data_relationships.go
 model_subscription_plan.go
 model_subscription_plan_create.go
 model_subscription_plan_create_data.go
@@ -128,6 +131,7 @@ model_subscription_type_create_data_attributes.go
 model_subscription_type_data.go
 model_subscription_type_data_attributes.go
 model_subscription_type_data_relationships.go
+model_subscription_type_data_relationships_subscription_plan_relation.go
 model_subscription_type_depends.go
 model_subscription_type_update.go
 model_subscription_type_update_data.go

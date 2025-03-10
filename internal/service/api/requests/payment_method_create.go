@@ -9,7 +9,7 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/resources"
 )
 
-func PaymentMethodCreate(r *http.Request) (req *resources.PaymentMethod, err error) {
+func PaymentMethodCreate(r *http.Request) (req *resources.PaymentMethodCreate, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 		err = jsonkit.NewDecodeError("body", err)
 		return

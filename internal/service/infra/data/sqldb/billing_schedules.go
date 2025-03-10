@@ -10,7 +10,7 @@ import (
 	"github.com/recovery-flow/subscriptions-tracker/internal/service/domain/models"
 )
 
-const billingSchedulesTable = "billing_schedules"
+const billingSchedulesTable = "billing_schedule"
 
 type BillingSchedules interface {
 	New() BillingSchedules
@@ -60,8 +60,8 @@ func (b *billingSchedules) Insert(ctx context.Context, bs *models.BillingSchedul
 		"user_id":        bs.UserID,
 		"scheduled_date": bs.SchedulesDate,
 		"status":         bs.Status,
-		"updated_at":     bs.UpdatedAt,
-		"created_at":     bs.CreatedAt,
+		//"updated_at":     bs.UpdatedAt,
+		"created_at": bs.CreatedAt,
 	}
 
 	if bs.AttemptedDate != nil {
@@ -140,7 +140,7 @@ func (b *billingSchedules) Select(ctx context.Context) ([]models.BillingSchedule
 			&bs.SchedulesDate,
 			&attemptedDate,
 			&bs.Status,
-			&bs.UpdatedAt,
+			//&bs.UpdatedAt,
 			&bs.CreatedAt,
 		)
 		if err != nil {
@@ -185,7 +185,7 @@ func (b *billingSchedules) Get(ctx context.Context) (*models.BillingSchedule, er
 		&bs.SchedulesDate,
 		&attemptedDate,
 		&bs.Status,
-		&bs.UpdatedAt,
+		//&bs.UpdatedAt,
 		&bs.CreatedAt,
 	)
 	if err != nil {
